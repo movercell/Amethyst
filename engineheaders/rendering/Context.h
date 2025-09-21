@@ -17,6 +17,8 @@ protected:
         WindowData* GetData() {return data;}
     };
 
+    //stored for making windows reference this their context(needs to be set _after_ making the first window)
+    std::weak_ptr<Context> selfref;
     std::array<InternalWindow, 10> windowArray;
 public:
 

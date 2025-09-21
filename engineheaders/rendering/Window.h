@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Context.h"
 #include <memory>
 
 //all if the glfw window macros
@@ -60,7 +61,8 @@ class Window {
     void operator delete(void* p) {}
 
     protected:
+    std::shared_ptr<Context> contextref;
 
-    WindowData* data = NULL;    
+    WindowData* data = nullptr;    
     Window() {};
 };
