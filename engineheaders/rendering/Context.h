@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Window.h"
+#include "rendering/Window.h"
 #include <array>
+#include <memory>
 
 class Context
 {

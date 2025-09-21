@@ -20,6 +20,7 @@ add_executable(amethyst
 	src/main.cpp
 	src/rendering/Window.cpp
 	src/rendering/Context.cpp
+	src/rendering/opengl/GLContext.cpp
 	)
 
 target_link_libraries(amethyst glad)
