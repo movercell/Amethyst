@@ -1,31 +1,28 @@
 #pragma once
 
 #include "rendering/Window.h"
-#include <array>
+#include <vector>
 #include <memory>
 
 class Context
 {
 protected:
-
-    class InternalWindow : Window {
-        public:
-
-        bool isValid = false;
-        void Construct(WindowData* = nullptr);
-        InternalWindow() {};
-        ~InternalWindow() {isValid = false;}
-        WindowData* GetData() {return data;}
+    class ____Window : Window {
+    public:
+        void Update();
+        ____Window(std::weak_ptr<Context> context, ____WindowData* ContextData);
+        ____WindowData* GetData() {return data;}
+        void Draw();
     };
 
-    //stored for making windows reference this their context(needs to be set _after_ making the first window)
-    std::weak_ptr<Context> selfref;
-    std::array<InternalWindow, 10> windowArray;
+    
+    ____WindowData* contextData = nullptr;
+    std::weak_ptr<Context> selfRef; //stored for making windows reference this their context
+    std::vector<std::weak_ptr<____Window>> windowVector = std::vector<std::weak_ptr<____Window>>();
+    
 public:
-
-    Context();
-    virtual ~Context();
-    //virtual void Render() = 0;
+    virtual ~Context() {};
+    virtual void Render() = 0;
 };
 
 

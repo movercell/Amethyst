@@ -48,22 +48,17 @@
 #define 	WINDOW_COCOA_GRAPHICS_SWITCHING   0x00023003
 #define 	WINDOW_X11_CLASS_NAME   0x00024001
 
-struct WindowData;
+struct ____WindowData;
 
 class Context;
 
 class Window {
+public:
+    ~Window();
 
-    public:
-
-    virtual ~Window();
-    
-    //memory deletion is done by the context
-    void operator delete(void* p) {}
-
-    protected:
-    std::shared_ptr<Context> contextref = nullptr;
-
-    WindowData* data = nullptr;    
+protected:
+    std::shared_ptr<Context> contextRef = nullptr;
+    ____WindowData* contextData = nullptr;
+    ____WindowData* data = nullptr;    
     Window() {};
 };

@@ -11,7 +11,6 @@
 
 
 int main() {
-	new GLContext;
 	glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -19,6 +18,7 @@ int main() {
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+	std::shared_ptr openglcontext = GLContext::Make();
 	if (window == NULL) {
   		std::cout << "Failed to create GLFW window" << std::endl;
   		glfwTerminate();
