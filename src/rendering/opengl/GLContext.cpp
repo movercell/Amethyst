@@ -15,6 +15,7 @@ std::shared_ptr<Context> GLContext::Make() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     tempContextRef->contextData = reinterpret_cast<____WindowData*>(glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL));
+    glfwDefaultWindowHints();
     return tempContextRef;
 }
 
@@ -23,5 +24,8 @@ GLContext::~GLContext() {
 }
 
 void GLContext::Render() {
-
+    for (std::weak_ptr<____Window> window : windowVector) {
+        window.lock()->Draw();
+    }
+    
 }

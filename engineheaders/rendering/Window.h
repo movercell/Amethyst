@@ -54,11 +54,12 @@ class Context;
 
 class Window {
 public:
-    ~Window();
+    virtual ~Window();
+    void Update();
 
 protected:
     std::shared_ptr<Context> contextRef = nullptr;
     ____WindowData* contextData = nullptr;
     ____WindowData* data = nullptr;    
-    Window() {};
+    Window() {}; //the compiler compains if this doesn't exist
 };

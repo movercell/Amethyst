@@ -3,13 +3,27 @@
 
 //first the internal window stuff
 
-void Context::____Window::Update() {
-    data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, "LearnOpenGL", NULL, reinterpret_cast<GLFWwindow*>(contextData)));
-}
-
 Context::____Window::____Window(std::weak_ptr<Context> ContextWeakPtr, ____WindowData* ContextDataPtr) {
     contextRef = ContextWeakPtr.lock();
 }
+
 void Context::____Window::Draw() {
 
+    GLFWwindow* temp = reinterpret_cast<GLFWwindow*>(data);
+    if (temp == nullptr) {
+        return; //TODO: make it crash when there's no actual window
+    }
+    glfwMakeContextCurrent(temp);
+
+    //TODO: run the UI function HERE
+
+    glfwSwapBuffers(temp);
+}
+
+//now the context stuff
+
+std::shared_ptr<Window> Context::MakeWindow() {
+    std::shared_ptr<____Window> tempRef = std::make_shared<____Window>(selfRef, contextData);
+    windowVector.push_back(tempRef);
+    return std::static_pointer_cast<Window>(tempRef);
 }

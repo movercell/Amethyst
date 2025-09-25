@@ -19,6 +19,8 @@ int main() {
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	std::shared_ptr openglcontext = GLContext::Make();
+	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
+	enginewindow->Update();
 	if (window == NULL) {
   		std::cout << "Failed to create GLFW window" << std::endl;
   		glfwTerminate();
@@ -52,6 +54,8 @@ int main() {
 
 	bool isWindowOpen = true;
 	while(!glfwWindowShouldClose(window)) {
+		openglcontext->Render();
+		glfwMakeContextCurrent(window);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Start the Dear ImGui frame
