@@ -1,7 +1,11 @@
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <memory>
 #include "rendering/Window.h"
-#include "GLContext.h"
+#include "rendering/opengl/GLContext.h"
 
 std::shared_ptr<Context> GLContext::Make() {
 
@@ -23,9 +27,15 @@ GLContext::~GLContext() {
 
 }
 
-void GLContext::Render() {
+void GLContext::Draw() {
     for (std::weak_ptr<____Window> window : windowVector) {
+        glViewport(0, 0, 800, 600);
+        ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
         window.lock()->Draw();
+        ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     
 }

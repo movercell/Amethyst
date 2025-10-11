@@ -13,3 +13,6 @@ build/*
 build_windows/*
 !build_windows/mingw-w64-x86_64.cmake
 imgui.ini
+
+engineheaders/html/*
+engineheaders/latex/*

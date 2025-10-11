@@ -54,7 +54,7 @@ int main() {
 
 	bool isWindowOpen = true;
 	while(!glfwWindowShouldClose(window)) {
-		openglcontext->Render();
+		openglcontext->Draw();
 		glfwMakeContextCurrent(window);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);

@@ -1,5 +1,6 @@
 #include "rendering/Context.h"
 #include <GLFW/glfw3.h>
+#include <imgui.h>
 
 //first the internal window stuff
 
@@ -16,6 +17,9 @@ void Context::____Window::Draw() {
     glfwMakeContextCurrent(temp);
 
     //TODO: run the UI function HERE
+    static bool isWindowOpen;
+    ImGui::Begin("hi", &isWindowOpen);
+    ImGui::End();
 
     glfwSwapBuffers(temp);
 }
