@@ -1,4 +1,5 @@
 #pragma once
+#include "master.h"
 
 #include "rendering/Window.h"
 #include <vector>
@@ -12,7 +13,7 @@
 *   Also provides the function for adding a window. \n
 *   The context does ***not*** count as a reference to anything within it except it's asset manager.
 */
-class Context
+class EXPORT Context
 {
 protected:
     //!@private

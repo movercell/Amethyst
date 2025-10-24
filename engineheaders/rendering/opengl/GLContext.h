@@ -1,11 +1,13 @@
 #pragma once
+#include "master.h"
+
 #include "rendering/Window.h"
 #include "rendering/Context.h"
 
 /*!
 *   \brief An OpenGL graphics context.
 */
-class GLContext : public Context
+class EXPORT GLContext : public Context
 {
 private:
     /* data */

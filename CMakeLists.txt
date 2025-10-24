@@ -27,3 +27,5 @@ target_link_libraries(amethyst glad)
 target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 
+target_compile_options(amethyst PUBLIC "-fvisibility=hidden")
+target_link_options(amethyst PUBLIC "-rdynamic")
