@@ -24,7 +24,7 @@ std::shared_ptr<Context> GLContext::Make() {
 }
 
 GLContext::~GLContext() {
-
+    glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(contextData));
 }
 
 void GLContext::Draw() {
