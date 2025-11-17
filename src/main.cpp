@@ -18,9 +18,6 @@ int main() {
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-	std::shared_ptr openglcontext = STDGLRenderer::Make();
-	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
-	enginewindow->Update();
 	if (window == NULL) {
   		std::cout << "Failed to create GLFW window" << std::endl;
   		glfwTerminate();
@@ -40,7 +37,7 @@ int main() {
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	ImGuiContext* uidata = ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -49,6 +46,9 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
 	ImGui_ImplOpenGL3_Init();
 
+	std::shared_ptr openglcontext = STDGLRenderer::Make();
+	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
+	enginewindow->Update();
 
 	std::cout << "Hello, world!" << std::endl;
 
@@ -59,6 +59,7 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Start the Dear ImGui frame
+		ImGui::SetCurrentContext(uidata);
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();

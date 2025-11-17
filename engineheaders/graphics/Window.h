@@ -4,6 +4,7 @@
 #include <memory>
 
 struct ____WindowData;
+struct ____UIData;
 
 class Renderer;
 
@@ -21,6 +22,8 @@ protected:
     std::shared_ptr<Renderer> rendererRef = nullptr;
     //!@private
     ____WindowData* rendererData = nullptr;
+    //!@private
+    ____UIData* UIData = nullptr;
     //!@private
     ____WindowData* data = nullptr;    
     //!@private

@@ -19,11 +19,12 @@ protected:
     //!@private
     class ____Window : public Window {
     public:
-        void Update();
         ____Window(std::weak_ptr<Renderer> renderer, ____WindowData* RendererData);
         ____WindowData* GetData() {return data;}
         void Draw();
     };
+
+    friend class Window;
 
     //!@private
     ____WindowData* rendererData = nullptr;
@@ -32,6 +33,12 @@ protected:
     //!@private
     std::vector<std::weak_ptr<____Window>> windowVector =
                             std::vector<std::weak_ptr<____Window>>();
+    //!@private
+    virtual void UINewFrame() = 0;
+    //!@private
+    virtual void UIEndFrame() = 0; 
+    //!@private
+    virtual ____UIData* UINewData(____WindowData* window) = 0;
     
 public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist

@@ -27,16 +27,38 @@ STDGLRenderer::~STDGLRenderer() {
     glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(rendererData));
 }
 
+____UIData* STDGLRenderer::UINewData(____WindowData* window) {
+    // Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	____UIData* data = reinterpret_cast<____UIData*>(ImGui::CreateContext());
+    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(data));
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(window), true);
+    ImGui_ImplOpenGL3_Init();
+
+    return data;
+}
+
+void STDGLRenderer::UINewFrame() {
+    ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+}
+
+void STDGLRenderer::UIEndFrame() {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+
 void STDGLRenderer::Draw() {
     for (std::weak_ptr<____Window> window : windowVector) {
         //TODO: make a Dear ImGUI context for each window
         glViewport(0, 0, 800, 600);
-        ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
         window.lock()->Draw();
-        ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     
 }
