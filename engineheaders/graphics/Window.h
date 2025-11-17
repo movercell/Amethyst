@@ -5,12 +5,12 @@
 
 struct ____WindowData;
 
-class Context;
+class Renderer;
 
 /*!
 *   \brief A window.
 */
-class EXPORT Window {
+class ENGINEEXPORT Window {
 public:
     virtual ~Window();
     //! Re-creates the system window with the current parameters of this object.
@@ -18,9 +18,9 @@ public:
 
 protected:
     //!@private
-    std::shared_ptr<Context> contextRef = nullptr;
+    std::shared_ptr<Renderer> rendererRef = nullptr;
     //!@private
-    ____WindowData* contextData = nullptr;
+    ____WindowData* rendererData = nullptr;
     //!@private
     ____WindowData* data = nullptr;    
     //!@private

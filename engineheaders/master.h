@@ -1,1 +1,1 @@
-#define EXPORT __attribute__ ((visibility ("default")))
+#define ENGINEEXPORT __attribute__ ((visibility ("default")))

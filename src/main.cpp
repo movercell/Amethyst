@@ -5,7 +5,7 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include "main.h"
-#include "rendering/opengl/GLContext.h"
+#include "graphics/opengl/STDGLRenderer.h"
 
 #include <iostream>
 
@@ -18,7 +18,7 @@ int main() {
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-	std::shared_ptr openglcontext = GLContext::Make();
+	std::shared_ptr openglcontext = STDGLRenderer::Make();
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
 	enginewindow->Update();
 	if (window == NULL) {

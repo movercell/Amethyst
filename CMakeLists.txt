@@ -18,14 +18,14 @@ add_library(imgui ${imgui_sources})
 	
 add_executable(amethyst
 	src/main.cpp
-	src/rendering/Window.cpp
-	src/rendering/Context.cpp
-	src/rendering/opengl/GLContext.cpp
+	src/graphics/Window.cpp
+	src/graphics/Renderer.cpp
+	src/graphics/opengl/STDGLRenderer.cpp
 	)
 
 target_link_libraries(amethyst glad)
 target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 
-target_compile_options(amethyst PUBLIC "-fvisibility=hidden")
 target_link_options(amethyst PUBLIC "-rdynamic")
+target_compile_options(amethyst PUBLIC "-fvisibility=hidden")

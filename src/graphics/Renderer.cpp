@@ -1,14 +1,14 @@
-#include "rendering/Context.h"
+#include "graphics/Renderer.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 
 //first the internal window stuff
 
-Context::____Window::____Window(std::weak_ptr<Context> ContextWeakPtr, ____WindowData* ContextDataPtr) {
-    contextRef = ContextWeakPtr.lock();
+Renderer::____Window::____Window(std::weak_ptr<Renderer> RendererWeakPtr, ____WindowData* RendererDataPtr) {
+    rendererRef = RendererWeakPtr.lock();
 }
 
-void Context::____Window::Draw() {
+void Renderer::____Window::Draw() {
 
     GLFWwindow* temp = reinterpret_cast<GLFWwindow*>(data);
     if (temp == nullptr) {
@@ -26,8 +26,8 @@ void Context::____Window::Draw() {
 
 //now the context stuff
 
-std::shared_ptr<Window> Context::MakeWindow() {
-    std::shared_ptr<____Window> tempRef = std::make_shared<____Window>(selfRef, contextData);
+std::shared_ptr<Window> __attribute__((visibility("default"))) Renderer::MakeWindow() {
+    std::shared_ptr<____Window> tempRef = std::make_shared<____Window>(selfRef, rendererData);
     windowVector.push_back(tempRef);
     return std::static_pointer_cast<Window>(tempRef);
 }
