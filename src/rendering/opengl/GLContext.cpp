@@ -29,6 +29,7 @@ GLContext::~GLContext() {
 
 void GLContext::Draw() {
     for (std::weak_ptr<____Window> window : windowVector) {
+        //TODO: make a Dear ImGUI context for each window
         glViewport(0, 0, 800, 600);
         ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
