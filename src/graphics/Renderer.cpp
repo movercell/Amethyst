@@ -22,14 +22,17 @@ void Renderer::____Window::Draw() {
     //TODO: run the UI function HERE
     static bool isWindowOpen;
     ImGui::Begin("hi", &isWindowOpen);
+    ImGui::Button("hia", ImVec2(40, 40));
     ImGui::End();
+
+    ImGui::ShowDemoWindow();
 
     rendererRef->UIEndFrame();
 
     glfwSwapBuffers(temp);
 }
 
-//now the context stuff
+//now the renderer stuff
 
 std::shared_ptr<Window> Renderer::MakeWindow() {
     std::shared_ptr<____Window> tempRef = std::make_shared<____Window>(selfRef, rendererData);

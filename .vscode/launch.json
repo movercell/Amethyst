@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/amethyst",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/testgame",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
