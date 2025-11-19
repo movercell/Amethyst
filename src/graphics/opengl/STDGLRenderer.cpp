@@ -6,6 +6,7 @@
 #include <memory>
 #include "graphics/Window.h"
 #include "graphics/opengl/STDGLRenderer.h"
+#include "../misc.h"
 
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
@@ -36,8 +37,11 @@ ____UIData* STDGLRenderer::UINewData(____WindowData* window) {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-    ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(window), true);
+    ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(window), false);
     ImGui_ImplOpenGL3_Init();
+
+    glfwSetWindowUserPointer(reinterpret_cast<GLFWwindow*>(window), reinterpret_cast<void*>(data));
+    GraphicsMisc::windowSetCallbacks(reinterpret_cast<GLFWwindow*>(window));
 
     return data;
 }

@@ -21,6 +21,7 @@ add_executable(amethyst
 	src/graphics/Window.cpp
 	src/graphics/Renderer.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
+	src/graphics/misc.cpp
 	)
 
 target_link_libraries(amethyst glad)
