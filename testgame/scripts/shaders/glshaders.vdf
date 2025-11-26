@@ -1,0 +1,12 @@
+Shaders {
+    Vertex {
+        Generic {
+            Source "generic.vs"
+        }
+    },
+    Fragment {
+        UnlitGeneric {
+            Source "unlitgeneric.fs"
+        }
+    }
+}
