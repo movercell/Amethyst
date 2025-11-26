@@ -107,6 +107,8 @@
 
 #pragma once
 
+#define GLMPresent
+
 #include <cmath>
 #include <climits>
 #include <cfloat>

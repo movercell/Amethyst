@@ -34,5 +34,7 @@ target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 target_link_libraries(amethyst vdfparser)
 
+target_compile_definitions(amethyst PUBLIC AMETHYSTENGINESRC)
+
 target_link_options(amethyst PUBLIC "-rdynamic")
 target_compile_options(amethyst PUBLIC "-fvisibility=hidden")

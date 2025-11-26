@@ -1,5 +1,5 @@
 #pragma once
-#include <glm/glm.hpp>
+#include "master.h"
 // Default camera values
 const float CAMERA_DEFAULT_YAW         = -90.0f;
 const float CAMERA_DEFAULT_PITCH       =  0.0f;
@@ -10,7 +10,7 @@ const float CAMERA_DEFAULT_FOV         =  120.0f;
 class Camera {
 public:
     // camera Attributes
-    glm::vec3 Position;
+    vec3 Position;
     // euler Angles
     float Yaw   = CAMERA_DEFAULT_YAW;
     float Pitch = CAMERA_DEFAULT_PITCH;

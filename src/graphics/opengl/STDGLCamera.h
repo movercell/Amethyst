@@ -1,9 +1,10 @@
 #pragma once
-#include "graphics/Camera.h"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "graphics/Camera.h"
 
 const glm::vec3 WorldUp = glm::vec3(0.0f, 0.0f, -1.0f);
 
@@ -15,8 +16,7 @@ public:
     GLuint Framebuffer;
 
     // Constructor with vectors
-    STDGLCamera(glm::vec2 resolution, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) : Front(glm::vec3(1.0f, 0.0f, 0.0f))
-    {
+    STDGLCamera(glm::vec2 resolution, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) : Front(glm::vec3(1.0f, 0.0f, 0.0f)) {
         Resolution = resolution;
         Position = position;
         Yaw = yaw;
@@ -25,9 +25,8 @@ public:
         UpdateCameraVectors();
     }
     // Constructor with scalar values
-    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f))
-    {
-        Position = glm::vec3(posX, posY, posZ);
+    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)) {
+        Position = vec3(posX, posY, posZ);
         Yaw = yaw;
         Pitch = pitch;
         glCreateFramebuffers(1, &Framebuffer);
