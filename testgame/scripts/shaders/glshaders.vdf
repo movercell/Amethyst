@@ -8,5 +8,10 @@ Shaders {
         UnlitGeneric {
             Source "unlitgeneric.fs"
         }
+    },
+    Depth {
+        Generic {
+            Source "generic.ds"
+        }
     }
 }

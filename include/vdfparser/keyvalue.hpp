@@ -4,7 +4,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-#include <case-insensitive-map.hpp>
+#include "case-insensitive-map.hpp"
 
 namespace VdfParser {
   /**

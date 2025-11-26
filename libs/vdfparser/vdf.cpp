@@ -1,6 +1,6 @@
 #include "vdf.hpp"
 #include <set>
-#include <source-parsers-shared/internal/peekable-stream.hpp>
+#include "peekable-stream.hpp"
 #include "errors.hpp"
 
 namespace VdfParser {

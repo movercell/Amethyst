@@ -1,38 +1,21 @@
 #pragma once
+#include "graphics/Camera.h"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Default camera values
-const float CAMERA_DEFAULT_YAW         = -90.0f;
-const float CAMERA_DEFAULT_PITCH       =  0.0f;
-const float CAMERA_DEFAULT_SPEED       =  2.5f;
-const float CAMERA_DEFAULT_SENSITIVITY =  0.1f;
-const float CAMERA_DEFAULT_FOV         =  120.0f;
 const glm::vec3 WorldUp = glm::vec3(0.0f, 0.0f, -1.0f);
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
-class STDGLCamera
-{
+class STDGLCamera : public Camera {
 public:
 
     GLuint Framebuffer;
 
-    // camera Attributes
-    glm::vec3 Position;
-    // euler Angles
-    float Yaw;
-    float Pitch;
-    // camera options
-    float MovementSpeed;
-    float MouseSensitivity;
-    float FOV;
-    glm::vec2 Resolution;
-
     // Constructor with vectors
-    STDGLCamera(glm::vec2 resolution, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) : Front(glm::vec3(1.0f, 0.0f, 0.0f)), MovementSpeed(CAMERA_DEFAULT_SPEED), MouseSensitivity(CAMERA_DEFAULT_SENSITIVITY), FOV(CAMERA_DEFAULT_FOV)
+    STDGLCamera(glm::vec2 resolution, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) : Front(glm::vec3(1.0f, 0.0f, 0.0f))
     {
         Resolution = resolution;
         Position = position;
@@ -42,7 +25,7 @@ public:
         UpdateCameraVectors();
     }
     // Constructor with scalar values
-    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(CAMERA_DEFAULT_SPEED), MouseSensitivity(CAMERA_DEFAULT_SENSITIVITY), FOV(CAMERA_DEFAULT_FOV)
+    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f))
     {
         Position = glm::vec3(posX, posY, posZ);
         Yaw = yaw;
