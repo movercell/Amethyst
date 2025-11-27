@@ -17,7 +17,6 @@ void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
     glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, 0.1f, 100.0f);
     glm::mat4 viewprojection = projection * view;
     glNamedBufferData(CameraMatrixBuffer, sizeof(glm::mat4), &viewprojection, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraMatrixBuffer);
 }
 
 void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
