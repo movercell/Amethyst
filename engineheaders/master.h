@@ -1,7 +1,9 @@
 #pragma once
 
-#ifdef GLMPresent // For syntax highlighting
-    #include <glm/glm.hpp>
+//#include <glm/glm.hpp> // For error highlighting
+
+#ifdef GLMPresent 
+    #include <bit>
 #endif
 
 #define ENGINEEXPORT __attribute__ ((visibility ("default")))
@@ -122,6 +124,15 @@ struct mat4 {
         }
         return result;
     }
+
+#if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
+    mat4(const glm::mat4& other) {
+        *this = std::bit_cast<mat4>(other);
+    } 
+    glm::mat4 toglm() {
+        return std::bit_cast<glm::mat4>(*this);
+    }
+#endif
 
 private:
     inline float multiplySlot(const mat4& other, int row, int column) {
