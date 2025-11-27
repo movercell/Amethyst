@@ -33,6 +33,7 @@ struct vec3 {
     vec3& operator/=(const float& other) { x /= other; y /= other; z /= other; return *this; }
 
     float dot(const vec3& other) { return x * other.x + y * other.y + z * other.z; }
+    vec3 cross(const vec3& other) { return vec3((y * other.z) - (z * other.y), (z * other.x) - (x * other.z), (x * other.y) - (y * other.x)); }
     
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec3(const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
@@ -65,6 +66,7 @@ struct vec2 {
     vec2& operator/=(const float& other) { x /= other; y /= other; return *this; }
 
     float dot(const vec2& other) { return x * other.x + y * other.y; }
+    float cross(const vec2& other) { return (x * other.y) - (y * other.x); }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec2(const glm::vec2& other) : x(other.x), y(other.y) {}

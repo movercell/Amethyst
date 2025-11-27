@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "graphics/Camera.h"
+#include "Camera.h"
 
-const glm::vec3 WorldUp = glm::vec3(0.0f, 0.0f, -1.0f);
+const vec3 WorldUp = vec3(0.0f, 0.0f, -1.0f);
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
