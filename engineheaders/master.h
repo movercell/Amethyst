@@ -67,7 +67,7 @@ struct vec2 {
 };
 
 struct vec4 {
-    float x = 0, y = 0, z = 0, w =0;
+    float x = 0, y = 0, z = 0, w = 0;
     vec4(float X, float Y, float Z, float W) { x = X; y = Y; z = Z; w = W; }
     vec4() {}
     vec4 operator+(const vec4& other) { return vec4( x + other.x, y + other.y, z + other.z, w + other.w); }
@@ -98,8 +98,8 @@ struct vec4 {
 
 
 
-struct Matrix {
-    Matrix(float a = 1, float b = 0, float c = 0, float d = 0,
+struct mat4 {
+    mat4(float a = 1, float b = 0, float c = 0, float d = 0,
            float e = 0, float f = 1, float g = 0, float h = 0,
            float i = 0, float j = 0, float k = 1, float l = 0,
            float m = 0, float n = 0, float o = 0, float p = 1) {
@@ -113,8 +113,8 @@ struct Matrix {
         return data[column][row];
     }
 
-    Matrix operator*(const Matrix& other) {
-        Matrix result;
+    mat4 operator*(const mat4& other) {
+        mat4 result;
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
                 result[x, y] = multiplySlot(other, x, y);
@@ -124,7 +124,7 @@ struct Matrix {
     }
 
 private:
-    inline float multiplySlot(const Matrix& other, int row, int column) {
+    inline float multiplySlot(const mat4& other, int row, int column) {
         return data[0][row] * other.data[column][0] + data[1][row] * other.data[column][1] + data[2][row] * other.data[column][2] + data[3][row] * other.data[column][3];
     } 
 
