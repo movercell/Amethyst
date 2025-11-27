@@ -1,5 +1,5 @@
 #include "graphics/Window.h"
-#include "graphics/Renderer.h"
+#include "graphics/Renderer.h" // IWYU pragma: keep
 #include "misc.h"
 #include "imgui.h"
 #include <GLFW/glfw3.h>
