@@ -95,3 +95,19 @@ struct vec4 {
     glm::vec4 toglm(){ return glm::vec4(x, y, z, w); }
 #endif
 };
+
+
+
+struct Matrix {
+    Matrix(float a, float b, float c, float d,
+           float e, float f, float g, float h,
+           float i, float j, float k, float l,
+           float m, float n, float o, float p) {
+        data[0][0] = a; data[1][0] = b; data[2][0] = c; data[3][0] = d;
+        data[0][1] = e; data[1][1] = f; data[2][1] = g; data[3][1] = h;
+        data[0][2] = i; data[1][2] = j; data[2][2] = k; data[3][2] = l;
+        data[0][3] = m; data[1][3] = n; data[2][3] = o; data[3][3] = p;
+    }
+private:
+    float data[4][4];
+};
