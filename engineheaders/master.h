@@ -99,15 +99,34 @@ struct vec4 {
 
 
 struct Matrix {
-    Matrix(float a, float b, float c, float d,
-           float e, float f, float g, float h,
-           float i, float j, float k, float l,
-           float m, float n, float o, float p) {
+    Matrix(float a = 1, float b = 0, float c = 0, float d = 0,
+           float e = 0, float f = 1, float g = 0, float h = 0,
+           float i = 0, float j = 0, float k = 1, float l = 0,
+           float m = 0, float n = 0, float o = 0, float p = 1) {
         data[0][0] = a; data[1][0] = b; data[2][0] = c; data[3][0] = d;
         data[0][1] = e; data[1][1] = f; data[2][1] = g; data[3][1] = h;
         data[0][2] = i; data[1][2] = j; data[2][2] = k; data[3][2] = l;
         data[0][3] = m; data[1][3] = n; data[2][3] = o; data[3][3] = p;
     }
+
+    float& operator[](int row, int column) {
+        return data[column][row];
+    }
+
+    Matrix operator*(const Matrix& other) {
+        Matrix result;
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                result[x, y] = multiplySlot(other, x, y);
+            }
+        }
+        return result;
+    }
+
 private:
+    inline float multiplySlot(const Matrix& other, int row, int column) {
+        return data[0][row] * other.data[column][0] + data[1][row] * other.data[column][1] + data[2][row] * other.data[column][2] + data[3][row] * other.data[column][3];
+    } 
+
     float data[4][4];
 };
