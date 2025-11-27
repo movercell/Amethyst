@@ -16,7 +16,7 @@ public:
     GLuint Framebuffer;
 
     // Constructor with vectors
-    STDGLCamera(glm::vec2 resolution, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) : Front(glm::vec3(1.0f, 0.0f, 0.0f)) {
+    STDGLCamera(vec2 resolution, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
         Resolution = resolution;
         Position = position;
         Yaw = yaw;
@@ -25,7 +25,7 @@ public:
         UpdateCameraVectors();
     }
     // Constructor with scalar values
-    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)) {
+    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) {
         Position = vec3(posX, posY, posZ);
         Yaw = yaw;
         Pitch = pitch;
@@ -42,8 +42,4 @@ public:
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void UpdateCameraVectors();
-
-    glm::vec3 Front;
-    glm::vec3 Up;
-    glm::vec3 Right;
 };

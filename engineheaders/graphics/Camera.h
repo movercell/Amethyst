@@ -9,13 +9,17 @@ const float CAMERA_DEFAULT_FOV         =  120.0f;
 
 class Camera {
 public:
-    // camera Attributes
+    // Camera attributes
     vec3 Position;
-    // euler Angles
+    // Euler angles
     float Yaw   = CAMERA_DEFAULT_YAW;
     float Pitch = CAMERA_DEFAULT_PITCH;
-    // camera options
+    // Camera options
     float MouseSensitivity = CAMERA_DEFAULT_SENSITIVITY;
     float FOV              = CAMERA_DEFAULT_FOV;
-    glm::vec2 Resolution;
+    vec2 Resolution;
+    // Coordinate axi
+    vec3 Front = vec3(1.0f, 0.0f, 0.0f);
+    vec3 Up;
+    vec3 Right;
 };
