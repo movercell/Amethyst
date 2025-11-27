@@ -20,7 +20,7 @@ void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraMatrixBuffer);
 }
 
-void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
+void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
 {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;

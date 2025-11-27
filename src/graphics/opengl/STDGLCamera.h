@@ -37,7 +37,7 @@ public:
     void Bind(GLuint CameraMatrixBuffer);
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
+    void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
