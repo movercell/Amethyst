@@ -5,8 +5,6 @@
 #include "graphics/Renderer.h"
 #include <vector>
 #include <cstdint>
-#include "../../src/model.h"
-#include "../../src/shader.h"
 /*!
 *   \brief An OpenGL renderer.
 */
@@ -16,11 +14,10 @@ private:
     ____UIData* UINewData(____WindowData* window);
     void UINewFrame();
     void UIEndFrame();
+    friend class STDGLRWorld;
 
     std::vector<void*> RWorldVec;
     uint32_t CameraUBO;
-    Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    Model model = Model("Untitled2.glb");
 public:
     ~STDGLRenderer();
     //!Makes the renderer

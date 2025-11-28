@@ -6,12 +6,16 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <memory>
 #include <utility>
+#include "GLFW/glfw3.h"
 #include "graphics/Camera.h"
 #include "graphics/Renderer.h"
 #include "graphics/Window.h"
 #include "graphics/opengl/STDGLRenderer.h"
 #include "STDGLRWorld.h"
 #include "../misc.h"
+
+#include "../../src/model.h"
+#include "../../src/shader.h"
 
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
@@ -66,7 +70,13 @@ void STDGLRenderer::UIEndFrame() {
 
 
 void STDGLRenderer::Draw() {
+    glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(rendererData));
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraUBO);
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0f);
+
+    Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
+    Model model = Model("Untitled2.glb");
 
     for (int RWorldI = 0; RWorldI < RWorldVec.size(); RWorldI++) {
         STDGLRWorld* rworld = static_cast<STDGLRWorld*>(RWorldVec[RWorldI]);
@@ -81,10 +91,12 @@ void STDGLRenderer::Draw() {
             }
 
             camera->Bind(CameraUBO);
+            glClear(GL_DEPTH_BUFFER_BIT);
             shader.use();
             model.Draw();
 
         }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
     }
 
@@ -103,7 +115,7 @@ void STDGLRenderer::Draw() {
 }
 
 RWorld* STDGLRenderer::newRWorld() {
-    STDGLRWorld* result = new STDGLRWorld();
+    STDGLRWorld* result = new STDGLRWorld(selfRef);
     RWorldVec.push_back(result);
 
     return result;

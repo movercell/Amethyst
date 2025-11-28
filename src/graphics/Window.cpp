@@ -16,7 +16,6 @@ void Window::Update() {
     }
     data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, "LearnOpenGL", NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
     UIData = rendererRef->UINewData(data);
-    std::cout << UIData;
 }
 
 Window::~Window() {

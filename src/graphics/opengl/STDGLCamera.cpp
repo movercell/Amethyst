@@ -16,7 +16,8 @@ void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
     glm::mat4 view = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
     glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, 0.1f, 100.0f);
     glm::mat4 viewprojection = projection * view;
-    glNamedBufferData(CameraMatrixBuffer, sizeof(glm::mat4), &viewprojection, GL_STATIC_DRAW);
+    glNamedBufferData(CameraMatrixBuffer, sizeof(glm::mat4), &viewprojection, GL_DYNAMIC_DRAW);
+    glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 }
 
 void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
@@ -37,4 +38,22 @@ void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constr
 
     // update Front, Right and Up Vectors using the updated Euler angles
     UpdateCameraVectors();
+}
+
+
+void STDGLCamera::CreateBuffers() {
+    glCreateFramebuffers(1, &Framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+    // Color buffer
+    glCreateTextures(GL_TEXTURE_2D, 1, &Colorbuffer);
+    glTextureStorage2D(Colorbuffer, 1, GL_RGB8, Resolution.x, Resolution.y);
+    glTextureParameteri(Colorbuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(Colorbuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffer, 0);
+    // Depth buffer
+    glCreateTextures(GL_TEXTURE_2D, 1, &Depthbuffer);
+    glTextureStorage2D(Depthbuffer, 1, GL_DEPTH_COMPONENT24, Resolution.x, Resolution.y);
+    glTextureParameteri(Depthbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(Depthbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
 }
