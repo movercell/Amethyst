@@ -3,6 +3,8 @@
 
 #include "graphics/Window.h"
 #include "graphics/Renderer.h"
+#include <vector>
+#include <cstdint>
 
 /*!
 *   \brief An OpenGL renderer.
@@ -10,13 +12,17 @@
 class ENGINEEXPORT STDGLRenderer : public Renderer
 {
 private:
-    /* data */
     ____UIData* UINewData(____WindowData* window);
     void UINewFrame();
     void UIEndFrame();
+
+    std::vector<void*> RWorldVec;
+    uint32_t CameraUBO;
 public:
     ~STDGLRenderer();
     //!Makes the renderer
     static std::shared_ptr<Renderer> Make();
+    RWorld* newRWorld();
+    void deleteRWorld(RWorld* target);
     void Draw();
 };

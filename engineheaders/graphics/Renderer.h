@@ -43,10 +43,12 @@ protected:
     
 public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist
-    //!Makes a window
+    //!Makes a window.
     std::shared_ptr<Window> MakeWindow();
-    //!Makes a Render World
-    std::shared_ptr<RWorld> MakeRWorld();
+    //!Makes a Render World.(Note: Supposed to only be used for game worlds, use separately at your own risk!)
+    virtual RWorld* newRWorld() = 0;
+    //!Deletes a Render World.
+    virtual void deleteRWorld(RWorld* target) = 0;
     //!Draws everything.
     virtual void Draw() = 0;
 };

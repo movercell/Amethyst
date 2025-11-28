@@ -1,5 +1,8 @@
+#include <array>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "graphics/Camera.h"
+#include "graphics/RWorld.h"
 #include "imgui.h"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -8,7 +11,9 @@
 #include "graphics/opengl/STDGLRenderer.h"
 
 #include <iostream>
+#include <memory>
 
+#include "master.h"
 #include "model.h"
 
 std::function<void()> mainuifunction = []() {
@@ -33,8 +38,8 @@ std::function<void()> mainuifunction = []() {
 
 int main() {
 	glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
@@ -63,7 +68,7 @@ int main() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-	Model model = Model("Untitled2.glb");
+	//Model model = Model("Untitled2.glb");
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
@@ -73,6 +78,10 @@ int main() {
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
+	RWorld* rworld = openglcontext->newRWorld();
+	std::array<std::shared_ptr<Camera>, 2> cameras;
+	cameras[0] = rworld->MakeCamera(vec2(800, 600));
+	cameras[1] = rworld->MakeCamera(vec2(800, 600), vec3(1, 1, 1));
 
 	std::cout << "Hello, world!" << std::endl;
 

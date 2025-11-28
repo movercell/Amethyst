@@ -1,11 +1,16 @@
+#include <algorithm>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <memory>
+#include <utility>
+#include "graphics/Camera.h"
+#include "graphics/Renderer.h"
 #include "graphics/Window.h"
 #include "graphics/opengl/STDGLRenderer.h"
+#include "STDGLRWorld.h"
 #include "../misc.h"
 
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
@@ -14,12 +19,14 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->selfRef = std::static_pointer_cast<Renderer>(tempRendererRef);
 
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     tempRendererRef->rendererData = reinterpret_cast<____WindowData*>(glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL));
+
+    glCreateBuffers(1, &(tempRendererRef->CameraUBO));
+    
     glfwDefaultWindowHints();
     return tempRendererRef;
 }
@@ -59,10 +66,49 @@ void STDGLRenderer::UIEndFrame() {
 
 
 void STDGLRenderer::Draw() {
-    for (std::weak_ptr<____Window> window : windowVector) {
-        //TODO: make a Dear ImGUI context for each window
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraUBO);
+
+    for (int RWorldI = 0; RWorldI < RWorldVec.size(); RWorldI++) {
+        STDGLRWorld* rworld = static_cast<STDGLRWorld*>(RWorldVec[RWorldI]);
+        for (int CameraI = 0; CameraI < rworld->CameraVec.size(); CameraI++) {
+            const std::shared_ptr<STDGLCamera>& camera = rworld->CameraVec[CameraI].lock();
+
+            // Check whether the camera still exists.
+            if (!camera) {
+                CameraI--;
+                rworld->CameraVec.erase(rworld->CameraVec.begin() + CameraI);
+                rworld->CameraVec.pop_back();
+            }
+
+            camera->Bind(CameraUBO);
+
+        }
+        
+    }
+
+    // Draw windows.
+    for (int i = 0; i < windowVector.size(); i++) {
+        std::weak_ptr<____Window>& window = windowVector[i];
+        if (window.expired()) {
+            i--;
+            windowVector.erase(windowVector.begin() + i);
+            continue;
+        }
         glViewport(0, 0, 800, 600);
         window.lock()->Draw();
     }
     
+}
+
+RWorld* STDGLRenderer::newRWorld() {
+    STDGLRWorld* result = new STDGLRWorld();
+    RWorldVec.push_back(result);
+
+    return result;
+}
+
+void STDGLRenderer::deleteRWorld(RWorld* target) {
+    auto location = std::find(RWorldVec.begin(), RWorldVec.end(), target);
+    std::swap(RWorldVec[std::distance(RWorldVec.begin(), location)], RWorldVec.back());
+    RWorldVec.pop_back();
 }
