@@ -1,0 +1,11 @@
+#version 460 core
+out vec4 FragColor;
+
+void main()
+{
+    const float near = 0.1f;
+    const float far = 100.0f;
+    const float linearDepth = (2.0 * near * far) / (far + near - gl_FragCoord.z * (far - near));
+    FragColor = vec4(0.7f * linearDepth, 0.7f * linearDepth, 0.7f * linearDepth, 1.0f);
+}
+

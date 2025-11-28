@@ -14,7 +14,6 @@
 #include <memory>
 
 #include "master.h"
-#include "model.h"
 
 std::function<void()> mainuifunction = []() {
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
