@@ -1,0 +1,14 @@
+#include "STDGLRWorld.h"
+#include "STDGLCamera.h"
+#include <memory>
+
+std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, vec3 position, float yaw, float pitch) {
+    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(resolution, position, yaw, pitch);
+    CameraVec.push_back(result);
+
+    return result;
+}
+
+STDGLRWorld::~STDGLRWorld() {
+
+}

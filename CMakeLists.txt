@@ -30,6 +30,7 @@ add_executable(amethyst
 	src/graphics/Renderer.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp
+	src/graphics/opengl/STDGLRWorld.cpp
 	src/graphics/misc.cpp
 	)
 

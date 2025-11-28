@@ -2,6 +2,7 @@
 #include "master.h"
 
 #include "graphics/Window.h"
+#include "graphics/RWorld.h"
 #include <vector>
 #include <memory>
 
@@ -44,6 +45,8 @@ public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist
     //!Makes a window
     std::shared_ptr<Window> MakeWindow();
+    //!Makes a Render World
+    std::shared_ptr<RWorld> MakeRWorld();
     //!Draws everything.
     virtual void Draw() = 0;
 };
