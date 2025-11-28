@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "model.h"
+
 
 int main() {
 	glfwInit();
@@ -41,6 +43,8 @@ int main() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	Model model = Model("Untitled2.glb");
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.

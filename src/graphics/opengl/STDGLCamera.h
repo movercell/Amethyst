@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Camera.h"
+#include "graphics/Camera.h"
 
 const vec3 WorldUp = vec3(0.0f, 0.0f, -1.0f);
 

@@ -20,6 +20,9 @@ add_library(imgui ${imgui_sources})
 
 file(GLOB_RECURSE vdfparser_sources      libs/vdfparser/*.cpp)
 add_library(vdfparser ${vdfparser_sources})
+
+add_library(assimp SHARED IMPORTED)
+set_target_properties(assimp PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/testgame/libassimp.so.6")
 	
 add_executable(amethyst
 	src/main.cpp
@@ -34,8 +37,11 @@ target_link_libraries(amethyst glad)
 target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 target_link_libraries(amethyst vdfparser)
+target_link_libraries(amethyst assimp)
+
 
 target_compile_definitions(amethyst PUBLIC AMETHYSTENGINESRC)
 
-target_link_options(amethyst PUBLIC "-rdynamic")
+target_link_options(amethyst PUBLIC "-rdynamic" "-Wl,-rpath,./")
 target_compile_options(amethyst PUBLIC "-fvisibility=hidden")
+
