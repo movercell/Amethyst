@@ -5,6 +5,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+void Window::SetUIFunction(std::function<void()> Function) {
+    UIFunction = Function;
+}
+
 void Window::Update() {
     if (data != nullptr) {
         glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(data));

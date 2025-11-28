@@ -19,13 +19,11 @@ void Renderer::____Window::Draw() {
     ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(UIData));
     rendererRef->UINewFrame();
 
-    //TODO: run the UI function HERE
-    static bool isWindowOpen;
-    ImGui::Begin("hi", &isWindowOpen);
-    ImGui::Button("hia", ImVec2(40, 40));
-    ImGui::End();
-
-    ImGui::ShowDemoWindow();
+    if (UIFunction) {
+        UIFunction();
+    } else {
+        exit(-2);
+    }
 
     rendererRef->UIEndFrame();
 

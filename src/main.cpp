@@ -11,6 +11,11 @@
 
 #include "model.h"
 
+std::function<void()> mainuifunction = []() {
+	ImGui::Begin("Hello from ui function");
+		ImGui::Text("hiiiiiiiiii");
+	ImGui::End();
+};
 
 int main() {
 	glfwInit();
@@ -53,6 +58,7 @@ int main() {
 	std::shared_ptr openglcontext = STDGLRenderer::Make();
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
 	enginewindow->Update();
+	enginewindow->SetUIFunction(mainuifunction);
 
 	std::cout << "Hello, world!" << std::endl;
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "master.h"
 
+#include <functional>
 #include <memory>
 
 struct ____WindowData;
@@ -16,8 +17,12 @@ public:
     virtual ~Window();
     //! Re-creates the system window with the current parameters of this object.
     void Update();
+    //! Sets the UI function
+    void SetUIFunction(std::function<void()> Function);
 
 protected:
+    //!@private
+    std::function<void()> UIFunction;
     //!@private
     std::shared_ptr<Renderer> rendererRef = nullptr;
     //!@private
