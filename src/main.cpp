@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "graphics/Camera.h"
 #include "graphics/RWorld.h"
+#include "graphics/Renderer.h"
 #include "imgui.h"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -15,7 +16,7 @@
 
 #include "master.h"
 
-std::function<void()> mainuifunction = []() {
+std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
@@ -79,8 +80,8 @@ int main() {
 	enginewindow->SetUIFunction(mainuifunction);
 	RWorld* rworld = openglcontext->newRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
-	cameras[0] = rworld->MakeCamera(vec2(800, 600));
-	cameras[1] = rworld->MakeCamera(vec2(800, 600), vec3(1, 1, 1));
+	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
+	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
 
 	std::cout << "Hello, world!" << std::endl;
 

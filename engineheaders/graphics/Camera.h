@@ -1,5 +1,6 @@
 #pragma once
 #include "master.h"
+#include <string>
 // Default camera values
 const float CAMERA_DEFAULT_YAW         = -90.0f;
 const float CAMERA_DEFAULT_PITCH       =  0.0f;
@@ -12,6 +13,9 @@ const float CAMERA_DEFAULT_FOV         =  120.0f;
 */
 class Camera {
 public:
+    //! Name of the camera by which it can be queried
+    std::string Name; 
+
     // Camera attributes.
     vec3 Position;
     // Euler angles.

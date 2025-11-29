@@ -3,9 +3,8 @@
 #include "misc.h"
 #include "imgui.h"
 #include <GLFW/glfw3.h>
-#include <iostream>
 
-void Window::SetUIFunction(std::function<void()> Function) {
+void Window::SetUIFunction(std::function<void(Renderer*)> Function) {
     UIFunction = Function;
 }
 

@@ -18,11 +18,11 @@ public:
     //! Re-creates the system window with the current parameters of this object.
     void Update();
     //! Sets the UI function
-    void SetUIFunction(std::function<void()> Function);
+    void SetUIFunction(std::function<void(Renderer*)> Function);
 
 protected:
     //!@private
-    std::function<void()> UIFunction;
+    std::function<void(Renderer*)> UIFunction;
     //!@private
     std::shared_ptr<Renderer> rendererRef = nullptr;
     //!@private

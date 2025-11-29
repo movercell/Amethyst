@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <string>
 
 #include "graphics/Camera.h"
 
@@ -18,18 +19,10 @@ public:
     GLuint Depthbuffer;
 
     // Constructor with vectors.
-    STDGLCamera(vec2 resolution, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+    STDGLCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
         Resolution = resolution;
+        Name = name;
         Position = position;
-        Yaw = yaw;
-        Pitch = pitch;
-        CreateBuffers();
-
-        UpdateCameraVectors();
-    }
-    // Constructor with scalar values.
-    STDGLCamera(float posX, float posY, float posZ, float yaw, float pitch) {
-        Position = vec3(posX, posY, posZ);
         Yaw = yaw;
         Pitch = pitch;
         CreateBuffers();
