@@ -7,6 +7,12 @@ project(AMETHYST VERSION 1.0
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
+add_compile_options(-pg -g)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+
+
+
 include_directories(include)
 include_directories(engineheaders)
 

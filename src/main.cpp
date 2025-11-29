@@ -31,7 +31,6 @@ std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
 				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
                  ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
                  ImGuiWindowFlags_NoBackground);
-		std::cout << camera->GetTexture() << std::endl;
 		ImGui::Image(camera->GetTexture(), viewport->Size);
 	ImGui::End();
 	ImGui::PopStyleVar(3);
