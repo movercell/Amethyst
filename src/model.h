@@ -12,10 +12,7 @@
 #include "mesh.h"
 
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
-#include <map>
 #include <vector>
 using namespace std;
 
@@ -58,8 +55,15 @@ private:
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
 
-        // process ASSIMP's root node recursively
-        processNode(scene->mRootNode, scene);
+        // Process the "Mesh" node recursively
+        auto MeshNode = scene->mRootNode->FindNode("Mesh");
+        if (!MeshNode) {    // Because if you export full scene hierarchy from Blender the root node is actually the root node's child
+            auto SceneNode = scene->mRootNode->FindNode("Scene Collection");
+            if (SceneNode)
+                MeshNode = SceneNode;
+        }
+        if (MeshNode)
+            processNode(MeshNode, scene);
     }
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).

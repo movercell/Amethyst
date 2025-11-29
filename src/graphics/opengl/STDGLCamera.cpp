@@ -1,4 +1,5 @@
 #include "STDGLCamera.h"
+#include "glm/geometric.hpp"
 
 void STDGLCamera::UpdateCameraVectors() {
     // calculate the new Front vector
@@ -10,6 +11,7 @@ void STDGLCamera::UpdateCameraVectors() {
     // also re-calculate the Right and Up vector
     Right = glm::normalize(Front.cross(WorldUp).toglm());  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
     Up    = glm::normalize(Right.cross(Front).toglm());
+
 }
 
 void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
@@ -24,7 +26,7 @@ void STDGLCamera::ProcessMouseMovement(vec2 offset, bool constrainPitch)
 {
     offset.x *= MouseSensitivity;
     offset.y *= MouseSensitivity;
-    Yaw   += offset.x;
+    Yaw   -= offset.x;
     Pitch -= offset.y;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped

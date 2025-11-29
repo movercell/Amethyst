@@ -33,11 +33,17 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
             camera->Position -= camera->Right * velocity;
         if (ImGui::IsKeyDown(ImGuiKey_D))
             camera->Position += camera->Right * velocity;
+        if (ImGui::IsKeyDown(ImGuiKey_Space))
+            camera->Position += vec3(0, 0, 1) * velocity;
+        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+            camera->Position += vec3(0, 0, -1) * velocity;
+
 	static vec2 lastmouse = vec2(0, 0);
 	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
 	vec2 mouseoffset = currmouse - lastmouse;
 	lastmouse = currmouse;
 	camera->ProcessMouseMovement(mouseoffset);
+	//camera->Position += vec3(0.1f, 0, 0) * deltaTime;
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -51,7 +57,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
                  ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
                  ImGuiWindowFlags_NoBackground);
-		ImGui::Image(camera->GetTexture(), viewport->Size);
+		ImGui::Image(camera->GetTexture(), viewport->Size, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 	ImGui::PopStyleVar(3);
 
@@ -60,6 +66,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 	ImGui::Begin("Hello from ui function");
 		ImGui::Text("%f", deltaTime);
+		ImGui::Text("%f", camera->Pitch);
+		ImGui::Text("%f", camera->Yaw);
+		ImGui::Text("%f", camera->Position.x);
+		ImGui::Text("%f", camera->Position.y);
+		ImGui::Text("%f", camera->Position.z);
 	ImGui::End();
 	ImGui::ShowDemoWindow();
 };

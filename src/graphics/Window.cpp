@@ -10,10 +10,12 @@ void Window::SetUIFunction(std::function<void(Renderer*, Window*)> Function) {
 }
 
 void Window::EatCursor(bool state) {
+    GLFWwindow* window = reinterpret_cast<GLFWwindow*>(data);
     if (state) {
-        glfwSetInputMode(reinterpret_cast<GLFWwindow*>(data), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetCursorPos(window, 0, 0);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
-        glfwSetInputMode(reinterpret_cast<GLFWwindow*>(data), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
 

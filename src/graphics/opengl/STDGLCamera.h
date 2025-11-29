@@ -7,7 +7,7 @@
 
 #include "graphics/Camera.h"
 
-const vec3 WorldUp = vec3(0.0f, 0.0f, -1.0f);
+const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL

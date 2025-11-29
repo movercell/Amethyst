@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <glm/glm.hpp> // For error highlighting
+#include <glm/glm.hpp> // For error highlighting
 
 #ifdef GLMPresent 
     #include <bit>
@@ -32,12 +32,12 @@ struct vec3 {
     vec3& operator*=(const float& other) { x *= other; y *= other; z *= other; return *this; }
     vec3& operator/=(const float& other) { x /= other; y /= other; z /= other; return *this; }
 
-    float dot(const vec3& other) { return x * other.x + y * other.y + z * other.z; }
-    vec3 cross(const vec3& other) { return vec3((y * other.z) - (z * other.y), (z * other.x) - (x * other.z), (x * other.y) - (y * other.x)); }
+    float dot(const vec3& other) const { return x * other.x + y * other.y + z * other.z; }
+    vec3 cross(const vec3& other) const { return vec3((y * other.z) - (z * other.y), (z * other.x) - (x * other.z), (x * other.y) - (y * other.x)); }
     
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
-    vec3(const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
-    glm::vec3 toglm(){ return glm::vec3(x, y, z); }
+    vec3 (const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
+    glm::vec3 toglm() const { return glm::vec3(x, y, z); }
 #endif
 };
 
@@ -65,12 +65,12 @@ struct vec2 {
     vec2& operator*=(const float& other) { x *= other; y *= other; return *this; }
     vec2& operator/=(const float& other) { x /= other; y /= other; return *this; }
 
-    float dot(const vec2& other) { return x * other.x + y * other.y; }
-    float cross(const vec2& other) { return (x * other.y) - (y * other.x); }
+    float dot(const vec2& other) const { return x * other.x + y * other.y; }
+    float cross(const vec2& other) const { return (x * other.y) - (y * other.x); }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
-    vec2(const glm::vec2& other) : x(other.x), y(other.y) {}
-    glm::vec2 toglm(){ return glm::vec2(x, y); }
+    vec2 (const glm::vec2& other) : x(other.x), y(other.y) {}
+    glm::vec2 toglm() const { return glm::vec2(x, y); }
 #endif
 };
 
@@ -98,11 +98,11 @@ struct vec4 {
     vec4& operator*=(const float& other) { x *= other; y *= other; z *= other; w *= other; return *this; }
     vec4& operator/=(const float& other) { x /= other; y /= other; z /= other; w /= other; return *this; }
 
-    float dot(const vec4& other) { return x * other.x + y * other.y + z * other.z + w * other.w; }
+    float dot(const vec4& other) const { return x * other.x + y * other.y + z * other.z + w * other.w; }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
-    vec4(const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
-    glm::vec4 toglm(){ return glm::vec4(x, y, z, w); }
+    vec4 (const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
+    glm::vec4 toglm() const { return glm::vec4(x, y, z, w); }
 #endif
 };
 
