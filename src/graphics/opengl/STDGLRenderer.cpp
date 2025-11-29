@@ -7,7 +7,6 @@
 #include <memory>
 #include <utility>
 #include "GLFW/glfw3.h"
-#include "graphics/Camera.h"
 #include "graphics/Renderer.h"
 #include "graphics/Window.h"
 #include "graphics/opengl/STDGLRenderer.h"

@@ -57,3 +57,11 @@ void STDGLCamera::CreateBuffers() {
     glTextureParameteri(Depthbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
 }
+
+uint32_t STDGLCamera::GetTexture() {
+    return Colorbuffer;
+}
+
+uint32_t STDGLCamera::GetDepthTexture() {
+    return Depthbuffer;
+}

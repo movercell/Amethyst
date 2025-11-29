@@ -1,5 +1,6 @@
 #pragma once
 #include "master.h"
+#include <cstdint>
 #include <string>
 // Default camera values
 const float CAMERA_DEFAULT_YAW         = -90.0f;
@@ -31,4 +32,7 @@ public:
     vec3 Up;
     //! Coordinate right axis.
     vec3 Right;
+
+    virtual uint32_t GetTexture() = 0;
+    virtual uint32_t GetDepthTexture() = 0;
 };
