@@ -1,11 +1,20 @@
 #include "graphics/Window.h"
+#include "GLFW/glfw3.h"
 #include "graphics/Renderer.h" // IWYU pragma: keep
 #include "misc.h"
 #include "imgui.h"
 #include <GLFW/glfw3.h>
 
-void Window::SetUIFunction(std::function<void(Renderer*)> Function) {
+void Window::SetUIFunction(std::function<void(Renderer*, Window*)> Function) {
     UIFunction = Function;
+}
+
+void Window::EatCursor(bool state) {
+    if (state) {
+        glfwSetInputMode(reinterpret_cast<GLFWwindow*>(data), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        glfwSetInputMode(reinterpret_cast<GLFWwindow*>(data), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }
 
 void Window::Update() {

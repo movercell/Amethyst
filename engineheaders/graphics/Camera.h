@@ -33,6 +33,9 @@ public:
     //! Coordinate right axis.
     vec3 Right;
 
+    //! Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+    virtual void ProcessMouseMovement(vec2 offset, bool constrainPitch = true) = 0;
+
     virtual uint32_t GetTexture() = 0;
     virtual uint32_t GetDepthTexture() = 0;
 };

@@ -1,6 +1,8 @@
 #include <array>
+#include <bit>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 #include "graphics/Camera.h"
 #include "graphics/RWorld.h"
 #include "graphics/Renderer.h"
@@ -16,8 +18,26 @@
 
 #include "master.h"
 
-std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
+// Time between current frame and last frame
+float deltaTime = 0.0f;	
+float lastFrame = 0.0f;
+
+std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 	Camera* camera = renderer->GetCamera("cam2");
+	float velocity = 2.5f * deltaTime;
+        if (ImGui::IsKeyDown(ImGuiKey_W))
+            camera->Position += camera->Front * velocity;
+        if (ImGui::IsKeyDown(ImGuiKey_S))
+            camera->Position -= camera->Front * velocity;
+        if (ImGui::IsKeyDown(ImGuiKey_A))
+            camera->Position -= camera->Right * velocity;
+        if (ImGui::IsKeyDown(ImGuiKey_D))
+            camera->Position += camera->Right * velocity;
+	static vec2 lastmouse = vec2(0, 0);
+	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
+	vec2 mouseoffset = currmouse - lastmouse;
+	lastmouse = currmouse;
+	camera->ProcessMouseMovement(mouseoffset);
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -39,7 +59,7 @@ std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
 		exit(0);
 	}
 	ImGui::Begin("Hello from ui function");
-		ImGui::Text("hiiiiiiiiii");
+		ImGui::Text("%f", deltaTime);
 	ImGui::End();
 	ImGui::ShowDemoWindow();
 };
@@ -86,6 +106,7 @@ int main() {
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
+	enginewindow->EatCursor(true);
 	RWorld* rworld = openglcontext->newRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
@@ -95,6 +116,10 @@ int main() {
 
 	bool isWindowOpen = true;
 	while(!glfwWindowShouldClose(window)) {
+		float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
 		openglcontext->Draw();
 		glfwMakeContextCurrent(window);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

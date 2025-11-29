@@ -21,7 +21,7 @@ void Renderer::____Window::Draw() {
     rendererRef->UINewFrame();
 
     if (UIFunction) {
-        UIFunction(rendererRef.get());
+        UIFunction(rendererRef.get(), this);
     } else {
         exit(-2);
     }

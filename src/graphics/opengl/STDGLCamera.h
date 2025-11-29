@@ -33,8 +33,8 @@ public:
     // Binds the camera into UBO slot 0.
     void Bind(GLuint CameraMatrixBuffer);
 
-    // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
+    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+    void ProcessMouseMovement(vec2 offset, bool constrainPitch = true);
 
     uint32_t GetTexture();
     uint32_t GetDepthTexture();

@@ -20,12 +20,12 @@ void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 }
 
-void STDGLCamera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
+void STDGLCamera::ProcessMouseMovement(vec2 offset, bool constrainPitch)
 {
-    xoffset *= MouseSensitivity;
-    yoffset *= MouseSensitivity;
-    Yaw   += xoffset;
-    Pitch -= yoffset;
+    offset.x *= MouseSensitivity;
+    offset.y *= MouseSensitivity;
+    Yaw   += offset.x;
+    Pitch -= offset.y;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
     if (constrainPitch)
