@@ -9,6 +9,7 @@
 class STDGLRWorld : public RWorld {
 public:
     std::shared_ptr<Camera> MakeCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH);
+    virtual Camera* GetCamera(std::string name);
 
     ~STDGLRWorld();
     STDGLRWorld(std::weak_ptr<Renderer> Renderer) {

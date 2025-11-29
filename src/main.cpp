@@ -17,13 +17,16 @@
 #include "master.h"
 
 std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
+	Camera* camera = renderer->GetCamera("cam1");
+
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 	ImGui::Begin("main", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-		ImGui::Text("hello");
+		std::cout << camera->GetTexture() << std::endl;
+		ImGui::Image(camera->GetTexture(), viewport->Size);
 	ImGui::End();
 	ImGui::PopStyleVar();
 

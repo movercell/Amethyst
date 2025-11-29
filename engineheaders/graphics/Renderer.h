@@ -1,8 +1,10 @@
 #pragma once
+#include "graphics/Camera.h"
 #include "master.h"
 
 #include "graphics/Window.h"
 #include "graphics/RWorld.h"
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -30,7 +32,7 @@ protected:
     //!@private
     ____WindowData* rendererData = nullptr;
     //!@private
-    std::weak_ptr<Renderer> selfRef; //stored for making windows reference this their context
+    std::weak_ptr<Renderer> selfRef; // Stored for making windows reference this their context
     //!@private
     std::vector<std::weak_ptr<____Window>> windowVector =
                             std::vector<std::weak_ptr<____Window>>();
@@ -43,13 +45,15 @@ protected:
     
 public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist
-    //!Makes a window.
+    //! Makes a window.
     std::shared_ptr<Window> MakeWindow();
-    //!Makes a Render World.(Note: Supposed to only be used for game worlds, use separately at your own risk!)
+    //! Makes a Render World.(Note: Supposed to only be used for game worlds, use separately at your own risk!)
     virtual RWorld* newRWorld() = 0;
-    //!Deletes a Render World.
+    //! Deletes a Render World.
     virtual void deleteRWorld(RWorld* target) = 0;
-    //!Draws everything.
+    //! Gets a camera.(used for getting the camera's render result in window UI functions)
+    virtual Camera* GetCamera(std::string name) = 0;
+    //! Draws everything.
     virtual void Draw() = 0;
 };
 

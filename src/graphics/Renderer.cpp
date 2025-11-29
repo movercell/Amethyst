@@ -5,6 +5,7 @@
 //first the internal window stuff
 
 Renderer::____Window::____Window(std::weak_ptr<Renderer> RendererWeakPtr, ____WindowData* RendererDataPtr) {
+    rendererData = RendererDataPtr;
     rendererRef = RendererWeakPtr.lock();
 }
 

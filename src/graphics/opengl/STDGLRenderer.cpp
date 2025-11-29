@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 #include "GLFW/glfw3.h"
+#include "graphics/RWorld.h"
 #include "graphics/Renderer.h"
 #include "graphics/Window.h"
 #include "graphics/opengl/STDGLRenderer.h"
@@ -87,6 +88,7 @@ void STDGLRenderer::Draw() {
                 CameraI--;
                 rworld->CameraVec.erase(rworld->CameraVec.begin() + CameraI);
                 rworld->CameraVec.pop_back();
+                continue;
             }
 
             camera->Bind(CameraUBO);
@@ -95,9 +97,9 @@ void STDGLRenderer::Draw() {
             model.Draw();
 
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Draw windows.
     for (int i = 0; i < windowVector.size(); i++) {
@@ -124,4 +126,13 @@ void STDGLRenderer::deleteRWorld(RWorld* target) {
     auto location = std::find(RWorldVec.begin(), RWorldVec.end(), target);
     std::swap(RWorldVec[std::distance(RWorldVec.begin(), location)], RWorldVec.back());
     RWorldVec.pop_back();
+}
+
+Camera* STDGLRenderer::GetCamera(std::string name) {
+    Camera* result = nullptr;
+    for (RWorld* rworld : RWorldVec) {
+        auto temp = rworld->GetCamera(name);
+        if (temp) result = temp;
+    }
+    return result;
 }

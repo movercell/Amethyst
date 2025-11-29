@@ -1,4 +1,5 @@
 #pragma once
+#include "graphics/RWorld.h"
 #include "master.h"
 
 #include "graphics/Window.h"
@@ -16,7 +17,7 @@ private:
     void UIEndFrame();
     friend class STDGLRWorld;
 
-    std::vector<void*> RWorldVec;
+    std::vector<RWorld*> RWorldVec;
     uint32_t CameraUBO;
 public:
     ~STDGLRenderer();
@@ -24,5 +25,6 @@ public:
     static std::shared_ptr<Renderer> Make();
     RWorld* newRWorld();
     void deleteRWorld(RWorld* target);
+    Camera* GetCamera(std::string name);
     void Draw();
 };
