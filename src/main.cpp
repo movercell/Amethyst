@@ -17,18 +17,24 @@
 #include "master.h"
 
 std::function<void(Renderer*)> mainuifunction = [](Renderer* renderer) {
-	Camera* camera = renderer->GetCamera("cam1");
+	Camera* camera = renderer->GetCamera("cam2");
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::Begin("main", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+	//Draws the camera output
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::Begin("main", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar |
+				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
+                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
+                 ImGuiWindowFlags_NoBackground);
 		std::cout << camera->GetTexture() << std::endl;
 		ImGui::Image(camera->GetTexture(), viewport->Size);
 	ImGui::End();
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(3);
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
 		exit(0);
