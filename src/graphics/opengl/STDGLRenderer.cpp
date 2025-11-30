@@ -32,6 +32,7 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
     glCreateBuffers(1, &(tempRendererRef->CameraUBO));
 
     glfwDefaultWindowHints();
+    tempRendererRef->tmpmodel = new Model("Untitled2.glb");
     return tempRendererRef;
 }
 
@@ -76,7 +77,7 @@ void STDGLRenderer::Draw() {
     glClearDepth(1.0f);
 
     Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    Model model = Model("Untitled2.glb");
+    
 
     for (int RWorldI = 0; RWorldI < RWorldVec.size(); RWorldI++) {
         STDGLRWorld* rworld = static_cast<STDGLRWorld*>(RWorldVec[RWorldI]);
@@ -94,7 +95,8 @@ void STDGLRenderer::Draw() {
             camera->Bind(CameraUBO);
             glClear(GL_DEPTH_BUFFER_BIT);
             shader.use();
-            model.Draw();
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, rworld->tmpinstancearr.InstanceBuffer);
+            tmpmodel->Draw();
 
         }
         

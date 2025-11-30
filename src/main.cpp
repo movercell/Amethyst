@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "GLFW/glfw3.h"
 #include "graphics/Camera.h"
+#include "graphics/ModelInstance.h"
 #include "graphics/RWorld.h"
 #include "graphics/Renderer.h"
 #include "imgui.h"
@@ -122,6 +123,8 @@ int main() {
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
+	std::shared_ptr<ModelInstance> model1 = rworld->MakeModelInstance();
+	model1->SetMatrix(mat4());
 
 	std::cout << "Hello, world!" << std::endl;
 

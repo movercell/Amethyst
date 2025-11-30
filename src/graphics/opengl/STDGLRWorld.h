@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <queue>
 
 class STDGLRWorld : public RWorld {
 public:
@@ -22,6 +23,22 @@ public:
         GLFWwindow* rendererData;
         uint32_t count = 0;
         GLuint InstanceBuffer = 0;
+        std::queue<uint16_t> FreedIndeces;
+        uint16_t NextIndex = 0;
+
+        void init(GLFWwindow* data) {
+            rendererData = data;
+            auto temp = glfwGetCurrentContext();
+            glfwMakeContextCurrent(rendererData);
+
+            glCreateBuffers(1, &InstanceBuffer);
+            uint8_t temparr[INSTANCE_MAX_COUNT * sizeof(mat4)] = { 0 }; // To init data to 0
+            glNamedBufferData(InstanceBuffer, INSTANCE_MAX_COUNT * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
+
+            glfwMakeContextCurrent(temp);
+        }
+        
+        std::shared_ptr<ModelInstance> MakeModelInstance();
 
         friend class GLModelInstance;
     };
@@ -29,20 +46,23 @@ public:
     class GLModelInstance : public ModelInstance {
     public:
         ModelInstanceArray* parent = nullptr;
-        uint32_t index;
+        uint16_t index;
 
         void SetMatrix(mat4 Matrix);
 
-        ~GLModelInstance() {
-
-        }
+        ~GLModelInstance();
+    
         friend class GLModelInstanceArray;
+
+        GLModelInstance(uint16_t Index, ModelInstanceArray* Parent) { index = Index; parent = Parent; }
     };
+    ModelInstanceArray tmpinstancearr;
 
 
     ~STDGLRWorld();
     STDGLRWorld(std::weak_ptr<Renderer> Renderer) {
         renderer = std::static_pointer_cast<STDGLRenderer>(Renderer.lock());
+        tmpinstancearr.init(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
     }
 
     std::vector<std::weak_ptr<STDGLCamera>> CameraVec;

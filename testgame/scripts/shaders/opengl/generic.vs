@@ -5,6 +5,10 @@ layout (std140, binding = 0) uniform Camera {
     mat4 CameraMatrix;
 };
 
+layout (std140, binding = 0) buffer Instances {
+    mat4 InstanceMatrices[1024];
+};
+
 void main() {
-    gl_Position = CameraMatrix * vec4(aPos, 1.0f);
+    gl_Position = CameraMatrix * InstanceMatrices[gl_InstanceID] * vec4(aPos, 1.0f);
 }
