@@ -43,7 +43,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
 	vec2 mouseoffset = currmouse - lastmouse;
 	lastmouse = currmouse;
-	camera->ProcessMouseMovement(mouseoffset);
+	camera->ProcessMouseMovement(mouseoffset, true);
 	//camera->Position += vec3(0.1f, 0, 0) * deltaTime;
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();

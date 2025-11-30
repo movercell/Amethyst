@@ -27,7 +27,11 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    tempRendererRef->rendererData = reinterpret_cast<____WindowData*>(glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL));
+
+    GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL);
+    glfwMakeContextCurrent(data);
+
+    tempRendererRef->rendererData = reinterpret_cast<____WindowData*>(data);
 
     glCreateBuffers(1, &(tempRendererRef->CameraUBO));
 
