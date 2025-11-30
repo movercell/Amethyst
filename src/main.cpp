@@ -73,7 +73,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		ImGui::Text("%f", camera->Position.y);
 		ImGui::Text("%f", camera->Position.z);
 	ImGui::End();
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 };
 
 int main() {
@@ -121,7 +121,7 @@ int main() {
 	enginewindow->EatCursor(true);
 	RWorld* rworld = openglcontext->newRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
-	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
+	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
 	std::shared_ptr<ModelInstance> model1 = rworld->MakeModelInstance();
 	model1->SetMatrix(mat4());
@@ -135,6 +135,7 @@ int main() {
         lastFrame = currentFrame;
 
 		openglcontext->Draw();
+		/*
 		glfwMakeContextCurrent(window);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -143,7 +144,7 @@ int main() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::ShowDemoWindow(); // Show demo window! :)
+		//ImGui::ShowDemoWindow(); // Show demo window! :)
 		//i don't actually have anything to render yet :(
 
 		if (isWindowOpen) {
@@ -157,7 +158,7 @@ int main() {
 		}
 
 		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();    

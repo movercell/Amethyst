@@ -6,7 +6,6 @@
 #include "graphics/Renderer.h"
 #include <vector>
 #include <cstdint>
-#include "../../src/model.h"
 /*!
 *   \brief An OpenGL renderer.
 */
@@ -21,7 +20,6 @@ private:
 
     std::vector<RWorld*> RWorldVec;
     uint32_t CameraUBO;
-    Model* tmpmodel;
 public:
     ~STDGLRenderer();
     //!Makes the renderer

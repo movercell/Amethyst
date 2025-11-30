@@ -6,7 +6,7 @@ layout (std140, binding = 0) uniform Camera {
 };
 
 layout (std140, binding = 0) buffer Instances {
-    mat4 InstanceMatrices[1024];
+    mat4 InstanceMatrices[4096];
 };
 
 void main() {
