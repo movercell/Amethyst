@@ -15,6 +15,7 @@ private:
     ____UIData* UINewData(____WindowData* window);
     void UINewFrame();
     void UIEndFrame();
+
     friend class STDGLRWorld;
 
     std::vector<RWorld*> RWorldVec;

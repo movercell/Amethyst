@@ -4,6 +4,18 @@
 #include "graphics/Camera.h"
 #include <memory>
 
+
+void STDGLRWorld::GLModelInstance::SetMatrix(mat4 Matrix) {
+    auto temp = glfwGetCurrentContext();
+    glfwMakeContextCurrent(parent->rendererData);
+
+    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), &Matrix);
+
+    glfwMakeContextCurrent(temp);
+}
+
+
+
 std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
     auto temp = glfwGetCurrentContext();
     glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
@@ -29,6 +41,10 @@ Camera* STDGLRWorld::GetCamera(std::string name) {
             return result;
     }
     return nullptr;
+}
+
+std::shared_ptr<ModelInstance> STDGLRWorld::MakeModelInstance() {
+
 }
 
 STDGLRWorld::~STDGLRWorld() {
