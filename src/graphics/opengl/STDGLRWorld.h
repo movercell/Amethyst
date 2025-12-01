@@ -25,15 +25,20 @@ public:
         GLuint InstanceBuffer = 0;
         std::queue<uint16_t> FreedIndeces;
         uint16_t NextIndex = 0;
+        uint16_t InstanceMaxCount;
 
-        void init(GLFWwindow* data) {
+        void init(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT) {
             rendererData = data;
+            InstanceMaxCount = instancemaxcount;
             auto temp = glfwGetCurrentContext();
             glfwMakeContextCurrent(rendererData);
 
             glCreateBuffers(1, &InstanceBuffer);
-            uint8_t temparr[INSTANCE_MAX_COUNT * sizeof(mat4)] = { 0 }; // To init data to 0
-            glNamedBufferData(InstanceBuffer, INSTANCE_MAX_COUNT * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
+            uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
+            for (int i = 0; i < InstanceMaxCount * sizeof(mat4); i++) {
+                temparr[i] = 0xFF;
+            }
+            glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
 
             glfwMakeContextCurrent(temp);
         }
