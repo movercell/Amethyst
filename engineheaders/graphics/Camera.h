@@ -38,4 +38,6 @@ public:
 
     virtual uint32_t GetTexture() = 0;
     virtual uint32_t GetDepthTexture() = 0;
+
+    virtual ~Camera() {};
 };

@@ -3,49 +3,13 @@
 #include "STDGLCamera.h"
 #include "graphics/Camera.h"
 #include "master.h"
-#include <cstdint>
 #include <memory>
-
-
-void STDGLRWorld::GLModelInstance::SetMatrix(mat4 Matrix) {
-    auto temp = glfwGetCurrentContext();
-    glfwMakeContextCurrent(parent->rendererData);
-
-    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), &Matrix);
-
-    glfwMakeContextCurrent(temp);
-}
-
-STDGLRWorld::GLModelInstance::~GLModelInstance() {
-    auto temp = glfwGetCurrentContext();
-    uint8_t temparr[sizeof(mat4)] = { 0xFF, 0x80, 0x00, 0x00 }; // To init data to NaN
-    glfwMakeContextCurrent(parent->rendererData);
-
-    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), temparr);
-
-    glfwMakeContextCurrent(temp);
-
-    parent->count--;
-    parent->FreedIndeces.push(index);
-}
-
-std::shared_ptr<ModelInstance> STDGLRWorld::ModelInstanceArray::MakeModelInstance() {
-    uint16_t index;
-    if (FreedIndeces.empty()) {
-        index = NextIndex;
-        NextIndex++;
-    } else {
-        index = FreedIndeces.front();
-        FreedIndeces.pop();
-    }
-    return std::make_shared<GLModelInstance>(index, this);
-}
 
 
 std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
     auto temp = glfwGetCurrentContext();
     glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
-    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(resolution, name, position, yaw, pitch);
+    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(renderer, resolution, name, position, yaw, pitch);
     CameraVec.push_back(result);
     glfwMakeContextCurrent(temp);
 

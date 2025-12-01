@@ -17,6 +17,7 @@ private:
     void UIEndFrame();
 
     friend class STDGLRWorld;
+    friend class STDGLCamera;
 
     std::vector<RWorld*> RWorldVec;
     uint32_t CameraUBO;

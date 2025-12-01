@@ -1,4 +1,5 @@
 #include "STDGLCamera.h"
+#include "GLFW/glfw3.h"
 #include "glm/geometric.hpp"
 
 void STDGLCamera::UpdateCameraVectors() {
@@ -66,4 +67,14 @@ uint32_t STDGLCamera::GetTexture() {
 
 uint32_t STDGLCamera::GetDepthTexture() {
     return Depthbuffer;
+}
+
+STDGLCamera::~STDGLCamera() {
+    auto temp = glfwGetCurrentContext();
+    glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(Renderer->rendererData));
+
+    glDeleteFramebuffers(1, &Framebuffer);
+    glDeleteTextures(2, &Colorbuffer); // Also removes the depth buffer.
+
+    glfwMakeContextCurrent(temp);
 }

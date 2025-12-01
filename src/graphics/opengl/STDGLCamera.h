@@ -3,9 +3,11 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 #include <string>
 
 #include "graphics/Camera.h"
+#include "graphics/opengl/STDGLRenderer.h"
 
 const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 
@@ -17,9 +19,12 @@ public:
     GLuint Framebuffer;
     GLuint Colorbuffer;
     GLuint Depthbuffer;
+    std::shared_ptr<STDGLRenderer> Renderer;
+
 
     // Constructor with vectors.
-    STDGLCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+    STDGLCamera(std::shared_ptr<STDGLRenderer> renderer, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+        Renderer = renderer;
         Resolution = resolution;
         Name = name;
         Position = position;
@@ -38,6 +43,8 @@ public:
 
     uint32_t GetTexture();
     uint32_t GetDepthTexture();
+
+    ~STDGLCamera();
 
 private:
     // Creates the buffers.
