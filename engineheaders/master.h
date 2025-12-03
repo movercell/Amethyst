@@ -149,3 +149,19 @@ private:
 
     float data[4][4];
 };
+
+
+namespace Shapes {
+    struct AABB {
+        vec3 Min = vec3(0, 0, 0);
+        vec3 Max = vec3(1, 1, 1); 
+    };
+    struct Sphere {
+        vec3 Position = vec3(0, 0, 0);
+        float Radius  = 0;
+    };
+    struct Line {
+        vec3 Start = vec3(0, 0, 0);
+        vec3 End   = vec3(1, 1, 1);
+    };
+}
