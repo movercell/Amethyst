@@ -8,6 +8,8 @@ const float CAMERA_DEFAULT_PITCH       =  0.0f;
 const float CAMERA_DEFAULT_SPEED       =  2.5f;
 const float CAMERA_DEFAULT_SENSITIVITY =  0.1f;
 const float CAMERA_DEFAULT_FOV         =  120.0f;
+const float CAMERA_DEFAULT_NEAR        =  1.0f;
+const float CAMERA_DEFAULT_FAR         =  100.0f;
 
 /*!
 * \brief A camera interface.
@@ -22,10 +24,8 @@ public:
     // Euler angles.
     float Yaw   = CAMERA_DEFAULT_YAW;
     float Pitch = CAMERA_DEFAULT_PITCH;
-    // Camera options
     float MouseSensitivity = CAMERA_DEFAULT_SENSITIVITY;
-    float FOV              = CAMERA_DEFAULT_FOV;
-    vec2 Resolution;
+    
     //! Coordinate front axis.
     vec3 Front = vec3(1, 0, 0);
     //! Coordinate up axis.
@@ -40,4 +40,56 @@ public:
     virtual uint32_t GetDepthTexture() = 0;
 
     virtual ~Camera() {};
+
+protected:
+
+    vec2 Resolution;
+    float FOV = CAMERA_DEFAULT_FOV;
+
+    struct Frustum
+    {
+        struct Plane{
+            // unit vector
+            vec3 Normal = vec3(0.f, 1.f, 0.f );
+            // distance from origin to the nearest point in the plane
+            float Distance = 0.f;    
+            
+            Plane() = default;
+
+	        Plane(const vec3& p1, const vec3& norm)
+	        	: Normal(norm.norm()),
+	        	Distance(Normal.dot(p1)) {}
+
+        };
+    
+        Plane TopFace;
+        Plane BottomFace;
+
+        Plane RightFace;
+        Plane LeftFace;
+
+        Plane FarFace;
+        Plane NearFace;
+    };
+
+    Frustum CreateFrustum() {
+        Frustum     frustum;
+        float halfVSide = CAMERA_DEFAULT_FAR * tanf(FOV * .5f);
+        float halfHSide = halfVSide * Resolution.x / Resolution.y;
+        vec3 frontMultFar = Front * CAMERA_DEFAULT_FAR;
+
+        frustum.NearFace = { Position + Front * CAMERA_DEFAULT_NEAR, Front };
+        frustum.FarFace = { Position + frontMultFar, Front * -1 };
+        frustum.RightFace = { Position,
+                                (frontMultFar - Right * halfHSide).cross(Up) };
+        frustum.LeftFace = { Position,
+                                Up.cross(frontMultFar + Right * halfHSide) };
+        frustum.TopFace = { Position,
+                                Right.cross(frontMultFar - Up * halfVSide) };
+        frustum.BottomFace = { Position,
+                                (frontMultFar + Up * halfVSide).cross(Right) };
+
+        return frustum;
+    }
+    
 };

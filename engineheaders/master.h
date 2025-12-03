@@ -34,6 +34,9 @@ struct vec3 {
 
     float dot(const vec3& other) const { return x * other.x + y * other.y + z * other.z; }
     vec3 cross(const vec3& other) const { return vec3((y * other.z) - (z * other.y), (z * other.x) - (x * other.z), (x * other.y) - (y * other.x)); }
+
+    float length() const { return std::sqrt(x*x + y*y + z*z); }
+    vec3 norm() const { float Length = length(); return vec3(x / Length, y / Length, z / Length); }
     
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec3 (const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
@@ -68,6 +71,9 @@ struct vec2 {
     float dot(const vec2& other) const { return x * other.x + y * other.y; }
     float cross(const vec2& other) const { return (x * other.y) - (y * other.x); }
 
+    float length() const { return std::sqrt(x*x + y*y); }
+    vec2 norm() const { float Length = length(); return vec2(x / Length, y / Length); }
+
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec2 (const glm::vec2& other) : x(other.x), y(other.y) {}
     glm::vec2 toglm() const { return glm::vec2(x, y); }
@@ -99,6 +105,9 @@ struct vec4 {
     vec4& operator/=(const float& other) { x /= other; y /= other; z /= other; w /= other; return *this; }
 
     float dot(const vec4& other) const { return x * other.x + y * other.y + z * other.z + w * other.w; }
+
+    float length() const { return std::sqrt(x*x + y*y + z*z + w*w); }
+    vec4 norm() const { float Length = length(); return vec4(x / Length, y / Length, z / Length, 2 / Length); }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec4 (const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
