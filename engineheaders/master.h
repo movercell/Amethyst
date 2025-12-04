@@ -1,6 +1,6 @@
 #pragma once
-
-#include <glm/glm.hpp> // For error highlighting
+#include <cmath>
+//#include <glm/glm.hpp> // For error highlighting
 
 #ifdef GLMPresent 
     #include <bit>
@@ -127,7 +127,7 @@ struct mat4 {
         data[0][2] = i; data[1][2] = j; data[2][2] = k; data[3][2] = l;
         data[0][3] = m; data[1][3] = n; data[2][3] = o; data[3][3] = p;
     }
-
+#ifndef __INTELLISENSE__    // Crude but disables the 2 errors that intellisense reports.(It thinks that usage of multidimentional subscript operator is not permitted.)
     float& operator[](int row, int column) {
         return data[column][row];
     }
@@ -141,7 +141,7 @@ struct mat4 {
         }
         return result;
     }
-
+#endif
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     mat4(const glm::mat4& other) {
         *this = std::bit_cast<mat4>(other);
