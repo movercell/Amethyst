@@ -85,23 +85,14 @@ void STDGLRenderer::Draw() {
 
     for (int RWorldI = 0; RWorldI < RWorldVec.size(); RWorldI++) {
         STDGLRWorld* rworld = static_cast<STDGLRWorld*>(RWorldVec[RWorldI]);
-        for (int CameraI = 0; CameraI < rworld->CameraVec.size(); CameraI++) {
-            const std::shared_ptr<STDGLCamera>& camera = rworld->CameraVec[CameraI].lock();
-
-            // Check whether the camera still exists.
-            if (!camera) {
-                CameraI--;
-                rworld->CameraVec.erase(rworld->CameraVec.begin() + CameraI);
-                rworld->CameraVec.pop_back();
-                continue;
-            }
-
+        auto SharedCameraVec = rworld->CameraVec.lock();
+        for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
+            //if (!camera) continue;
             camera->Bind(CameraUBO);
             glClear(GL_DEPTH_BUFFER_BIT);
             shader.use();
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, rworld->tmpinstancearr.InstanceBuffer);
             tmpmodel.Draw();
-
         }
         
     }

@@ -17,18 +17,11 @@ std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::stri
 }
 
 Camera* STDGLRWorld::GetCamera(std::string name) {
-    for (int CameraI = 0; CameraI < CameraVec.size(); CameraI++) {
-        Camera* result = CameraVec[CameraI].lock().get();
-
-        // Check whether the camera still exists.
-        if (!result) {
-            CameraI--;
-            CameraVec.erase(CameraVec.begin() + CameraI);
-            CameraVec.pop_back();
-            continue;
-        }
-        if (result->Name == name)
-            return result;
+    auto SharedCameraVec = CameraVec.lock();
+    for (std::shared_ptr<Camera> camera : SharedCameraVec) {
+        if (!camera) continue;
+        if (camera->Name == name)
+            return camera.get();
     }
     return nullptr;
 }

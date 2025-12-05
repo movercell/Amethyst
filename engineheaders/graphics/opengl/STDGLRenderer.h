@@ -22,7 +22,7 @@ private:
     friend class STDGLCamera;
 
     std::vector<RWorld*> RWorldVec;
-    weak_vector<RWorld> hi;
+    
     uint32_t CameraUBO;
 public:
     ~STDGLRenderer();

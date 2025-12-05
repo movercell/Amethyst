@@ -25,6 +25,6 @@ public:
         tmpinstancearr.init(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
     }
 
-    std::vector<std::weak_ptr<STDGLCamera>> CameraVec;
+    weak_vector<STDGLCamera> CameraVec;
     std::shared_ptr<STDGLRenderer> renderer;
 };
