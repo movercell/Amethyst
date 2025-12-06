@@ -99,15 +99,10 @@ void STDGLRenderer::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Draw windows.
-    for (int i = 0; i < windowVector.size(); i++) {
-        std::weak_ptr<____Window>& window = windowVector[i];
-        if (window.expired()) {
-            i--;
-            windowVector.erase(windowVector.begin() + i);
-            continue;
-        }
+    auto SharedWindowVector = WindowVector.lock();
+    for (auto window : SharedWindowVector) {
         glViewport(0, 0, 800, 600);
-        window.lock()->Draw();
+        window->Draw();
     }
     
 }

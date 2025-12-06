@@ -35,6 +35,6 @@ void Renderer::____Window::Draw() {
 
 std::shared_ptr<Window> Renderer::MakeWindow() {
     std::shared_ptr<____Window> tempRef = std::make_shared<____Window>(selfRef, rendererData);
-    windowVector.push_back(tempRef);
+    WindowVector.push_back(tempRef);
     return std::static_pointer_cast<Window>(tempRef);
 }

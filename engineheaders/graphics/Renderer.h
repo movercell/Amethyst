@@ -1,6 +1,7 @@
 #pragma once
 #include "graphics/Camera.h"
 #include "master.h"
+#include "weak_vector.h"
 
 #include "graphics/Window.h"
 #include "graphics/RWorld.h"
@@ -34,8 +35,7 @@ protected:
     //!@private
     std::weak_ptr<Renderer> selfRef; // Stored for making windows reference this their context
     //!@private
-    std::vector<std::weak_ptr<____Window>> windowVector =
-                            std::vector<std::weak_ptr<____Window>>();
+    weak_vector<____Window> WindowVector = weak_vector<____Window>();
     //!@private
     virtual void UINewFrame() = 0;
     //!@private
