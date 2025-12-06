@@ -17,7 +17,7 @@ public:
     GLuint InstanceBuffer = 0;
     std::queue<uint16_t> FreedIndeces;
     uint16_t NextIndex = 0;
-    uint16_t InstanceMaxCount;
+    uint16_t InstanceMaxCount; // Used to limit the amount of static model instances to just what's needed.
 
     void init(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT) {
         rendererData = data;

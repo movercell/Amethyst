@@ -8,7 +8,7 @@ class weak_vector {
 private:
     std::vector<std::weak_ptr<T>, Allocator> InternalVector;
 public:
-    weak_vector(decltype(sizeof(0)) capacity = 20, const Allocator& alloc = Allocator()) : InternalVector(std::vector<std::weak_ptr<T>, Allocator>(alloc)) { InternalVector.reserve(capacity); }
+    weak_vector(size_t capacity = 20, const Allocator& alloc = Allocator()) : InternalVector(std::vector<std::weak_ptr<T>, Allocator>(alloc)) { InternalVector.reserve(capacity); }
     void push_back(std::weak_ptr<T> value) { InternalVector.push_back(value); }
     std::vector<std::shared_ptr<T>> lock() {
         std::vector<std::shared_ptr<T>> result;
