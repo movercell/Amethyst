@@ -173,4 +173,9 @@ namespace Shapes {
         vec3 Start = vec3(0, 0, 0);
         vec3 End   = vec3(1, 1, 1);
     };
+    struct Vertex {
+        vec3 Position;
+        vec3 Normal;
+        vec3 TexCoords;
+    };
 }

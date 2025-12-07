@@ -13,6 +13,7 @@
 */
 class ENGINEEXPORT STDGLRenderer : public Renderer
 {
+#ifdef AMETHYSTENGINESRC
 private:
     ____UIData* UINewData(____WindowData* window);
     void UINewFrame();
@@ -22,8 +23,9 @@ private:
     friend class STDGLCamera;
 
     weak_vector<RWorld> RWorldVec;
-    
+
     uint32_t CameraUBO;
+#endif
 public:
     ~STDGLRenderer();
     //!Makes the renderer

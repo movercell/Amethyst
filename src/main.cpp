@@ -1,3 +1,5 @@
+#undef AMETHYSTENGINESRC
+
 #include <array>
 #include <bit>
 #include <glad/glad.h>
