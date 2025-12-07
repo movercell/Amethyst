@@ -119,7 +119,7 @@ int main() {
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
 	enginewindow->EatCursor(true);
-	RWorld* rworld = openglcontext->newRWorld();
+	auto rworld = openglcontext->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));

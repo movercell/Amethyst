@@ -21,15 +21,14 @@ private:
     friend class STDGLRWorld;
     friend class STDGLCamera;
 
-    std::vector<RWorld*> RWorldVec;
+    weak_vector<RWorld> RWorldVec;
     
     uint32_t CameraUBO;
 public:
     ~STDGLRenderer();
     //!Makes the renderer
     static std::shared_ptr<Renderer> Make();
-    RWorld* newRWorld();
-    void deleteRWorld(RWorld* target);
+    std::shared_ptr<RWorld> MakeRWorld();
     Camera* GetCamera(std::string name);
     void Draw();
 };

@@ -83,11 +83,11 @@ void STDGLRenderer::Draw() {
     Model tmpmodel = Model("sphere.glb");
     
 
-    for (int RWorldI = 0; RWorldI < RWorldVec.size(); RWorldI++) {
-        STDGLRWorld* rworld = static_cast<STDGLRWorld*>(RWorldVec[RWorldI]);
+    auto SharedRWorldVec = RWorldVec.lock();
+    for (auto rworldbase : SharedRWorldVec) {
+        auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
         auto SharedCameraVec = rworld->CameraVec.lock();
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
-            //if (!camera) continue;
             camera->Bind(CameraUBO);
             glClear(GL_DEPTH_BUFFER_BIT);
             shader.use();
@@ -107,22 +107,17 @@ void STDGLRenderer::Draw() {
     
 }
 
-RWorld* STDGLRenderer::newRWorld() {
-    STDGLRWorld* result = new STDGLRWorld(selfRef);
+std::shared_ptr<RWorld> STDGLRenderer::MakeRWorld() {
+    auto result = make_shared<STDGLRWorld>(selfRef);
     RWorldVec.push_back(result);
 
     return result;
 }
 
-void STDGLRenderer::deleteRWorld(RWorld* target) {
-    auto location = std::find(RWorldVec.begin(), RWorldVec.end(), target);
-    std::swap(RWorldVec[std::distance(RWorldVec.begin(), location)], RWorldVec.back());
-    RWorldVec.pop_back();
-}
-
 Camera* STDGLRenderer::GetCamera(std::string name) {
     Camera* result = nullptr;
-    for (RWorld* rworld : RWorldVec) {
+    auto SharedRWorldVec = RWorldVec.lock();
+    for (auto rworld : SharedRWorldVec) {
         auto temp = rworld->GetCamera(name);
         if (temp) result = temp;
     }
