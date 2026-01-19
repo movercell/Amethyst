@@ -80,7 +80,7 @@ void STDGLRenderer::Draw() {
     glClearDepth(1.0f);
 
     Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    Model tmpmodel = Model("sphere.glb");
+    STDGLModel tmpmodel = STDGLModel("sphere.glb");
     
 
     auto SharedRWorldVec = RWorldVec.lock();

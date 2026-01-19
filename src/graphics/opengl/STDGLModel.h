@@ -8,7 +8,17 @@
 #include <cstdint>
 #include <memory>
 #include <queue>
+#include <assimp/scene.h>
 
+class STDGLMesh {
+public:
+    GLuint VAO;
+    GLuint VBO, EBO;
+    unsigned int IndexCount;
+
+    STDGLMesh(aiMesh* paimesh);
+    ~STDGLMesh();
+};
 
 class STDGLModel {
 public:
@@ -16,13 +26,6 @@ public:
     void DrawDepth();
 
     STDGLModel(std::string name);
-    ~STDGLModel();
-
-    class STDGLMesh {
-        GLuint VAO;
-        GLuint VBO;
-        GLuint EBO;
-    };
 
     std::vector<STDGLMesh> Meshes;
 };
