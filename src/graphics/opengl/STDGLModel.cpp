@@ -34,7 +34,8 @@ STDGLModel::STDGLModel(std::string name) {
 }
 
 STDGLMesh::STDGLMesh(aiMesh* paimesh) {
-    glCreateBuffers(2, &VBO);
+    MeshInfo_t Info;
+    glCreateBuffers(3, &VBO);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     {
@@ -45,6 +46,7 @@ STDGLMesh::STDGLMesh(aiMesh* paimesh) {
             vertex.Position = std::bit_cast<vec3>(paimesh->mVertices[vertexindex]);
             vertex.Normal = std::bit_cast<vec3>(paimesh->mNormals[vertexindex]);
             vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
+            Info.Radius = std::max(Info.Radius, vertex.Position.length());
             vertices.push_back(vertex);
         }
         glNamedBufferData(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), GL_STATIC_DRAW);
@@ -62,6 +64,9 @@ STDGLMesh::STDGLMesh(aiMesh* paimesh) {
         IndexCount = indeces.size();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     }
+
+    glNamedBufferData(MeshInfo, sizeof(MeshInfo_t), &Info, GL_STATIC_DRAW);
+
     // vertex positions
     glEnableVertexAttribArray(0);	
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)0);
@@ -83,6 +88,7 @@ STDGLModel::~STDGLModel() {
 
 void STDGLModel::Draw() {
     for (auto mesh : Meshes) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, mesh.MeshInfo);
         glBindVertexArray(mesh.VAO);
         glDrawElementsInstanced(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, 0, 4096);
     }

@@ -12,8 +12,11 @@
 
 class STDGLMesh {
 public:
+    struct MeshInfo_t {
+        float Radius;
+    };
     GLuint VAO;
-    GLuint VBO, EBO;
+    GLuint VBO, EBO, MeshInfo;
     unsigned int IndexCount;
 
     STDGLMesh(aiMesh* paimesh);
