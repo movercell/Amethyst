@@ -69,12 +69,12 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		exit(0);
 	}
 	ImGui::Begin("Hello from ui function");
-		ImGui::Text("%f", deltaTime);
-		ImGui::Text("%f", camera->Pitch);
-		ImGui::Text("%f", camera->Yaw);
-		ImGui::Text("%f", camera->Position.x);
-		ImGui::Text("%f", camera->Position.y);
-		ImGui::Text("%f", camera->Position.z);
+		ImGui::Text("Delta		 : %f", deltaTime);
+		ImGui::Text("Camera pitch: %f", camera->Pitch);
+		ImGui::Text("Camera yaw  : %f", camera->Yaw);
+		ImGui::Text("Camera X	 : %f", camera->Position.x);
+		ImGui::Text("Camera Y	 : %f", camera->Position.y);
+		ImGui::Text("Camera Z	 : %f", camera->Position.z);
 	ImGui::End();
 	//ImGui::ShowDemoWindow();
 };
