@@ -27,20 +27,21 @@ float lastFrame = 0.0f;
 
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 	Camera* camera = renderer->GetCamera("cam2");
-	float velocity = 2.5f * deltaTime;
+	float velocity = 100.0f * deltaTime;
+	vec3 direction;
         if (ImGui::IsKeyDown(ImGuiKey_W))
-            camera->Position += camera->Front * velocity;
+            direction  += camera->Front;
         if (ImGui::IsKeyDown(ImGuiKey_S))
-            camera->Position -= camera->Front * velocity;
+            direction  -= camera->Front;
         if (ImGui::IsKeyDown(ImGuiKey_A))
-            camera->Position -= camera->Right * velocity;
+            direction  -= camera->Right;
         if (ImGui::IsKeyDown(ImGuiKey_D))
-            camera->Position += camera->Right * velocity;
+            direction  += camera->Right;
         if (ImGui::IsKeyDown(ImGuiKey_Space))
-            camera->Position += vec3(0, 0, 1) * velocity;
+            direction  += vec3(0, 0, 1);
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-            camera->Position += vec3(0, 0, -1) * velocity;
-
+            direction += vec3(0, 0, -1);
+	camera->Position += direction * velocity;
 	static vec2 lastmouse = vec2(0, 0);
 	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
 	vec2 mouseoffset = currmouse - lastmouse;
@@ -120,11 +121,12 @@ int main() {
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
-	//enginewindow->EatCursor(true);
+	enginewindow->EatCursor(true);
 	auto rworld = openglcontext->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
+	cameras[1]->FOV = 120.0f;
 	std::array<std::shared_ptr<ModelInstance>, 2> models;
 	models[0] = rworld->MakeModelInstance();
 	models[0]->SetMatrix(mat4());

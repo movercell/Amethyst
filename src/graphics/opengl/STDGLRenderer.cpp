@@ -78,9 +78,10 @@ void STDGLRenderer::Draw() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraUBO);
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
+    glClearColor(0, 0, 0, 1);
 
     Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    STDGLModel tmpmodel = STDGLModel("sphere.glb");
+    STDGLModel tmpmodel = STDGLModel("nahsphere.glb");
     
 
     auto SharedRWorldVec = RWorldVec.lock();
@@ -89,7 +90,7 @@ void STDGLRenderer::Draw() {
         auto SharedCameraVec = rworld->CameraVec.lock();
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
             camera->Bind(CameraUBO);
-            glClear(GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             shader.use();
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, rworld->tmpinstancearr.InstanceBuffer);
             tmpmodel.Draw();

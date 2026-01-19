@@ -32,6 +32,8 @@ public:
     vec3 Up = vec3(0, 0, 1);
     //! Coordinate right axis.
     vec3 Right = vec3(0, 1, 0);
+    //! FOV.
+    float FOV = CAMERA_DEFAULT_FOV;
 
     //! Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     virtual void ProcessMouseMovement(vec2 offset, bool constrainPitch = true) = 0;
@@ -44,7 +46,6 @@ public:
 protected:
 
     vec2 Resolution;
-    float FOV = CAMERA_DEFAULT_FOV;
 
     struct Frustum
     {
