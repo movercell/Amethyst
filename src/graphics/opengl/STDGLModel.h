@@ -17,7 +17,6 @@ public:
     unsigned int IndexCount;
 
     STDGLMesh(aiMesh* paimesh);
-    ~STDGLMesh();
 };
 
 class STDGLModel {
@@ -26,6 +25,7 @@ public:
     void DrawDepth();
 
     STDGLModel(std::string name);
+    ~STDGLModel();
 
     std::vector<STDGLMesh> Meshes;
 };

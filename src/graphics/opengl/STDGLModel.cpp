@@ -28,12 +28,15 @@ STDGLModel::STDGLModel(std::string name) {
     
     Meshes.reserve(scene->mNumMeshes);
     for (int meshindex = 0; meshindex < scene->mNumMeshes; meshindex++) {
-        Meshes.push_back(STDGLMesh(scene->mMeshes[meshindex]));
+        STDGLMesh mesh(scene->mMeshes[meshindex]);
+        Meshes.push_back(std::move(mesh));
     }
 }
 
 STDGLMesh::STDGLMesh(aiMesh* paimesh) {
     glCreateBuffers(2, &VBO);
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
     {
         std::vector<Shapes::Vertex> vertices;
         vertices.reserve(paimesh->mNumVertices);
@@ -45,6 +48,7 @@ STDGLMesh::STDGLMesh(aiMesh* paimesh) {
             vertices.push_back(vertex);
         }
         glNamedBufferData(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
     }
     {
         std::vector<GLuint> indeces;
@@ -56,8 +60,8 @@ STDGLMesh::STDGLMesh(aiMesh* paimesh) {
         }
         glNamedBufferData(EBO, indeces.size() * sizeof(GLuint), indeces.data(), GL_STATIC_DRAW);
         IndexCount = indeces.size();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     }
-    glGenVertexArrays(1, &VAO);
     // vertex positions
     glEnableVertexAttribArray(0);	
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)0);
@@ -67,11 +71,14 @@ STDGLMesh::STDGLMesh(aiMesh* paimesh) {
     // vertex texture coords
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)offsetof(Shapes::Vertex, TexCoords));
+    
 }
 
-STDGLMesh::~STDGLMesh() {
-    glDeleteBuffers(2, &VBO);
-    glDeleteVertexArrays(1, &VAO);
+STDGLModel::~STDGLModel() {
+    for (auto mesh : Meshes) {
+        glDeleteVertexArrays(1, &mesh.VAO);
+        glDeleteBuffers(2, &mesh.VBO);
+    }
 }
 
 void STDGLModel::Draw() {
