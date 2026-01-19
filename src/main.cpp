@@ -126,7 +126,7 @@ int main() {
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
-	cameras[1]->FOV = 120.0f;
+	//cameras[1]->FOV = 120.0f;
 	std::array<std::shared_ptr<ModelInstance>, 2> models;
 	models[0] = rworld->MakeModelInstance();
 	models[0]->SetMatrix(mat4());
