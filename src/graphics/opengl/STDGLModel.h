@@ -10,6 +10,23 @@
 #include <queue>
 
 
+class STDGLModel {
+public:
+    void Draw();
+    void DrawDepth();
+
+    STDGLModel(std::string name);
+    ~STDGLModel();
+
+    class STDGLMesh {
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+    };
+
+    std::vector<STDGLMesh> Meshes;
+};
+
 class STDGLModelInstanceArray {
 public:
     GLFWwindow* rendererData;
@@ -42,16 +59,16 @@ public:
     friend class GLModelInstance;
 };
 
-    class STDGLModelInstance : public ModelInstance {
-    public:
-        STDGLModelInstanceArray* parent = nullptr;
-        uint16_t index;
+class STDGLModelInstance : public ModelInstance {
+public:
+    STDGLModelInstanceArray* parent = nullptr;
+    uint16_t index;
 
-        void SetMatrix(mat4 Matrix);
+    void SetMatrix(mat4 Matrix);
 
-        ~STDGLModelInstance();
+    ~STDGLModelInstance();
     
-        friend class GLModelInstanceArray;
+    friend class GLModelInstanceArray;
 
-        STDGLModelInstance(uint16_t Index, STDGLModelInstanceArray* Parent) { index = Index; parent = Parent; }
-    };
+    STDGLModelInstance(uint16_t Index, STDGLModelInstanceArray* Parent) { index = Index; parent = Parent; }
+};

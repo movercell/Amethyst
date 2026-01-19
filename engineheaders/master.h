@@ -176,6 +176,6 @@ namespace Shapes {
     struct Vertex {
         vec3 Position;
         vec3 Normal;
-        vec3 TexCoords;
+        vec2 TexCoords;
     };
 }

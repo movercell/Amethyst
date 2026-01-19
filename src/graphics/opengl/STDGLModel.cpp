@@ -1,6 +1,7 @@
 #include "STDGLCamera.h"
 #include "master.h"
 #include "STDGLModel.h"
+#include "Filesystem.h"
 
 void STDGLModelInstance::SetMatrix(mat4 Matrix) {
     auto temp = glfwGetCurrentContext();
