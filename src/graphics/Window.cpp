@@ -25,7 +25,7 @@ void Window::Update() {
         ImGui::DestroyContext(reinterpret_cast<ImGuiContext*>(UIData));
     }
 	glfwWindowHint(GLFW_SAMPLES, 16);
-    data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, "LearnOpenGL", NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
+    data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
     UIData = rendererRef->UINewData(data);
 }
 

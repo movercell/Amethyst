@@ -119,6 +119,7 @@ int main() {
 
 	std::shared_ptr openglcontext = STDGLRenderer::Make();
 	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
+	enginewindow->Name = "Amethyst";
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
 	enginewindow->EatCursor(true);
@@ -131,7 +132,7 @@ int main() {
 	models[0] = rworld->MakeModelInstance();
 	models[0]->SetMatrix(mat4());
 	models[1] = rworld->MakeModelInstance();
-	models[1]->SetMatrix(mat4(1, 0, 0, 2));
+	models[1]->SetMatrix(mat4(1, 0, 0, 128));
 
 	std::cout << "Hello, world!" << std::endl;
 

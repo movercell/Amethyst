@@ -22,6 +22,8 @@ public:
     //! Consumes the cursor
     void EatCursor(bool state);
 
+    std::string Name = "Window";
+
 protected:
     //!@private
     std::function<void(Renderer*, Window*)> UIFunction;
