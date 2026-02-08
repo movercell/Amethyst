@@ -34,7 +34,11 @@ protected:
     //!@private
     ____UIData* UIData = nullptr;
     //!@private
-    ____WindowData* data = nullptr;    
+    ____WindowData* data = nullptr;
+    //!@private
+    bool ShouldEatCursor = false;
+    //!@private
+    inline void ProcessCursorEating();
     //!@private
     Window() {}; //the compiler compains if this doesn't exist
 };

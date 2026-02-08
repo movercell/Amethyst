@@ -5,18 +5,24 @@
 #include "imgui.h"
 #include <GLFW/glfw3.h>
 
+inline void Window::ProcessCursorEating() {
+    auto* window = reinterpret_cast<GLFWwindow*>(data);
+    if (ShouldEatCursor) {
+        glfwSetCursorPos(window, 0, 0);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+}
+
 void Window::SetUIFunction(std::function<void(Renderer*, Window*)> Function) {
     UIFunction = Function;
 }
 
 void Window::EatCursor(bool state) {
     GLFWwindow* window = reinterpret_cast<GLFWwindow*>(data);
-    if (state) {
-        glfwSetCursorPos(window, 0, 0);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
+    ShouldEatCursor = state;
+    ProcessCursorEating();
 }
 
 void Window::Update() {
@@ -26,6 +32,9 @@ void Window::Update() {
     }
 	glfwWindowHint(GLFW_SAMPLES, 16);
     data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
+
+    ProcessCursorEating();
+
     UIData = rendererRef->UINewData(data);
 }
 
