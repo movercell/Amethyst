@@ -81,49 +81,28 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 int main() {
 	glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, 16);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-	if (window == NULL) {
-  		std::cout << "Failed to create GLFW window" << std::endl;
-  		glfwTerminate();
-  		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		glfwTerminate();
-		return -1;
+	// Initialize GLAD
+	{
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		auto temp = glfwCreateWindow(1, 1, "a", NULL, NULL);
+		glfwMakeContextCurrent(temp);
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			std::cout << "Failed to initialize GLAD" << std::endl;
+			glfwTerminate();
+			return -1;
+		}
+		glfwMakeContextCurrent(NULL);
+		glfwDestroyWindow(temp);
 	}
 
-	glViewport(0, 0, 800, 600);
-
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGuiContext* uidata = ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-	//Model model = Model("Untitled2.glb");
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-	ImGui_ImplOpenGL3_Init();
-
-	std::shared_ptr openglcontext = STDGLRenderer::Make();
-	std::shared_ptr<Window> enginewindow = openglcontext->MakeWindow();
+	std::shared_ptr openglrenderer = STDGLRenderer::Make();
+	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow();
 	enginewindow->Name = "Amethyst";
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
 	enginewindow->EatCursor(true);
-	auto rworld = openglcontext->MakeRWorld();
+	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
@@ -137,38 +116,13 @@ int main() {
 	std::cout << "Hello, world!" << std::endl;
 
 	bool isWindowOpen = true;
-	while(!glfwWindowShouldClose(window)) {
+	while(true) {
 		float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-		openglcontext->Draw();
-		/*
-		glfwMakeContextCurrent(window);
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		// Start the Dear ImGui frame
-		ImGui::SetCurrentContext(uidata);
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-		//ImGui::ShowDemoWindow(); // Show demo window! :)
-		//i don't actually have anything to render yet :(
-
-		if (isWindowOpen) {
-			ImGui::Begin("Grid Test", &isWindowOpen);
-			ImGui::Button("lol", ImVec2(25.0f, 25.0f));
-			ImGui::SameLine();
-			ImGui::PushID(1);
-			ImGui::Button("lol", ImVec2(25.0f, 25.0f));
-			ImGui::PopID();
-			ImGui::End();
-		}
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
-
-		glfwSwapBuffers(window);
+		openglrenderer->Draw();
+		
 		glfwPollEvents();    
 	}
 	
