@@ -4,14 +4,11 @@
 #include <bit>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "GLFW/glfw3.h"
 #include "graphics/Camera.h"
 #include "graphics/ModelInstance.h"
 #include "graphics/RWorld.h"
 #include "graphics/Renderer.h"
 #include "imgui.h"
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 
 #include "main.h"
 #include "graphics/opengl/STDGLRenderer.h"
@@ -106,7 +103,6 @@ int main() {
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800, 600), "cam2", vec3(1, 1, 1));
-	//cameras[1]->FOV = 120.0f;
 	std::array<std::shared_ptr<ModelInstance>, 2> models;
 	models[0] = rworld->MakeModelInstance();
 	models[0]->SetMatrix(mat4());
@@ -129,7 +125,3 @@ int main() {
 	glfwTerminate();
 
 }
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}  
