@@ -45,7 +45,6 @@ public:
     void init(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT) {
         rendererData = data;
         InstanceMaxCount = instancemaxcount;
-        auto temp = glfwGetCurrentContext();
         glfwMakeContextCurrent(rendererData);
 
         glCreateBuffers(1, &InstanceBuffer);
@@ -54,8 +53,6 @@ public:
             temparr[i] = 0xFF;
         }
         glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
-
-        glfwMakeContextCurrent(temp);
     }
 
     ~STDGLModelInstanceArray();

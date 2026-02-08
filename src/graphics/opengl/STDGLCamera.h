@@ -17,8 +17,7 @@ class STDGLCamera : public Camera {
 public:
 
     GLuint Framebuffer;
-    GLuint Colorbuffer;
-    GLuint Depthbuffer;
+    GLuint Colorbuffer, Depthbuffer;
     std::shared_ptr<STDGLRenderer> Renderer;
 
 
