@@ -61,6 +61,14 @@ ____UIData* STDGLRenderer::UINewData(____WindowData* window) {
     return data;
 }
 
+void STDGLRenderer::UIDeleteData(____UIData* data) {
+    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(data));
+
+    ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+}
+
 void STDGLRenderer::UINewFrame() {
     ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

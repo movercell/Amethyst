@@ -16,6 +16,7 @@ class ENGINEEXPORT STDGLRenderer : public Renderer
 #ifdef AMETHYSTENGINESRC
 private:
     ____UIData* UINewData(____WindowData* window);
+    void UIDeleteData(____UIData* data);
     void UINewFrame();
     void UIEndFrame();
 

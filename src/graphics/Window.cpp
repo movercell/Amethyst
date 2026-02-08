@@ -22,7 +22,7 @@ void Window::EatCursor(bool state) {
 void Window::Update() {
     if (data != nullptr) {
         glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(data));
-        ImGui::DestroyContext(reinterpret_cast<ImGuiContext*>(UIData));
+        rendererRef->UIDeleteData(UIData);
     }
 	glfwWindowHint(GLFW_SAMPLES, 16);
     data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData)));

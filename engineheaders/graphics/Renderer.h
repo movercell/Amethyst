@@ -42,6 +42,8 @@ protected:
     virtual void UIEndFrame() = 0; 
     //!@private
     virtual ____UIData* UINewData(____WindowData* window) = 0;
+    //!@private
+    virtual void UIDeleteData(____UIData* data) = 0;
     
 public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist
