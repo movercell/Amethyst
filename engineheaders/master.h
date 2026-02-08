@@ -6,7 +6,18 @@
     #include <bit>
 #endif
 
-#define ENGINEEXPORT __attribute__ ((visibility ("default")))
+#ifdef _WIN32
+    #ifdef AMETHYSTENGINESRC
+        #define ENGINEEXPORT __declspec(dllexport)
+        #define GAMEEXPORT __declspec(dllimport)
+    #else
+        #define ENGINEEXPORT __declspec(dllimport)
+        #define GAMEEXPORT __declspec(dllexport)
+    #endif 
+#else
+    #define ENGINEEXPORT __attribute__ ((visibility ("default")))
+    #define GAMEEXPORT __attribute__ ((visibility ("default")))
+#endif
 
 struct vec3 {
     float x = 0, y = 0, z = 0;
@@ -36,7 +47,7 @@ struct vec3 {
     vec3 cross(const vec3& other) const { return vec3((y * other.z) - (z * other.y), (z * other.x) - (x * other.z), (x * other.y) - (y * other.x)); }
 
     float length() const { return std::sqrt(x*x + y*y + z*z); }
-    vec3 norm() const { float Length = length(); return vec3(x / Length, y / Length, z / Length); }
+    vec3 norm() const { float Length = length(); if (Length == 0.0f) return vec3(); return vec3(x / Length, y / Length, z / Length); }
     
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec3 (const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
@@ -72,7 +83,7 @@ struct vec2 {
     float cross(const vec2& other) const { return (x * other.y) - (y * other.x); }
 
     float length() const { return std::sqrt(x*x + y*y); }
-    vec2 norm() const { float Length = length(); return vec2(x / Length, y / Length); }
+    vec2 norm() const { float Length = length(); if (Length == 0.0f) return vec2();  return vec2(x / Length, y / Length); }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec2 (const glm::vec2& other) : x(other.x), y(other.y) {}
@@ -107,7 +118,7 @@ struct vec4 {
     float dot(const vec4& other) const { return x * other.x + y * other.y + z * other.z + w * other.w; }
 
     float length() const { return std::sqrt(x*x + y*y + z*z + w*w); }
-    vec4 norm() const { float Length = length(); return vec4(x / Length, y / Length, z / Length, 2 / Length); }
+    vec4 norm() const { float Length = length(); if (Length == 0.0f) return vec4();  return vec4(x / Length, y / Length, z / Length, 2 / Length); }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec4 (const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}

@@ -41,13 +41,13 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
             direction  += vec3(0, 0, 1);
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
             direction += vec3(0, 0, -1);
+	direction = direction.norm();
 	camera->Position += direction * velocity;
 	static vec2 lastmouse = vec2(0, 0);
 	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
 	vec2 mouseoffset = currmouse - lastmouse;
 	lastmouse = currmouse;
 	camera->ProcessMouseMovement(mouseoffset, true);
-	//camera->Position += vec3(0.1f, 0, 0) * deltaTime;
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);

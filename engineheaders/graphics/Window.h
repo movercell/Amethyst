@@ -22,7 +22,7 @@ public:
     //! Consumes the cursor
     void EatCursor(bool state);
 
-    std::string Name = "Window";
+    std::string Name = "Unnamed window";
 
 protected:
     //!@private
