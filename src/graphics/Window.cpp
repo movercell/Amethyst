@@ -8,7 +8,6 @@
 inline void Window::ProcessCursorEating() {
     auto* window = reinterpret_cast<GLFWwindow*>(data);
     if (ShouldEatCursor) {
-        glfwSetCursorPos(window, 0, 0);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -36,6 +35,7 @@ void Window::Update() {
     ProcessCursorEating();
 
     UIData = rendererRef->UINewData(data);
+    glfwSetWindowUserPointer(reinterpret_cast<GLFWwindow*>(data), reinterpret_cast<void*>(this));
 }
 
 Window::~Window() {

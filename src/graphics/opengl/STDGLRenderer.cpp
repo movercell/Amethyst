@@ -55,7 +55,6 @@ ____UIData* STDGLRenderer::UINewData(____WindowData* window) {
     ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(window), false);
     ImGui_ImplOpenGL3_Init();
 
-    glfwSetWindowUserPointer(reinterpret_cast<GLFWwindow*>(window), reinterpret_cast<void*>(data));
     GraphicsMisc::windowSetCallbacks(reinterpret_cast<GLFWwindow*>(window));
 
     return data;

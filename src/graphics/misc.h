@@ -1,14 +1,17 @@
+#pragma once
+
 #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
 
-namespace GraphicsMisc {
-    void windowFocusCallback(GLFWwindow* window, int focused);
-    void windowCursorEnterCallback(GLFWwindow* window, int entered);
-    void windowCursorPosCallback(GLFWwindow* window, double x, double y);
-    void windowMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    void windowKeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
-    void windowCharCallback(GLFWwindow* window, unsigned int c);
+class GraphicsMisc {
+public:
+    static void windowFocusCallback(GLFWwindow* window, int focused);
+    static void windowCursorEnterCallback(GLFWwindow* window, int entered);
+    static void windowCursorPosCallback(GLFWwindow* window, double x, double y);
+    static void windowMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void windowKeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
+    static void windowCharCallback(GLFWwindow* window, unsigned int c);
 
-    void windowSetCallbacks(GLFWwindow*);
-}
+    static void windowSetCallbacks(GLFWwindow*);
+};
