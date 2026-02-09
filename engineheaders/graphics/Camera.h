@@ -41,6 +41,8 @@ public:
 
     virtual ~Camera() {};
 
+
+    inline vec2 GetResolution() {return Resolution; };
 protected:
 
     float FOV = CAMERA_DEFAULT_FOV;

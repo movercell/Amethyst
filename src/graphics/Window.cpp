@@ -30,7 +30,7 @@ void Window::Update() {
         rendererRef->UIDeleteData(UIData);
     }
 	glfwWindowHint(GLFW_SAMPLES, 16);
-    data = reinterpret_cast<____WindowData*>(glfwCreateWindow(800, 600, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
+    data = reinterpret_cast<____WindowData*>(glfwCreateWindow(Resolution.x, Resolution.y, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData)));
 
     ProcessCursorEating();
 

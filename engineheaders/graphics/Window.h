@@ -47,5 +47,8 @@ public:
     //! Consumes the cursor
     void EatCursor(bool state);
 
+    //! Window name.
     std::string Name = "Unnamed window";
+    //!@private
+    vec2 Resolution = vec2(800, 600);
 };
