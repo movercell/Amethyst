@@ -89,7 +89,7 @@ void STDGLRenderer::Draw() {
     glClearColor(0, 0, 0, 1);
 
     Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    STDGLModel tmpmodel = STDGLModel("nahsphere.glb");
+    STDGLModel tmpmodel = STDGLModel("error.glb");
     
 
     auto SharedRWorldVec = RWorldVec.lock();

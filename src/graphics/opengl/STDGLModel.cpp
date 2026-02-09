@@ -7,7 +7,7 @@
 #include <iostream>
 
 STDGLModel::STDGLModel(std::string name) {
-    auto modelfile = Filesystem::GetFile(name, std::ios::in);
+    auto modelfile = Filesystem::GetFile("models/" + name, std::ios::in);
     if (!modelfile) {
         modelfile = Filesystem::GetFile("models/error.glb", std::ios::in);
     }
