@@ -5,7 +5,13 @@
 #include "imgui.h"
 #include <GLFW/glfw3.h>
 
-inline void Window::ProcessCursorEating() {
+void Window::EatCursor(bool state) {
+    GLFWwindow* window = reinterpret_cast<GLFWwindow*>(data);
+    ShouldEatCursor = state;
+    ProcessCursorEating();
+}
+
+void Window::ProcessCursorEating() {
     auto* window = reinterpret_cast<GLFWwindow*>(data);
     if (ShouldEatCursor) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -14,14 +20,16 @@ inline void Window::ProcessCursorEating() {
     }
 }
 
+bool Window::IsEatingCursor() {
+    return ShouldEatCursor;
+}
+
 void Window::SetUIFunction(std::function<void(Renderer*, Window*)> Function) {
     UIFunction = Function;
 }
 
-void Window::EatCursor(bool state) {
-    GLFWwindow* window = reinterpret_cast<GLFWwindow*>(data);
-    ShouldEatCursor = state;
-    ProcessCursorEating();
+bool Window::IsWindowInFocus() {
+    return glfwGetWindowAttrib(reinterpret_cast<GLFWwindow*>(data), GLFW_FOCUSED);
 }
 
 void Window::Update() {

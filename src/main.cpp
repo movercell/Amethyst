@@ -23,28 +23,38 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
+
+	static bool isUsingCamera = true;
+
+	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
+		isUsingCamera = !isUsingCamera;
+		window->EatCursor(isUsingCamera);
+	}
+
 	Camera* camera = renderer->GetCamera("cam2");
 	float velocity = 100.0f * deltaTime;
 	vec3 direction;
-        if (ImGui::IsKeyDown(ImGuiKey_W))
-            direction  += camera->Front;
-        if (ImGui::IsKeyDown(ImGuiKey_S))
-            direction  -= camera->Front;
-        if (ImGui::IsKeyDown(ImGuiKey_A))
-            direction  -= camera->Right;
-        if (ImGui::IsKeyDown(ImGuiKey_D))
-            direction  += camera->Right;
-        if (ImGui::IsKeyDown(ImGuiKey_Space))
-            direction  += vec3(0, 0, 1);
-        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-            direction += vec3(0, 0, -1);
-	direction = direction.norm();
-	camera->Position += direction * velocity;
-	static vec2 lastmouse = vec2(0, 0);
-	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
-	vec2 mouseoffset = currmouse - lastmouse;
-	lastmouse = currmouse;
-	camera->ProcessMouseMovement(mouseoffset, true);
+	if (isUsingCamera && window->IsWindowInFocus()) {
+    	    if (ImGui::IsKeyDown(ImGuiKey_W))
+    	        direction  += camera->Front;
+    	    if (ImGui::IsKeyDown(ImGuiKey_S))
+    	        direction  -= camera->Front;
+    	    if (ImGui::IsKeyDown(ImGuiKey_A))
+    	        direction  -= camera->Right;
+    	    if (ImGui::IsKeyDown(ImGuiKey_D))
+    	        direction  += camera->Right;
+    	    if (ImGui::IsKeyDown(ImGuiKey_Space))
+    	        direction  += vec3(0, 0, 1);
+    	    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+    	        direction += vec3(0, 0, -1);
+		direction = direction.norm();
+		camera->Position += direction * velocity;
+		static vec2 lastmouse = vec2(0, 0);
+		vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
+		vec2 mouseoffset = currmouse - lastmouse;
+		lastmouse = currmouse;
+		camera->ProcessMouseMovement(mouseoffset, true);
+	}
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);

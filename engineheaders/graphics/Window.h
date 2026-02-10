@@ -46,9 +46,13 @@ public:
     void SetUIFunction(std::function<void(Renderer*, Window*)> Function);
     //! Consumes the cursor
     void EatCursor(bool state);
+    //! Is the cursor being consumed?
+    bool IsEatingCursor();
+    //! Is the window in focus?
+    bool IsWindowInFocus();
 
     //! Window name.
     std::string Name = "Unnamed window";
-    //!@private
+    //! Window resolution
     vec2 Resolution = vec2(800, 600);
 };
