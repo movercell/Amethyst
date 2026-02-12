@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "graphics/ModelInstance.h"
+#include "engine/graphics/ModelInstance.h"
 #include <memory>
 
 /*!

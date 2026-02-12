@@ -1,6 +1,6 @@
 #pragma once
 
-#include "master.h"
+#include "engine/master.h"
 
 /*!
 * \brief A graphical instance of a model

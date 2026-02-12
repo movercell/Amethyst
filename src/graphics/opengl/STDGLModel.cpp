@@ -1,7 +1,7 @@
 #include "STDGLCamera.h"
-#include "master.h"
+#include "engine/master.h"
 #include "STDGLModel.h"
-#include "Filesystem.h"
+#include "engine/Filesystem.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <iostream>

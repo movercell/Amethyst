@@ -4,19 +4,19 @@
 #include <bit>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "graphics/Camera.h"
-#include "graphics/ModelInstance.h"
-#include "graphics/RWorld.h"
-#include "graphics/Renderer.h"
+#include "engine/graphics/Camera.h"
+#include "engine/graphics/ModelInstance.h"
+#include "engine/graphics/RWorld.h"
+#include "engine/graphics/Renderer.h"
 #include "imgui.h"
 
 #include "main.h"
-#include "graphics/opengl/STDGLRenderer.h"
+#include "engine/graphics/opengl/STDGLRenderer.h"
 
 #include <iostream>
 #include <memory>
 
-#include "master.h"
+#include "engine/master.h"
 
 // Time between current frame and last frame
 float deltaTime = 0.0f;	

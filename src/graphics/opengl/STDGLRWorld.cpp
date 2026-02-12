@@ -1,8 +1,8 @@
 #include "STDGLRWorld.h"
 #include "GLFW/glfw3.h"
 #include "STDGLCamera.h"
-#include "graphics/Camera.h"
-#include "master.h"
+#include "engine/graphics/Camera.h"
+#include "engine/master.h"
 #include <memory>
 
 

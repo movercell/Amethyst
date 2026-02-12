@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-#include "graphics/Camera.h"
-#include "graphics/opengl/STDGLRenderer.h"
+#include "engine/graphics/Camera.h"
+#include "engine/graphics/opengl/STDGLRenderer.h"
 
 const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 

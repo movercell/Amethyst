@@ -3,7 +3,7 @@
 #define INSTANCE_MAX_COUNT 4096
 
 #include "STDGLCamera.h"
-#include "graphics/ModelInstance.h"
+#include "engine/graphics/ModelInstance.h"
 #include "GLFW/glfw3.h"
 #include <cstdint>
 #include <memory>

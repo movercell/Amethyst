@@ -1,5 +1,5 @@
 #pragma once
-#include "master.h"
+#include "engine/master.h"
 #include <cstdint>
 #include <string>
 // Default camera values

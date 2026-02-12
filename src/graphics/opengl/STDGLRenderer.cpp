@@ -7,10 +7,10 @@
 #include <memory>
 #include <utility>
 #include "GLFW/glfw3.h"
-#include "graphics/RWorld.h"
-#include "graphics/Renderer.h"
-#include "graphics/Window.h"
-#include "graphics/opengl/STDGLRenderer.h"
+#include "engine/graphics/RWorld.h"
+#include "engine/graphics/Renderer.h"
+#include "engine/graphics/Window.h"
+#include "engine/graphics/opengl/STDGLRenderer.h"
 #include "STDGLRWorld.h"
 #include "../misc.h"
 

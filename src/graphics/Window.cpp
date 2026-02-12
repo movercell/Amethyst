@@ -1,6 +1,6 @@
-#include "graphics/Window.h"
+#include "engine/graphics/Window.h"
 #include "GLFW/glfw3.h"
-#include "graphics/Renderer.h" // IWYU pragma: keep
+#include "engine/graphics/Renderer.h" // IWYU pragma: keep
 #include "misc.h"
 #include "imgui.h"
 #include <GLFW/glfw3.h>

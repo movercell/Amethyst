@@ -3,9 +3,9 @@
 #define INSTANCE_MAX_COUNT 4096
 
 #include "STDGLCamera.h"
-#include "graphics/ModelInstance.h"
-#include "graphics/RWorld.h"
-#include "graphics/opengl/STDGLRenderer.h"
+#include "engine/graphics/ModelInstance.h"
+#include "engine/graphics/RWorld.h"
+#include "engine/graphics/opengl/STDGLRenderer.h"
 #include <memory>
 #include <vector>
 #include "STDGLModel.h"

@@ -1,10 +1,10 @@
 #pragma once
-#include "graphics/Camera.h"
-#include "master.h"
-#include "weak_vector.h"
+#include "engine/graphics/Camera.h"
+#include "engine/master.h"
+#include "engine/weak_vector.h"
 
-#include "graphics/Window.h"
-#include "graphics/RWorld.h"
+#include "engine/graphics/Window.h"
+#include "engine/graphics/RWorld.h"
 #include <string>
 #include <vector>
 #include <memory>

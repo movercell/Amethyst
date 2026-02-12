@@ -1,11 +1,11 @@
 #pragma once
-#include "master.h"
+#include "engine/master.h"
 
 #include <functional>
 #include <memory>
 
 #ifdef AMETHYSTENGINESRC
- #include "../../src/graphics/misc.h"
+ #include "../../../src/graphics/misc.h"
 #endif
 
 struct ____WindowData;

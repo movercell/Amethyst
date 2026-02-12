@@ -1,12 +1,12 @@
 #pragma once
-#include "graphics/RWorld.h"
-#include "master.h"
+#include "engine/graphics/RWorld.h"
+#include "engine/master.h"
 
-#include "graphics/Window.h"
-#include "graphics/Renderer.h"
+#include "engine/graphics/Window.h"
+#include "engine/graphics/Renderer.h"
 #include <vector>
 #include <cstdint>
-#include "weak_vector.h"
+#include "engine/weak_vector.h"
 
 /*!
 *   \brief An OpenGL renderer.
