@@ -4,11 +4,11 @@
 
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
+#include "engine/geometry/Model.h"
 #include "GLFW/glfw3.h"
 #include <cstdint>
 #include <memory>
 #include <queue>
-#include <assimp/scene.h>
 
 class STDGLMesh {
 public:
@@ -19,7 +19,7 @@ public:
     GLuint VBO, EBO, MeshInfo;
     unsigned int IndexCount;
 
-    STDGLMesh(aiMesh* paimesh);
+    STDGLMesh(const Geometry::Mesh& mesh);
 };
 
 class STDGLModel {
@@ -27,7 +27,7 @@ public:
     void Draw();
     void DrawDepth();
 
-    STDGLModel(std::string name);
+    STDGLModel(std::string path);
     ~STDGLModel();
 
     std::vector<STDGLMesh> Meshes;
@@ -49,9 +49,7 @@ public:
 
         glCreateBuffers(1, &InstanceBuffer);
         uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
-        for (int i = 0; i < InstanceMaxCount * sizeof(mat4); i++) {
-            temparr[i] = 0xFF;
-        }
+        std::fill(temparr, temparr + InstanceMaxCount * sizeof(mat4), 0xFF);
         glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
     }
 

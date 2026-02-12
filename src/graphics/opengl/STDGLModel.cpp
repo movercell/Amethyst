@@ -1,69 +1,28 @@
 #include "STDGLCamera.h"
 #include "engine/master.h"
 #include "STDGLModel.h"
-#include "engine/Filesystem.h"
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <iostream>
 
-STDGLModel::STDGLModel(std::string name) {
-    auto modelfile = Filesystem::GetFile("models/" + name, std::ios::in);
-    if (!modelfile) {
-        modelfile = Filesystem::GetFile("models/error.glb", std::ios::in);
-    }
-
-    Assimp::Importer importer;
-    const aiScene* scene;
-    std::vector<char> buffer;
-    {
-        buffer = std::vector<char>((std::istreambuf_iterator<char>(modelfile)), (std::istreambuf_iterator<char>()));
-        scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, name.c_str());
-    };
-    // check for errors
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
-    {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-        exit(-1);
-    }
-    
-    Meshes.reserve(scene->mNumMeshes);
-    for (int meshindex = 0; meshindex < scene->mNumMeshes; meshindex++) {
-        STDGLMesh mesh(scene->mMeshes[meshindex]);
-        Meshes.push_back(std::move(mesh));
+STDGLModel::STDGLModel(std::string path = "error.glb") {
+    Geometry::Model model(path);
+    Meshes.reserve(model.Meshes.size());
+    for (auto mesh : model.Meshes) {
+        Meshes.push_back(std::move(STDGLMesh(mesh)));
     }
 }
 
-STDGLMesh::STDGLMesh(aiMesh* paimesh) {
+STDGLMesh::STDGLMesh(const Geometry::Mesh& mesh) {
     MeshInfo_t Info;
     glCreateBuffers(3, &VBO);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    {
-        std::vector<Shapes::Vertex> vertices;
-        vertices.reserve(paimesh->mNumVertices);
-        for (int vertexindex = 0; vertexindex < paimesh->mNumVertices; vertexindex++) {
-            Shapes::Vertex vertex;
-            vertex.Position = std::bit_cast<vec3>(paimesh->mVertices[vertexindex]);
-            vertex.Normal = std::bit_cast<vec3>(paimesh->mNormals[vertexindex]);
-            vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
-            Info.Radius = std::max(Info.Radius, vertex.Position.length());
-            vertices.push_back(vertex);
-        }
-        glNamedBufferData(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    }
-    {
-        std::vector<GLuint> indeces;
-        indeces.reserve(paimesh->mNumFaces * 3);
-        for (int faceindex = 0; faceindex < paimesh->mNumFaces; faceindex++) {
-            for (int indexindex = 0; indexindex < 3; indexindex++) {
-                indeces.push_back(paimesh->mFaces[faceindex].mIndices[indexindex]);
-            }
-        }
-        glNamedBufferData(EBO, indeces.size() * sizeof(GLuint), indeces.data(), GL_STATIC_DRAW);
-        IndexCount = indeces.size();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    }
+
+    glNamedBufferData(VBO, mesh.Vertices.size() * sizeof(Shapes::Vertex), mesh.Vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glNamedBufferData(EBO, mesh.Indeces.size() * sizeof(GLuint), mesh.Indeces.data(), GL_STATIC_DRAW);
+    IndexCount = mesh.Indeces.size();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    Info.Radius = mesh.Radius;
 
     glNamedBufferData(MeshInfo, sizeof(MeshInfo_t), &Info, GL_STATIC_DRAW);
 

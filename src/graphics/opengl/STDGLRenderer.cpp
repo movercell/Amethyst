@@ -84,6 +84,7 @@ void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(rendererData));
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraUBO);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
     glClearColor(0, 0, 0, 1);
 

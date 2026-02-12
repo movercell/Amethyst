@@ -39,6 +39,7 @@ add_executable(amethyst
 	src/graphics/opengl/STDGLRWorld.cpp
 	src/graphics/opengl/STDGLModel.cpp
 	src/graphics/misc.cpp
+	src/geometry/Model.cpp
 	)
 
 target_link_libraries(amethyst glad)
