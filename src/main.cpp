@@ -59,6 +59,9 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+	ImGui::DockSpaceOverViewport(0, viewport, ImGuiDockNodeFlags_PassthruCentralNode);
+
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
 
@@ -70,7 +73,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
                  ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
                  ImGuiWindowFlags_NoBackground);
-		ImGui::Image(camera->GetTexture(), viewport->Size, ImVec2(0, 1), ImVec2(1, 0));
+		ImVec2 CameraSize = ImGui::GetContentRegionAvail();
+		ImGui::Image(camera->GetTexture(), CameraSize, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 	ImGui::PopStyleVar(3);
 
