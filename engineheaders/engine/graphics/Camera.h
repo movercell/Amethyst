@@ -9,7 +9,7 @@ const float CAMERA_DEFAULT_SPEED       =  2.5f;
 const float CAMERA_DEFAULT_SENSITIVITY =  0.1f;
 const float CAMERA_DEFAULT_FOV         =  120.0f;
 const float CAMERA_DEFAULT_NEAR        =  1.0f;
-const float CAMERA_DEFAULT_FAR         =  100.0f;
+const float CAMERA_DEFAULT_FAR         =  32768.0f;
 
 /*!
 * \brief A camera interface.

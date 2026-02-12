@@ -17,7 +17,7 @@ void STDGLCamera::UpdateCameraVectors() {
 
 void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
     glm::mat4 view = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-    glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
     glm::mat4 viewprojection = projection * view;
     glNamedBufferData(CameraMatrixBuffer, sizeof(glm::mat4), &viewprojection, GL_STATIC_DRAW);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);

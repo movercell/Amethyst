@@ -51,6 +51,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		camera->Position += direction * velocity;
 		static vec2 lastmouse = vec2(0, 0);
 		vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
+		if (ImGui::IsKeyPressed(ImGuiKey_Z, false))
+			lastmouse = currmouse;
 		vec2 mouseoffset = currmouse - lastmouse;
 		lastmouse = currmouse;
 		camera->ProcessMouseMovement(mouseoffset, true);
