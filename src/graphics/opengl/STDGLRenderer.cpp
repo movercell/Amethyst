@@ -87,7 +87,7 @@ void STDGLRenderer::Draw() {
     glClearColor(0, 0, 0, 1);
 
     Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-    STDGLModel tmpmodel = STDGLModel("error.glb");
+    STDGLModel* tmpmodel = new STDGLModel("error.glb");
     
 
     auto SharedRWorldVec = RWorldVec.lock();
@@ -100,10 +100,11 @@ void STDGLRenderer::Draw() {
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             shader.use();
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, rworld->tmpinstancearr.InstanceBuffer);
-            tmpmodel.Draw();
+            tmpmodel->Draw();
         }
         
     }
+    delete tmpmodel;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Draw windows.
