@@ -70,7 +70,7 @@ uint32_t STDGLCamera::GetDepthTexture() {
 }
 
 STDGLCamera::~STDGLCamera() {
-    glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(Renderer->rendererData));
+    glfwMakeContextCurrent(context);
 
     glDeleteFramebuffers(1, &Framebuffer);
     glDeleteTextures(2, &Colorbuffer); // Also removes the depth buffer.

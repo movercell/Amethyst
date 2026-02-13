@@ -119,7 +119,7 @@ void STDGLRenderer::Draw() {
 }
 
 std::shared_ptr<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = make_shared<STDGLRWorld>(selfRef);
+    auto result = make_shared<STDGLRWorld>(selfRef, reinterpret_cast<GLFWwindow*>(rendererData));
     RWorldVec.push_back(result);
 
     return result;

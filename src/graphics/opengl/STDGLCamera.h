@@ -12,18 +12,17 @@
 const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 
 
-// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class STDGLCamera : public Camera {
 public:
 
     GLuint Framebuffer;
     GLuint Colorbuffer, Depthbuffer;
-    std::shared_ptr<STDGLRenderer> Renderer;
+    GLFWwindow* context;
 
 
     // Constructor with vectors.
-    STDGLCamera(std::shared_ptr<STDGLRenderer> renderer, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
-        Renderer = renderer;
+    STDGLCamera(GLFWwindow* Context, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+        context = Context;
         Resolution = resolution;
         Name = name;
         Position = position;

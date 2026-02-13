@@ -20,11 +20,13 @@ public:
 
 
     ~STDGLRWorld();
-    STDGLRWorld(std::weak_ptr<Renderer> Renderer) {
-        renderer = std::static_pointer_cast<STDGLRenderer>(Renderer.lock());
-        tmpinstancearr.init(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
+    STDGLRWorld(std::weak_ptr<Renderer> Renderer, GLFWwindow* Context) {
+        renderer = Renderer.lock();
+        context = Context;
+        tmpinstancearr.init(context);
     }
 
     weak_vector<STDGLCamera> CameraVec;
-    std::shared_ptr<STDGLRenderer> renderer;
+    std::shared_ptr<Renderer> renderer;
+    GLFWwindow* context;
 };

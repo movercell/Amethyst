@@ -7,8 +7,8 @@
 
 
 std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
-    glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(renderer->rendererData));
-    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(renderer, resolution, name, position, yaw, pitch);
+    glfwMakeContextCurrent(context);
+    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(context, resolution, name, position, yaw, pitch);
     CameraVec.push_back(result);
 
     return result;
