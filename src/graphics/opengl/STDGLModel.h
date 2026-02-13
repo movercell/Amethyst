@@ -51,6 +51,7 @@ public:
         uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
         std::fill(temparr, temparr + InstanceMaxCount * sizeof(mat4), 0xFF);
         glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
+        delete[] temparr;
     }
 
     ~STDGLModelInstanceArray();

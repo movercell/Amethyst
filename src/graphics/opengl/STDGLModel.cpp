@@ -41,7 +41,7 @@ STDGLMesh::STDGLMesh(const Geometry::Mesh& mesh) {
 STDGLModel::~STDGLModel() {
     for (auto mesh : Meshes) {
         glDeleteVertexArrays(1, &mesh.VAO);
-        glDeleteBuffers(2, &mesh.VBO);
+        glDeleteBuffers(3, &mesh.VBO);
     }
 }
 
@@ -63,10 +63,10 @@ void STDGLModelInstance::SetMatrix(mat4 Matrix) {
 }
 
 STDGLModelInstance::~STDGLModelInstance() {
-    uint8_t temparr[sizeof(mat4)] = { 0xFF, 0x80, 0x00, 0x00 }; // To init data to NaN
+    mat4 temp = mat4(NAN);
     glfwMakeContextCurrent(parent->rendererData);
 
-    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), temparr);
+    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), &temp);
 
     parent->count--;
     parent->FreedIndeces.push(index);

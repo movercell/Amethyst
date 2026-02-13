@@ -22,6 +22,8 @@
 float deltaTime = 0.0f;	
 float lastFrame = 0.0f;
 
+bool EngineShouldNotTerminate = true;
+
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
 	static bool isUsingCamera = true;
@@ -79,7 +81,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	ImGui::PopStyleVar(3);
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-		exit(0);
+		EngineShouldNotTerminate = false;
 	}
 	ImGui::Begin("Hello from ui function");
 		ImGui::Text("Delta		 : %f", deltaTime);
@@ -128,7 +130,7 @@ int main() {
 	std::cout << "Hello, world!" << std::endl;
 
 	bool isWindowOpen = true;
-	while(true) {
+	while(EngineShouldNotTerminate) {
 		float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
