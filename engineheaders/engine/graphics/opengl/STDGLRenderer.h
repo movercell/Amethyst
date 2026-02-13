@@ -20,8 +20,7 @@ private:
     void UIEndFrame();
 
     weak_vector<RWorld> RWorldVec;
-
-    uint32_t CameraUBO;
+    
 public:
     ~STDGLRenderer();
     //!Makes the renderer

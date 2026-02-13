@@ -33,8 +33,6 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->rendererData = reinterpret_cast<____WindowData*>(data);
 
-    glCreateBuffers(1, &(tempRendererRef->CameraUBO));
-
     glfwDefaultWindowHints();
     return tempRendererRef;
 }
@@ -83,7 +81,6 @@ void STDGLRenderer::UIEndFrame() {
 
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(rendererData));
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, CameraUBO);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
@@ -98,7 +95,7 @@ void STDGLRenderer::Draw() {
         auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
         auto SharedCameraVec = rworld->CameraVec.lock();
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
-            camera->Bind(CameraUBO);
+            camera->Bind();
             glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             shader.use();

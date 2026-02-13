@@ -17,7 +17,13 @@ public:
 
     GLuint Framebuffer;
     GLuint Colorbuffer, Depthbuffer;
+    GLuint Infobuffer;
     GLFWwindow* context;
+
+    struct Camerainfo_t {
+        mat4 ViewProjection;
+    };
+    Camerainfo_t Info;
 
 
     // Constructor with vectors.
@@ -34,7 +40,7 @@ public:
     }
 
     // Binds the camera into UBO slot 0.
-    void Bind(GLuint CameraMatrixBuffer);
+    void Bind();
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(vec2 offset, bool constrainPitch = true);

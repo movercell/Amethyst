@@ -15,11 +15,12 @@ void STDGLCamera::UpdateCameraVectors() {
 
 }
 
-void STDGLCamera::Bind(GLuint CameraMatrixBuffer) {
+void STDGLCamera::Bind() {
     glm::mat4 view = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
     glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
-    glm::mat4 viewprojection = projection * view;
-    glNamedBufferData(CameraMatrixBuffer, sizeof(glm::mat4), &viewprojection, GL_STATIC_DRAW);
+    Info.ViewProjection = projection * view;
+    glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 }
 
@@ -59,6 +60,10 @@ void STDGLCamera::CreateBuffers() {
     glTextureParameteri(Depthbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(Depthbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
+
+    // Information buffer
+    glCreateBuffers(1, &Infobuffer);
+    glNamedBufferStorage(Infobuffer, sizeof(Camerainfo_t), nullptr, GL_DYNAMIC_STORAGE_BIT);
 }
 
 uint32_t STDGLCamera::GetTexture() {
@@ -74,4 +79,5 @@ STDGLCamera::~STDGLCamera() {
 
     glDeleteFramebuffers(1, &Framebuffer);
     glDeleteTextures(2, &Colorbuffer); // Also removes the depth buffer.
+    glDeleteBuffers(1, &Infobuffer);
 }
