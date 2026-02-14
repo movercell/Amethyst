@@ -72,7 +72,7 @@ STDGLModelInstance::~STDGLModelInstance() {
     parent->FreedIndeces.push(index);
 }
 
-std::shared_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
+std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     uint16_t index;
     if (FreedIndeces.empty()) {
         index = NextIndex;
@@ -81,7 +81,7 @@ std::shared_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
         index = FreedIndeces.front();
         FreedIndeces.pop();
     }
-    return std::make_shared<STDGLModelInstance>(index, this);
+    return std::make_unique<STDGLModelInstance>(index, this);
 }
 
 STDGLModelInstanceArray::~STDGLModelInstanceArray() {

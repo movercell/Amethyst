@@ -17,7 +17,7 @@ public:
     //! Gets a camera.(used for getting the camera's render result in window UI functions)
     virtual Camera* GetCamera(std::string name) = 0;
     //! Adds a model instance to the scene.
-    virtual std::shared_ptr<ModelInstance> MakeModelInstance() = 0;
+    virtual std::unique_ptr<ModelInstance> MakeModelInstance() = 0;
 
     virtual ~RWorld() {};
 };

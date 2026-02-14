@@ -56,7 +56,7 @@ public:
 
     ~STDGLModelInstanceArray();
         
-    std::shared_ptr<ModelInstance> MakeModelInstance();
+    std::unique_ptr<ModelInstance> MakeModelInstance();
 
     friend class GLModelInstance;
 };

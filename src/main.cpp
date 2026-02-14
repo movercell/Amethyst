@@ -121,7 +121,7 @@ int main() {
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
-	std::array<std::shared_ptr<ModelInstance>, 2> models;
+	std::array<std::unique_ptr<ModelInstance>, 2> models;
 	models[0] = rworld->MakeModelInstance();
 	models[0]->SetMatrix(mat4());
 	models[1] = rworld->MakeModelInstance();

@@ -24,7 +24,7 @@ Camera* STDGLRWorld::GetCamera(std::string name) {
     return nullptr;
 }
 
-std::shared_ptr<ModelInstance> STDGLRWorld::MakeModelInstance() {
+std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance() {
     return tmpinstancearr.MakeModelInstance();
 }
 
