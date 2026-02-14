@@ -55,7 +55,7 @@ void STDGLRenderer::Draw() {
     glClearDepth(1.0f);
     glClearColor(0, 0, 0, 1);
 
-    Shader shader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
+    Shader tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
     STDGLModel* tmpmodel = new STDGLModel("error.glb");
     
 
@@ -69,7 +69,7 @@ void STDGLRenderer::Draw() {
             camera->Bind();
             glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-            shader.use();
+            tmpshader.use();
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, rworld->tmpinstancearr.InstanceBuffer);
             tmpmodel->Draw();
         }
