@@ -11,6 +11,8 @@
 *  Intended to be linked with an actual game world, so use it outside of one at your own risk.
 */
 class RWorld {
+protected:
+    bool SkipRendering = false;
 public:
     //! Makes a camera.
     virtual std::shared_ptr<Camera> MakeCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) = 0;
@@ -18,6 +20,8 @@ public:
     virtual Camera* GetCamera(std::string name) = 0;
     //! Adds a model instance to the scene.
     virtual std::unique_ptr<ModelInstance> MakeModelInstance() = 0;
+    void ShouldSkipRendering(bool state) { SkipRendering = state; }
+    bool isSkippingRendering() { return SkipRendering; }
 
     virtual ~RWorld() {};
 };

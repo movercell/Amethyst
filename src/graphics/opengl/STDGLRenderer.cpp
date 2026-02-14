@@ -44,7 +44,7 @@ STDGLRenderer::~STDGLRenderer() {
 std::shared_ptr<Window> STDGLRenderer::MakeWindow() {
     std::shared_ptr<STDGLWindow> tempRef = std::make_shared<STDGLWindow>(selfRef, rendererData);
     WindowVector.push_back(tempRef);
-    return std::static_pointer_cast<Window>(tempRef);
+    return static_pointer_cast<Window>(tempRef);
 }
 
 
@@ -62,6 +62,8 @@ void STDGLRenderer::Draw() {
     auto SharedRWorldVec = RWorldVec.lock();
     for (auto rworldbase : SharedRWorldVec) {
         auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
+        if (rworld->isSkippingRendering())
+            continue;
         auto SharedCameraVec = rworld->CameraVec.lock();
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
             camera->Bind();
