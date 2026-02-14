@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "engine/graphics/ModelInstance.h"
 #include <memory>
+#include <string>
 
 /*!
 * \brief A world for rendering purposes.
@@ -19,7 +20,7 @@ public:
     //! Gets a camera.(used for getting the camera's render result in window UI functions)
     virtual Camera* GetCamera(std::string name) = 0;
     //! Adds a model instance to the scene.
-    virtual std::unique_ptr<ModelInstance> MakeModelInstance() = 0;
+    virtual std::unique_ptr<ModelInstance> MakeModelInstance(std::string path = "error.glb") = 0;
     void ShouldSkipRendering(bool state) { SkipRendering = state; }
     bool isSkippingRendering() { return SkipRendering; }
 

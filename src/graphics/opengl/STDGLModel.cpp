@@ -84,6 +84,24 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     return std::make_unique<STDGLModelInstance>(index, this);
 }
 
+void STDGLModelInstanceArray::Draw() {
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, InstanceBuffer);
+    STDGLModel* tmpmodel = new STDGLModel("error.glb");
+    tmpmodel->Draw();
+    delete tmpmodel;
+}
+
+STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, uint16_t instancemaxcount) {
+    rendererData = data;
+    InstanceMaxCount = instancemaxcount;
+
+    glCreateBuffers(1, &InstanceBuffer);
+    uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
+    std::fill(temparr, temparr + InstanceMaxCount * sizeof(mat4), 0xFF);
+    glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
+    delete[] temparr;
+}
+
 STDGLModelInstanceArray::~STDGLModelInstanceArray() {
     glfwMakeContextCurrent(rendererData);
 

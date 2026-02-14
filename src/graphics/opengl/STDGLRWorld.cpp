@@ -24,8 +24,18 @@ Camera* STDGLRWorld::GetCamera(std::string name) {
     return nullptr;
 }
 
-std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance() {
-    return tmpinstancearr.MakeModelInstance();
+std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(std::string path) {
+    glfwMakeContextCurrent(context);
+    std::unique_ptr<ModelInstance> ret;
+
+    try {
+        ret = InstanceArrays.at(path).MakeModelInstance();
+    } catch(std::out_of_range) {
+        auto array = InstanceArrays.emplace(path, context).first;
+        ret = array->second.MakeModelInstance();
+    }
+
+    return ret;
 }
 
 STDGLRWorld::~STDGLRWorld() {

@@ -101,15 +101,15 @@ int main() {
 	enginewindow->Name = "Amethyst";
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
-	enginewindow->EatCursor(true);
+	//enginewindow->EatCursor(true);
 	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
 	std::array<std::unique_ptr<ModelInstance>, 2> models;
-	models[0] = rworld->MakeModelInstance();
+	models[0] = rworld->MakeModelInstance("sphere.glb");
 	models[0]->SetMatrix(mat4());
-	models[1] = rworld->MakeModelInstance();
+	models[1] = rworld->MakeModelInstance("lmao");
 	models[1]->SetMatrix(mat4(1, 0, 0, 128));
 
 	std::cout << "Hello, world!" << std::endl;

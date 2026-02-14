@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include "STDGLWindow.h"
 #include "GLFW/glfw3.h"
 #include "engine/graphics/Renderer.h"
@@ -73,6 +74,7 @@ STDGLWindow::STDGLWindow(std::weak_ptr<Renderer> RendererWeakPtr, GLFWwindow* Re
 
 void STDGLWindow::Draw() {
     glfwMakeContextCurrent(data);
+    glViewport(0, 0, Resolution.x, Resolution.y);
     
     ImGui::SetCurrentContext(UIData);
     ImGui_ImplOpenGL3_NewFrame();

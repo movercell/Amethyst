@@ -42,21 +42,12 @@ public:
     uint16_t NextIndex = 0;
     uint16_t InstanceMaxCount; // Used to limit the amount of static model instances to just what's needed.
 
-    void init(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT) {
-        rendererData = data;
-        InstanceMaxCount = instancemaxcount;
-        glfwMakeContextCurrent(rendererData);
-
-        glCreateBuffers(1, &InstanceBuffer);
-        uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
-        std::fill(temparr, temparr + InstanceMaxCount * sizeof(mat4), 0xFF);
-        glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
-        delete[] temparr;
-    }
+    STDGLModelInstanceArray(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT);
 
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
+    void Draw();
 
     friend class GLModelInstance;
 };
