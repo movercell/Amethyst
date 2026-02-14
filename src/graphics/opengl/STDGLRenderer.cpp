@@ -29,14 +29,14 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
     GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL);
     glfwMakeContextCurrent(data);
 
-    tempRendererRef->rendererData = reinterpret_cast<____WindowData*>(data);
+    tempRendererRef->rendererData = data;
 
     glfwDefaultWindowHints();
     return tempRendererRef;
 }
 
 STDGLRenderer::~STDGLRenderer() {
-    glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(rendererData));
+    glfwDestroyWindow(rendererData);
 }
 
 
@@ -48,7 +48,7 @@ std::shared_ptr<Window> STDGLRenderer::MakeWindow() {
 
 
 void STDGLRenderer::Draw() {
-    glfwMakeContextCurrent(reinterpret_cast<GLFWwindow*>(rendererData));
+    glfwMakeContextCurrent(rendererData);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
@@ -85,10 +85,10 @@ void STDGLRenderer::Draw() {
 }
 
 std::shared_ptr<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = make_shared<STDGLRWorld>(selfRef, reinterpret_cast<GLFWwindow*>(rendererData));
+    auto result = make_shared<STDGLRWorld>(selfRef, rendererData);
     RWorldVec.push_back(result);
 
-    return result;
+    return static_pointer_cast<RWorld>(result);
 }
 
 Camera* STDGLRenderer::GetCamera(std::string name) {

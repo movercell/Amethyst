@@ -8,9 +8,6 @@
  #include "../../../src/graphics/misc.h"
 #endif
 
-struct ____WindowData;
-struct ____UIData;
-
 class Renderer;
 
 /*!
