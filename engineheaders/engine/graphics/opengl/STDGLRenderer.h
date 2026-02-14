@@ -17,7 +17,7 @@
 class ENGINEEXPORT STDGLRenderer : public Renderer
 {
 #ifdef AMETHYSTENGINESRC
-private:
+protected:
     GLFWwindow* rendererData = nullptr;
     weak_vector<RWorld> RWorldVec;
     weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
