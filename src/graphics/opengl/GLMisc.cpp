@@ -1,6 +1,22 @@
 #include <imgui.h>
+#include <glad/glad.h>
 #include "GLMisc.h"
 #include "STDGLWindow.h"
+
+#include <iostream>
+
+void GLMisc::EnsureGLLoaded() {
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	auto temp = glfwCreateWindow(1, 1, "a", NULL, NULL);
+	glfwMakeContextCurrent(temp);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		glfwTerminate();
+		exit(-1);
+	}
+	glfwMakeContextCurrent(NULL);
+	glfwDestroyWindow(temp);
+}
 
 void GLMisc::windowFocusCallback(GLFWwindow* window, int focused) {
     auto* WindowObject = reinterpret_cast<STDGLWindow*>(glfwGetWindowUserPointer(window));

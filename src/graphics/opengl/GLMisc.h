@@ -5,6 +5,8 @@
 
 class GLMisc {
 public:
+    static void EnsureGLLoaded();
+
     static void windowFocusCallback(GLFWwindow* window, int focused);
     static void windowCursorEnterCallback(GLFWwindow* window, int entered);
     static void windowCursorPosCallback(GLFWwindow* window, double x, double y);

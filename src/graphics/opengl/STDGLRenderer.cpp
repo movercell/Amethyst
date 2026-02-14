@@ -16,6 +16,7 @@
 #include "../../src/shader.h"
 
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
+    GLMisc::EnsureGLLoaded();
 
     std::shared_ptr<STDGLRenderer> tempRendererRef = std::make_shared<STDGLRenderer>();
 

@@ -2,7 +2,6 @@
 
 #include <array>
 #include <bit>
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "engine/graphics/Camera.h"
 #include "engine/graphics/ModelInstance.h"
@@ -96,20 +95,6 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 int main() {
 	glfwInit();
-
-	// Initialize GLAD
-	{
-		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		auto temp = glfwCreateWindow(1, 1, "a", NULL, NULL);
-		glfwMakeContextCurrent(temp);
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			std::cout << "Failed to initialize GLAD" << std::endl;
-			glfwTerminate();
-			return -1;
-		}
-		glfwMakeContextCurrent(NULL);
-		glfwDestroyWindow(temp);
-	}
 
 	std::shared_ptr openglrenderer = STDGLRenderer::Make();
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow();
