@@ -9,7 +9,7 @@
 #include "engine/graphics/Window.h"
 #include "engine/graphics/opengl/STDGLRenderer.h"
 #include "STDGLRWorld.h"
-#include "../misc.h"
+#include "GLMisc.h"
 #include "STDGLWindow.h"
 
 #include "../../src/model.h"

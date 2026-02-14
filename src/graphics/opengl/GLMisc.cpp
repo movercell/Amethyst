@@ -1,6 +1,6 @@
 #include <imgui.h>
-#include "misc.h"
-#include "opengl/STDGLWindow.h"
+#include "GLMisc.h"
+#include "STDGLWindow.h"
 
 void GLMisc::windowFocusCallback(GLFWwindow* window, int focused) {
     auto* WindowObject = reinterpret_cast<STDGLWindow*>(glfwGetWindowUserPointer(window));

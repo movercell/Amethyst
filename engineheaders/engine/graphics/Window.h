@@ -1,12 +1,9 @@
 #pragma once
+
 #include "engine/master.h"
 
 #include <functional>
 #include <memory>
-
-#ifdef AMETHYSTENGINESRC
- #include "../../../src/graphics/misc.h"
-#endif
 
 class Renderer;
 

@@ -38,7 +38,7 @@ add_executable(amethyst
 	src/graphics/opengl/STDGLRWorld.cpp
 	src/graphics/opengl/STDGLModel.cpp
 	src/graphics/opengl/STDGLWindow.cpp
-	src/graphics/misc.cpp
+	src/graphics/opengl/GLMisc.cpp
 	src/geometry/Model.cpp
 	)
 

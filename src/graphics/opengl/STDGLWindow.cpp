@@ -1,7 +1,7 @@
 #include "STDGLWindow.h"
 #include "GLFW/glfw3.h"
 #include "engine/graphics/Renderer.h"
-#include "../misc.h"
+#include "GLMisc.h"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
