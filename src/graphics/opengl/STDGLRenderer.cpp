@@ -12,7 +12,6 @@
 #include "GLMisc.h"
 #include "STDGLWindow.h"
 
-#include "../../src/model.h"
 #include "../../src/shader.h"
 
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
