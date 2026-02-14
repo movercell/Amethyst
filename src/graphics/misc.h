@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
 
-class GraphicsMisc {
+class GLMisc {
 public:
     static void windowFocusCallback(GLFWwindow* window, int focused);
     static void windowCursorEnterCallback(GLFWwindow* window, int entered);

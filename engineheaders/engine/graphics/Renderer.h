@@ -21,34 +21,12 @@ class ENGINEEXPORT Renderer
 {
 protected:
     //!@private
-    class ____Window : public Window {
-    public:
-        ____Window(std::weak_ptr<Renderer> renderer, ____WindowData* RendererData);
-        ____WindowData* GetData() {return data;}
-        void Draw();
-    };
-
-    friend class Window;
-
-    //!@private
-    ____WindowData* rendererData = nullptr;
-    //!@private
     std::weak_ptr<Renderer> selfRef; // Stored for making windows reference this their context
-    //!@private
-    weak_vector<____Window> WindowVector = weak_vector<____Window>();
-    //!@private
-    virtual void UINewFrame() = 0;
-    //!@private
-    virtual void UIEndFrame() = 0; 
-    //!@private
-    virtual ____UIData* UINewData(____WindowData* window) = 0;
-    //!@private
-    virtual void UIDeleteData(____UIData* data) = 0;
     
 public:
     virtual ~Renderer() {}; //the compiler compains if this doesn't exist
     //! Makes a window.
-    std::shared_ptr<Window> MakeWindow();
+    virtual std::shared_ptr<Window> MakeWindow() = 0;
     //! Makes a Render World.(Note: Supposed to only be used for game worlds, use separately at your own risk!)
     virtual std::shared_ptr<RWorld> MakeRWorld() = 0;
     //! Gets a camera.(used for getting the camera's render result in window UI functions)

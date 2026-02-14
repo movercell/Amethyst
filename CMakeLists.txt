@@ -32,12 +32,12 @@ set_target_properties(assimp PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/t
 	
 add_executable(amethyst
 	src/main.cpp
-	src/graphics/Window.cpp
-	src/graphics/Renderer.cpp
+	
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp
 	src/graphics/opengl/STDGLRWorld.cpp
 	src/graphics/opengl/STDGLModel.cpp
+	src/graphics/opengl/STDGLWindow.cpp
 	src/graphics/misc.cpp
 	src/geometry/Model.cpp
 	)

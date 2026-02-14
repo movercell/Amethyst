@@ -20,36 +20,20 @@ class ENGINEEXPORT Window {
 protected:
     //!@private
     std::function<void(Renderer*, Window*)> UIFunction;
-    //!@private
-    std::shared_ptr<Renderer> rendererRef = nullptr;
-    //!@private
-    ____WindowData* rendererData = nullptr;
-    //!@private
-    ____UIData* UIData = nullptr;
-    //!@private
-    ____WindowData* data = nullptr;
-    //!@private
-    bool ShouldEatCursor = false;
-    //!@private
-    void ProcessCursorEating();
-    //!@private
-    Window() {}; //the compiler compains if this doesn't exist
-
-    #ifdef AMETHYSTENGINESRC
-        friend class GraphicsMisc;
-    #endif
 public:
-    virtual ~Window();
+    virtual ~Window() {};
     //! Re-creates the system window with the current parameters of this object.
-    void Update();
+    virtual void Update() = 0;
     //! Sets the UI function
-    void SetUIFunction(std::function<void(Renderer*, Window*)> Function);
+    virtual void SetUIFunction(std::function<void(Renderer*, Window*)> Function) {
+        UIFunction = Function;
+    }
     //! Consumes the cursor
-    void EatCursor(bool state);
+    virtual void EatCursor(bool state) = 0;
     //! Is the cursor being consumed?
-    bool IsEatingCursor();
+    virtual bool IsEatingCursor() = 0;
     //! Is the window in focus?
-    bool IsWindowInFocus();
+    virtual bool IsWindowInFocus() = 0;
 
     //! Window name.
     std::string Name = "Unnamed window";

@@ -7,20 +7,21 @@
 #include <vector>
 #include <cstdint>
 #include "engine/weak_vector.h"
+#ifdef AMETHYSTENGINESRC
+    #include "../src/graphics/opengl/STDGLWindow.h"
+#endif
 
 /*!
 *   \brief An OpenGL renderer.
 */
 class ENGINEEXPORT STDGLRenderer : public Renderer
 {
+#ifdef AMETHYSTENGINESRC
 private:
-    ____UIData* UINewData(____WindowData* window);
-    void UIDeleteData(____UIData* data);
-    void UINewFrame();
-    void UIEndFrame();
-
+    ____WindowData* rendererData = nullptr;
     weak_vector<RWorld> RWorldVec;
-    
+    weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
+#endif
 public:
     ~STDGLRenderer();
     //!Makes the renderer
@@ -28,4 +29,5 @@ public:
     std::shared_ptr<RWorld> MakeRWorld();
     Camera* GetCamera(std::string name);
     void Draw();
+    std::shared_ptr<Window> MakeWindow();
 };

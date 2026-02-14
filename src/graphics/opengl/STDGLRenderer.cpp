@@ -1,9 +1,6 @@
 #include <algorithm>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 #include <memory>
 #include <utility>
 #include "GLFW/glfw3.h"
@@ -13,6 +10,7 @@
 #include "engine/graphics/opengl/STDGLRenderer.h"
 #include "STDGLRWorld.h"
 #include "../misc.h"
+#include "STDGLWindow.h"
 
 #include "../../src/model.h"
 #include "../../src/shader.h"
@@ -41,41 +39,11 @@ STDGLRenderer::~STDGLRenderer() {
     glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(rendererData));
 }
 
-____UIData* STDGLRenderer::UINewData(____WindowData* window) {
-    // Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	____UIData* data = reinterpret_cast<____UIData*>(ImGui::CreateContext());
-    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(data));
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 
-    ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(window), false);
-    ImGui_ImplOpenGL3_Init();
-
-    GraphicsMisc::windowSetCallbacks(reinterpret_cast<GLFWwindow*>(window));
-
-    return data;
-}
-
-void STDGLRenderer::UIDeleteData(____UIData* data) {
-    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(data));
-
-    ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-}
-
-void STDGLRenderer::UINewFrame() {
-    ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-}
-
-void STDGLRenderer::UIEndFrame() {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+std::shared_ptr<Window> STDGLRenderer::MakeWindow() {
+    std::shared_ptr<STDGLWindow> tempRef = std::make_shared<STDGLWindow>(selfRef, rendererData);
+    WindowVector.push_back(tempRef);
+    return std::static_pointer_cast<Window>(tempRef);
 }
 
 
