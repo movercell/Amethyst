@@ -24,7 +24,7 @@ Camera* STDGLRWorld::GetCamera(const std::string& name) {
     return nullptr;
 }
 
-std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(std::string path) {
+std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string& path) {
     glfwMakeContextCurrent(context);
     std::unique_ptr<ModelInstance> ret;
 
