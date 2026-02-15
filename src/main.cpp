@@ -96,6 +96,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 int main() {
 	glfwInit();
 
+	std::atexit(&exitfunc);
+
 	std::shared_ptr openglrenderer = STDGLRenderer::Make();
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow();
 	enginewindow->Name = "Amethyst";
@@ -130,7 +132,8 @@ int main() {
 		
 		glfwPollEvents();    
 	}
+}
 
+void exitfunc() {
 	glfwTerminate();
-
 }
