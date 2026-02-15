@@ -118,13 +118,14 @@ int main() {
 	while(EngineShouldNotTerminate) {
 		float currentFrame = static_cast<float>(glfwGetTime());
 		static float position = 0;
-        deltaTime = currentFrame - lastFrame;
+        float rawdeltaTime = currentFrame - lastFrame;
+		deltaTime = std::lerp(deltaTime, rawdeltaTime, 0.1f);
         lastFrame = currentFrame;
 
 		models[1]->SetMatrix(mat4(1, 0, 0, 128, 
 								  0, 1, 0, 0,
 								  0, 0, 1, position));
-		position += 32.0f * deltaTime;
+		position += 16.0f * deltaTime;
 		openglrenderer->Draw();
 		
 		glfwPollEvents();    
