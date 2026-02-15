@@ -14,7 +14,7 @@ std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::stri
     return result;
 }
 
-Camera* STDGLRWorld::GetCamera(std::string name) {
+Camera* STDGLRWorld::GetCamera(const std::string& name) {
     auto SharedCameraVec = CameraVec.lock();
     for (std::shared_ptr<Camera> camera : SharedCameraVec) {
         if (!camera) continue;
