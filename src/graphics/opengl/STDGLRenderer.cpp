@@ -57,7 +57,7 @@ void STDGLRenderer::Draw() {
     Shader tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
 
     auto SharedRWorldVec = RWorldVec.lock();
-    for (auto rworldbase : SharedRWorldVec) {
+    for (auto& rworldbase : SharedRWorldVec) {
         auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
         if (rworld->isSkippingRendering())
             continue;
@@ -77,14 +77,14 @@ void STDGLRenderer::Draw() {
 
     // Draw windows.
     auto SharedWindowVector = WindowVector.lock();
-    for (auto window : SharedWindowVector) {
+    for (auto& window : SharedWindowVector) {
         window->Draw();
     }
     
 }
 
 std::shared_ptr<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = make_shared<STDGLRWorld>(selfRef, rendererData);
+    auto result = make_shared<STDGLRWorld>(selfRef, rendererData, &ModelSystem);
     RWorldVec.push_back(result);
 
     return static_pointer_cast<RWorld>(result);

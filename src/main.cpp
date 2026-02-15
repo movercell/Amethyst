@@ -107,9 +107,9 @@ int main() {
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
 	std::array<std::unique_ptr<ModelInstance>, 2> models;
-	models[0] = rworld->MakeModelInstance("sphere.glb");
+	models[0] = rworld->MakeModelInstance("error.glb");
 	models[0]->SetMatrix(mat4());
-	models[1] = rworld->MakeModelInstance("sphere.glb");
+	models[1] = rworld->MakeModelInstance("error.glb");
 	models[1]->SetMatrix(mat4(1, 0, 0, 128));
 
 	std::cout << "Hello, world!" << std::endl;
@@ -117,9 +117,14 @@ int main() {
 	bool isWindowOpen = true;
 	while(EngineShouldNotTerminate) {
 		float currentFrame = static_cast<float>(glfwGetTime());
+		static float position = 0;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+		models[1]->SetMatrix(mat4(1, 0, 0, 128, 
+								  0, 1, 0, 0,
+								  0, 0, 1, position));
+		position += 32.0f * deltaTime;
 		openglrenderer->Draw();
 		
 		glfwPollEvents();    

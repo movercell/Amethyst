@@ -20,12 +20,14 @@ public:
 
 
     ~STDGLRWorld();
-    STDGLRWorld(std::weak_ptr<Renderer> Renderer, GLFWwindow* Context) {
+    STDGLRWorld(std::weak_ptr<Renderer> Renderer, GLFWwindow* Context, STDGLModelSystem* ModelSystem) {
         renderer = Renderer.lock();
         context = Context;
+        modelsystem = ModelSystem;
     }
 
     weak_vector<STDGLCamera> CameraVec;
     std::shared_ptr<Renderer> renderer;
     GLFWwindow* context;
+    STDGLModelSystem* modelsystem;
 };

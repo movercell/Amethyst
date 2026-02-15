@@ -31,18 +31,19 @@ public:
     ~STDGLModel();
 
     std::vector<STDGLMesh> Meshes;
+    std::string Path;
 };
 
 class STDGLModelInstanceArray {
 public:
     GLFWwindow* rendererData;
-    uint32_t count = 0;
     GLuint InstanceBuffer = 0;
     std::queue<uint16_t> FreedIndeces;
     uint16_t NextIndex = 0;
     uint16_t InstanceMaxCount; // Used to limit the amount of static model instances to just what's needed.
+    std::shared_ptr<STDGLModel> Model;
 
-    STDGLModelInstanceArray(GLFWwindow* data, uint16_t instancemaxcount = INSTANCE_MAX_COUNT);
+    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount = INSTANCE_MAX_COUNT);
 
     ~STDGLModelInstanceArray();
         
@@ -64,4 +65,12 @@ public:
     friend class GLModelInstanceArray;
 
     STDGLModelInstance(uint16_t Index, STDGLModelInstanceArray* Parent) { index = Index; parent = Parent; }
+};
+
+
+class STDGLModelSystem {
+public:
+    weak_vector<STDGLModel> Models;
+
+    std::shared_ptr<STDGLModel> GetModel(std::string path);
 };

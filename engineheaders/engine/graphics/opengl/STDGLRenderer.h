@@ -9,6 +9,7 @@
 #include "engine/weak_vector.h"
 #ifdef AMETHYSTENGINESRC
     #include "../src/graphics/opengl/STDGLWindow.h"
+    #include "../src/graphics/opengl/STDGLModel.h"
 #endif
 
 /*!
@@ -21,6 +22,7 @@ protected:
     GLFWwindow* rendererData = nullptr;
     weak_vector<RWorld> RWorldVec;
     weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
+    STDGLModelSystem ModelSystem;
 #endif
 public:
     ~STDGLRenderer();
