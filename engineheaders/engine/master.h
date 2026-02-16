@@ -139,10 +139,10 @@ struct mat4 {
         data[0][3] = m; data[1][3] = n; data[2][3] = o; data[3][3] = p;
     }
 #ifndef __INTELLISENSE__    // Crude but disables the 2 errors that intellisense reports.(It thinks that usage of multidimentional subscript operator is not permitted.)
-    float& operator[](int row, int column) {
+    float& operator[](int column, int row) {
         return data[column][row];
     }
-
+#endif
     mat4 operator*(const mat4& other) {
         mat4 result;
         for (int y = 0; y < 4; y++) {
@@ -152,7 +152,7 @@ struct mat4 {
         }
         return result;
     }
-#endif
+
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     mat4(const glm::mat4& other) {
         *this = std::bit_cast<mat4>(other);
