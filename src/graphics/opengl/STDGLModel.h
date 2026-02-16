@@ -42,6 +42,7 @@ public:
     uint16_t NextIndex = 0;
     uint16_t InstanceMaxCount; // Used to limit the amount of static model instances to just what's needed.
     std::shared_ptr<STDGLModel> Model;
+    std::weak_ptr<STDGLModelInstanceArray> selfRef;
 
     STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount = INSTANCE_MAX_COUNT);
 
@@ -55,16 +56,14 @@ public:
 
 class STDGLModelInstance : public ModelInstance {
 public:
-    STDGLModelInstanceArray* parent = nullptr;
+    std::shared_ptr<STDGLModelInstanceArray> parent;
     uint16_t index;
 
     void SetMatrix(mat4 Matrix);
 
     ~STDGLModelInstance();
-    
-    friend class GLModelInstanceArray;
 
-    STDGLModelInstance(uint16_t Index, STDGLModelInstanceArray* Parent) { index = Index; parent = Parent; }
+    STDGLModelInstance(uint16_t Index, std::shared_ptr<STDGLModelInstanceArray> Parent) { index = Index; parent = Parent; }
 };
 
 

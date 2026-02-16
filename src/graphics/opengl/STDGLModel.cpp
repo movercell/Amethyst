@@ -81,7 +81,7 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
         index = FreedIndeces.front();
         FreedIndeces.pop();
     }
-    return std::make_unique<STDGLModelInstance>(index, this);
+    return std::make_unique<STDGLModelInstance>(index, selfRef.lock());
 }
 
 void STDGLModelInstanceArray::Draw() {

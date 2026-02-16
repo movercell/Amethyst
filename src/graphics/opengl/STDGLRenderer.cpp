@@ -58,18 +58,22 @@ void STDGLRenderer::Draw() {
 
     auto SharedRWorldVec = RWorldVec.lock();
     for (auto& rworldbase : SharedRWorldVec) {
+
         auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
         if (rworld->isSkippingRendering())
             continue;
         auto SharedCameraVec = rworld->CameraVec.lock();
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
+
             camera->Bind();
             glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             tmpshader.use();
-            for (auto& iarray : rworld->InstanceArrays) {
-                iarray.second.Draw();
+            auto InstanceArraysShared = rworld->InstanceArrays.lock();
+            for (auto& iarray : InstanceArraysShared) {
+                iarray->Draw();
             }
+            
         }
         
     }

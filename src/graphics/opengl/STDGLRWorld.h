@@ -16,7 +16,7 @@ public:
     virtual Camera* GetCamera(const std::string& name);
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 
-    std::unordered_map<std::string, STDGLModelInstanceArray> InstanceArrays;
+    weak_vector<STDGLModelInstanceArray> InstanceArrays;
 
 
     ~STDGLRWorld();
