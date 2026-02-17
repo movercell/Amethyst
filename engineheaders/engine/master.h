@@ -19,7 +19,7 @@
     #define GAMEEXPORT __attribute__ ((visibility ("default")))
 #endif
 
-struct vec3 {
+struct alignas(sizeof(float) * 4) vec3 {
     float x = 0, y = 0, z = 0;
     vec3(float X, float Y, float Z) { x = X; y = Y; z = Z; }
     vec3() {}
@@ -55,7 +55,7 @@ struct vec3 {
 #endif
 };
 
-struct vec2 {
+struct alignas(sizeof(float) * 2) vec2 {
     float x = 0, y = 0;
     vec2(float X, float Y) { x = X; y = Y; }
     vec2() {}
@@ -91,10 +91,11 @@ struct vec2 {
 #endif
 };
 
-struct vec4 {
+struct alignas(sizeof(float) * 4) vec4 {
     float x = 0, y = 0, z = 0, w = 0;
     vec4(float X, float Y, float Z, float W) { x = X; y = Y; z = Z; w = W; }
     vec4() {}
+    vec4(vec3 other) { x = other.x; y = other.y; z = other.z; }
     vec4 operator+(const vec4& other) { return vec4( x + other.x, y + other.y, z + other.z, w + other.w); }
     vec4 operator-(const vec4& other) { return vec4( x - other.x, y - other.y, z - other.z, w - other.w); }
     vec4 operator*(const vec4& other) { return vec4( x * other.x, y * other.y, z * other.z, w * other.w); }
@@ -128,7 +129,7 @@ struct vec4 {
 
 
 
-struct mat4 {
+struct alignas(sizeof(float) * 4) mat4 {
     mat4(float a = 1, float b = 0, float c = 0, float d = 0,
            float e = 0, float f = 1, float g = 0, float h = 0,
            float i = 0, float j = 0, float k = 1, float l = 0,
@@ -138,11 +139,11 @@ struct mat4 {
         data[0][2] = i; data[1][2] = j; data[2][2] = k; data[3][2] = l;
         data[0][3] = m; data[1][3] = n; data[2][3] = o; data[3][3] = p;
     }
-#ifndef __INTELLISENSE__    // Crude but disables the 2 errors that intellisense reports.(It thinks that usage of multidimentional subscript operator is not permitted.)
+
     float& operator[](int column, int row) {
         return data[column][row];
     }
-#endif
+
     mat4 operator*(const mat4& other) {
         mat4 result;
         for (int y = 0; y < 4; y++) {

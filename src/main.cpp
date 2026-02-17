@@ -103,7 +103,7 @@ int main() {
 	enginewindow->Name = "Amethyst";
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
-	//enginewindow->EatCursor(true);
+	enginewindow->EatCursor(true);
 	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");

@@ -44,8 +44,10 @@ Geometry::Mesh::Mesh(void* Meshdata) {
     Vertices.reserve(paimesh->mNumVertices);
     for (int vertexindex = 0; vertexindex < paimesh->mNumVertices; vertexindex++) {
         Shapes::Vertex vertex;
-        vertex.Position = std::bit_cast<vec3>(paimesh->mVertices[vertexindex]);
-        vertex.Normal = std::bit_cast<vec3>(paimesh->mNormals[vertexindex]);
+        const auto& aipos = paimesh->mVertices[vertexindex];
+        vertex.Position = vec3(aipos.x, aipos.y, aipos.z);
+        const auto& ainorm = paimesh->mNormals[vertexindex];
+        vertex.Normal = vec3(ainorm.x, ainorm.y, ainorm.z);
         vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
         Radius = std::max(Radius, vertex.Position.length());
         Vertices.push_back(vertex);
