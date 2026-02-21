@@ -31,13 +31,13 @@ bool STDGLWindow::IsWindowInFocus() {
 
 void STDGLWindow::Update() {
     if (data != nullptr) {
-        glfwDestroyWindow(data);
-        
         ImGui::SetCurrentContext(UIData);
 
         ImGui_ImplOpenGL3_Shutdown();
 	    ImGui_ImplGlfw_Shutdown();
 	    ImGui::DestroyContext();
+
+		glfwDestroyWindow(data);
     }
 	glfwWindowHint(GLFW_SAMPLES, 16);
     data = glfwCreateWindow(Resolution.x, Resolution.y, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData));
@@ -63,7 +63,13 @@ void STDGLWindow::Update() {
 
 STDGLWindow::~STDGLWindow() {
     if (data != nullptr) {
-        glfwDestroyWindow(data);
+        ImGui::SetCurrentContext(UIData);
+
+        ImGui_ImplOpenGL3_Shutdown();
+	    ImGui_ImplGlfw_Shutdown();
+	    ImGui::DestroyContext();
+		
+		glfwDestroyWindow(data);
     }
 };
 
