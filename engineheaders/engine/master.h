@@ -21,7 +21,7 @@
 
 struct alignas(sizeof(float) * 4) vec3 {
     float x = 0, y = 0, z = 0;
-    vec3(float X, float Y, float Z) { x = X; y = Y; z = Z; }
+    vec3(const float& X, const float& Y, const float& Z) { x = X; y = Y; z = Z; }
     vec3() {}
     vec3 operator+(const vec3& other) { return vec3( x + other.x, y + other.y, z + other.z); }
     vec3 operator-(const vec3& other) { return vec3( x - other.x, y - other.y, z - other.z); }
@@ -57,7 +57,7 @@ struct alignas(sizeof(float) * 4) vec3 {
 
 struct alignas(sizeof(float) * 2) vec2 {
     float x = 0, y = 0;
-    vec2(float X, float Y) { x = X; y = Y; }
+    vec2(const float& X, const float& Y) { x = X; y = Y; }
     vec2() {}
     vec2 operator+(const vec2& other) { return vec2( x + other.x, y + other.y); }
     vec2 operator-(const vec2& other) { return vec2( x - other.x, y - other.y); }
@@ -93,7 +93,7 @@ struct alignas(sizeof(float) * 2) vec2 {
 
 struct alignas(sizeof(float) * 4) vec4 {
     float x = 0, y = 0, z = 0, w = 0;
-    vec4(float X, float Y, float Z, float W) { x = X; y = Y; z = Z; w = W; }
+    vec4(const float& X, const float& Y, const float& Z, const float& W) { x = X; y = Y; z = Z; w = W; }
     vec4() {}
     vec4(vec3 other) { x = other.x; y = other.y; z = other.z; }
     vec4 operator+(const vec4& other) { return vec4( x + other.x, y + other.y, z + other.z, w + other.w); }
@@ -130,10 +130,10 @@ struct alignas(sizeof(float) * 4) vec4 {
 
 
 struct alignas(sizeof(float) * 4) mat4 {
-    mat4(float a = 1, float b = 0, float c = 0, float d = 0,
-           float e = 0, float f = 1, float g = 0, float h = 0,
-           float i = 0, float j = 0, float k = 1, float l = 0,
-           float m = 0, float n = 0, float o = 0, float p = 1) {
+    mat4(const float& a = 1, const float& b = 0, const float& c = 0, const float&  d = 0,
+         const float& e = 0, const float& f = 1, const float& g = 0, const float&  h = 0,
+         const float& i = 0, const float& j = 0, const float& k = 1, const float&  l = 0,
+         const float& m = 0, const float& n = 0, const float& o = 0, const float&  p = 1) {
         data[0][0] = a; data[1][0] = b; data[2][0] = c; data[3][0] = d;
         data[0][1] = e; data[1][1] = f; data[2][1] = g; data[3][1] = h;
         data[0][2] = i; data[1][2] = j; data[2][2] = k; data[3][2] = l;
