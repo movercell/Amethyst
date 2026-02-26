@@ -17,7 +17,7 @@ namespace Geometry {
         Mesh() = delete;
         std::vector<Shapes::Vertex> Vertices;
         std::vector<uint32_t> Indeces;
-        float Radius;
+        float Radius = 0.0f;
     };
 
     class ENGINEEXPORT Model {

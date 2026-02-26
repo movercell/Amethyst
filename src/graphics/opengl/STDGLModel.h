@@ -24,7 +24,7 @@ public:
         Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
     };
     struct ModelInfo_t {
-        float Radius = 0;
+        float Radius = 0.0f;
     };
 
     STDGLModel(std::string path);

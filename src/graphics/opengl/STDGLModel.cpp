@@ -15,13 +15,12 @@ STDGLModel::STDGLModel(std::string path = "error.glb") {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    int vertex_count_total = 0;
-    int index_count_total = 0;
-
     std::vector<Shapes::Vertex> vertices;
     std::vector<GLuint> indeces;
 
     {   // Reserve the space
+        int vertex_count_total = 0;
+        int index_count_total = 0;
         for (auto mesh : model.Meshes) {
             vertex_count_total += mesh.Vertices.size();
             index_count_total += mesh.Indeces.size();
@@ -33,19 +32,21 @@ STDGLModel::STDGLModel(std::string path = "error.glb") {
     int mesh_base_vertex = 0;
     int mesh_base_index = 0;
 
+    // Concatenate the vectors
     for (int meshindex = 0; meshindex < meshcount; meshindex++) {
         const auto& mesh = model.Meshes[meshindex];
         Meshes.emplace_back((unsigned int)mesh.Indeces.size(), mesh_base_vertex, mesh_base_index);
 
-        std::copy(mesh.Vertices.begin(), mesh.Vertices.end(), std::back_inserter(vertices));
-        std::copy(mesh.Indeces.begin(), mesh.Indeces.end(), std::back_inserter(indeces));
+        std::copy(mesh.Vertices.cbegin(), mesh.Vertices.cend(), std::back_inserter(vertices));
+        std::copy(mesh.Indeces.cbegin(),  mesh.Indeces.cend(),  std::back_inserter(indeces));
 
         Info.Radius = std::max(Info.Radius, mesh.Radius);
 
         mesh_base_vertex += mesh.Vertices.size();
-        mesh_base_index += mesh.Indeces.size();
+        mesh_base_index  += mesh.Indeces.size();
     }
     
+    // Upload to the GPU
     glNamedBufferData(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glNamedBufferData(EBO, indeces.size() * sizeof(GLuint), indeces.data(), GL_STATIC_DRAW);
