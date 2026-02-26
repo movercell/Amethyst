@@ -33,9 +33,13 @@ add_library(imgui ${imgui_sources})
 
 file(GLOB_RECURSE vdfparser_sources      libs/vdfparser/*.cpp)
 add_library(vdfparser ${vdfparser_sources})
-
 add_library(assimp SHARED IMPORTED)
+if(WIN32)
+set_target_properties(assimp PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/testgame/libassimp.dll")
+set_target_properties(assimp PROPERTIES IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/build_windows/libassimp.dll.a")
+else()
 set_target_properties(assimp PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/testgame/libassimp.so.6")
+endif()
 	
 add_executable(amethyst
 	src/main.cpp
