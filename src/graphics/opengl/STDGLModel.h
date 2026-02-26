@@ -1,6 +1,7 @@
 #pragma once
 
-#define INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_MESH_MAX_COUNT 8
 
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
@@ -10,28 +11,29 @@
 #include <memory>
 #include <queue>
 
-class STDGLMesh {
-public:
-    struct MeshInfo_t {
-        float Radius;
-    };
-    GLuint VAO;
-    GLuint VBO, EBO, MeshInfo;
-    unsigned int IndexCount;
-
-    STDGLMesh(const Geometry::Mesh& mesh);
-};
-
 class STDGLModel {
 public:
     void Draw();
     void DrawDepth();
 
+    struct Mesh {
+        unsigned int IndexCount;
+        unsigned int BaseVertex;
+        unsigned int BaseIndex;
+
+        Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
+    };
+    struct ModelInfo_t {
+        float Radius = 0;
+    };
+
     STDGLModel(std::string path);
     ~STDGLModel();
 
-    std::vector<STDGLMesh> Meshes;
+    std::vector<Mesh> Meshes;
     std::string Path;
+    GLuint VAO;
+    GLuint VBO, EBO, ModelInfo;
 };
 
 class STDGLModelInstanceArray {
@@ -44,7 +46,7 @@ public:
     std::shared_ptr<STDGLModel> Model;
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
 
-    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount = INSTANCE_MAX_COUNT);
+    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount = STDGLMODEL_INSTANCE_MAX_COUNT);
 
     ~STDGLModelInstanceArray();
         

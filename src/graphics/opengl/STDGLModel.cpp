@@ -4,28 +4,54 @@
 
 STDGLModel::STDGLModel(std::string path = "error.glb") {
     Geometry::Model model(path);
-    Meshes.reserve(model.Meshes.size());
-    for (auto mesh : model.Meshes) {
-        Meshes.push_back(std::move(STDGLMesh(mesh)));
-    }
     Path = path;
-}
 
-STDGLMesh::STDGLMesh(const Geometry::Mesh& mesh) {
-    MeshInfo_t Info;
+    int meshcount = std::min((int)model.Meshes.size(), STDGLMODEL_MESH_MAX_COUNT);
+
+    Meshes.reserve(meshcount);
+
+    ModelInfo_t Info;
     glCreateBuffers(3, &VBO);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    glNamedBufferData(VBO, mesh.Vertices.size() * sizeof(Shapes::Vertex), mesh.Vertices.data(), GL_STATIC_DRAW);
+    int vertex_count_total = 0;
+    int index_count_total = 0;
+
+    std::vector<Shapes::Vertex> vertices;
+    std::vector<GLuint> indeces;
+
+    {   // Reserve the space
+        for (auto mesh : model.Meshes) {
+            vertex_count_total += mesh.Vertices.size();
+            index_count_total += mesh.Indeces.size();
+        }
+        vertices.reserve(vertex_count_total);
+        indeces.reserve(index_count_total);
+    }
+
+    int mesh_base_vertex = 0;
+    int mesh_base_index = 0;
+
+    for (int meshindex = 0; meshindex < meshcount; meshindex++) {
+        const auto& mesh = model.Meshes[meshindex];
+        Meshes.emplace_back((unsigned int)mesh.Indeces.size(), mesh_base_vertex, mesh_base_index);
+
+        std::copy(mesh.Vertices.begin(), mesh.Vertices.end(), std::back_inserter(vertices));
+        std::copy(mesh.Indeces.begin(), mesh.Indeces.end(), std::back_inserter(indeces));
+
+        Info.Radius = std::max(Info.Radius, mesh.Radius);
+
+        mesh_base_vertex += mesh.Vertices.size();
+        mesh_base_index += mesh.Indeces.size();
+    }
+    
+    glNamedBufferData(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glNamedBufferData(EBO, mesh.Indeces.size() * sizeof(GLuint), mesh.Indeces.data(), GL_STATIC_DRAW);
-    IndexCount = mesh.Indeces.size();
+    glNamedBufferData(EBO, indeces.size() * sizeof(GLuint), indeces.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    Info.Radius = mesh.Radius;
-
-    glNamedBufferData(MeshInfo, sizeof(MeshInfo_t), &Info, GL_STATIC_DRAW);
+    glNamedBufferData(ModelInfo, sizeof(ModelInfo_t), &Info, GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);	
@@ -36,21 +62,18 @@ STDGLMesh::STDGLMesh(const Geometry::Mesh& mesh) {
     // vertex texture coords
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)offsetof(Shapes::Vertex, TexCoords));
-    
 }
 
 STDGLModel::~STDGLModel() {
-    for (auto mesh : Meshes) {
-        glDeleteVertexArrays(1, &mesh.VAO);
-        glDeleteBuffers(3, &mesh.VBO);
-    }
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(3, &VBO);
 }
 
 void STDGLModel::Draw() {
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ModelInfo);
+    glBindVertexArray(VAO);
     for (auto mesh : Meshes) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, mesh.MeshInfo);
-        glBindVertexArray(mesh.VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, 0, 4096);
+        glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, (void*)(mesh.BaseIndex * sizeof(GLuint)), 4096, mesh.BaseVertex);
     }
 }
 

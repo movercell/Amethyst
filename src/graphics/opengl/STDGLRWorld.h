@@ -1,6 +1,6 @@
 #pragma once
 
-#define INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_INSTANCE_MAX_COUNT 4096
 
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
