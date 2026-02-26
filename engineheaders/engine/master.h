@@ -190,4 +190,7 @@ namespace Shapes {
         vec3 Normal;
         vec2 TexCoords;
     };
+    struct Triangle {
+        std::array<Vertex, 3> Vertices;
+    };
 }
