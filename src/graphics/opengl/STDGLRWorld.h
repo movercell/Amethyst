@@ -1,7 +1,5 @@
 #pragma once
 
-#define STDGLMODEL_INSTANCE_MAX_COUNT 4096
-
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
 #include "engine/graphics/RWorld.h"
