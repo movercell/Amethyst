@@ -62,6 +62,13 @@ target_link_libraries(amethyst assimp)
 
 target_compile_definitions(amethyst PUBLIC AMETHYSTENGINESRC)
 
+if(UNIX)
 target_link_options(amethyst PUBLIC "-rdynamic" "-Wl,-rpath,./")
 target_compile_options(amethyst PUBLIC "-fvisibility=hidden")
+endif()
 
+if(WIN32)
+	set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
+    target_link_options(amethyst PUBLIC "-Wl,--out-implib,${CMAKE_CURRENT_BINARY_DIR}/amethyst.exe.a")
+	set_target_properties(amethyst PROPERTIES IMPORT_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/amethyst.exe.a")
+endif()
