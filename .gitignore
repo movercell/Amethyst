@@ -20,3 +20,4 @@ engineheaders/engine/html/*
 engineheaders/engine/latex/*
 testgame/gmon.out
 testgame/amethyst
+testgame/amethyst.exe
