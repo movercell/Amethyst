@@ -15,8 +15,7 @@
 /*!
 *   \brief An OpenGL renderer.
 */
-class ENGINEEXPORT STDGLRenderer : public Renderer
-{
+class ENGINEEXPORT STDGLRenderer : public Renderer {
 #ifdef AMETHYSTENGINESRC
 protected:
     GLFWwindow* rendererData = nullptr;

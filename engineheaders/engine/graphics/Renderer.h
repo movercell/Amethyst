@@ -17,8 +17,7 @@
 *   Also provides the function for adding a window. \n
 *   The renderer does ***not*** count as a reference to anything within it.
 */
-class ENGINEEXPORT Renderer
-{
+class ENGINEEXPORT Renderer {
 protected:
     //!@private
     std::weak_ptr<Renderer> selfRef; // Stored for making windows reference this their context
