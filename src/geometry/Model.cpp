@@ -7,9 +7,9 @@
 #include <iostream>
 
 Geometry::Model::Model(std::string path) {
-    auto modelfile = Filesystem::GetFile("models/" + path, std::ios::in);
+    auto modelfile = Filesystem::GetFile("models/" + path, std::ios::in | std::ios_base::binary);
     if (!modelfile) {
-        modelfile = Filesystem::GetFile("models/error.glb", std::ios::in);
+        modelfile = Filesystem::GetFile("models/error.glb", std::ios::in | std::ios_base::binary);
     }
 
     Assimp::Importer importer;
@@ -20,7 +20,7 @@ Geometry::Model::Model(std::string path) {
     };
     // check for errors
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
-        modelfile = Filesystem::GetFile("models/error.glb", std::ios::in);
+        modelfile = Filesystem::GetFile("models/error.glb", std::ios::in | std::ios_base::binary);
 
         auto buffer = std::vector<char>((std::istreambuf_iterator<char>(modelfile)), (std::istreambuf_iterator<char>()));
         scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
