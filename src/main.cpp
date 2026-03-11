@@ -8,6 +8,7 @@
 #include "engine/graphics/RWorld.h"
 #include "engine/graphics/Renderer.h"
 #include "imgui.h"
+#include "engine/Filesystem.h"
 
 #include "main.h"
 #include "engine/graphics/opengl/STDGLRenderer.h"
@@ -103,7 +104,7 @@ int main() {
 	enginewindow->Name = "Amethyst";
 	enginewindow->Update();
 	enginewindow->SetUIFunction(mainuifunction);
-	enginewindow->EatCursor(true);
+	//enginewindow->EatCursor(true);
 	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
@@ -116,7 +117,8 @@ int main() {
 
 	std::cout << "Hello, world!" << std::endl;
 
-	bool isWindowOpen = true;
+	auto datafilething = Filesystem::GetDataFile("scripts/shaders/glshaders.adf");
+
 	while(EngineShouldNotTerminate) {
 		float currentFrame = static_cast<float>(glfwGetTime());
 		static float position = 0;
