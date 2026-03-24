@@ -26,7 +26,7 @@ bool EngineShouldNotTerminate = true;
 
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
-	static bool isUsingCamera = true;
+	static bool isUsingCamera = false;
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
 		isUsingCamera = !isUsingCamera;
@@ -109,11 +109,12 @@ int main() {
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
-	std::array<std::unique_ptr<ModelInstance>, 2> models;
+	std::array<std::unique_ptr<ModelInstance>, 3> models;
 	models[0] = rworld->MakeModelInstance("multimesh.glb");
-	models[0]->SetMatrix(mat4());
+	models[0]->SetMatrix(mat4(1, 0, 0, -128));
 	models[1] = rworld->MakeModelInstance(".glb");
-	models[1]->SetMatrix(mat4(1, 0, 0, 128));
+	models[1]->SetMatrix(mat4());
+	models[2] = rworld->MakeModelInstance("cube.glb"); // The rotating one, no need to set the matrix in the initializer
 
 	std::cout << "Hello, world!" << std::endl;
 
@@ -126,10 +127,12 @@ int main() {
 		deltaTime = std::lerp(deltaTime, rawdeltaTime, 0.1f);
         lastFrame = currentFrame;
 
-		//models[1]->SetMatrix(mat4(1, 0, 0, 128, 
-		//						  0, 1, 0, 0,
-		//						  0, 0, 1, position));
-		position += 16.0f * deltaTime;
+		models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
+																					0, 10, 0, 0,
+																					0, 0, 10, 0,
+																					0, 0, 0, 1));
+		position += 32.0f * deltaTime;
+		if (position > 360.0f) position -= 360.0f;
 		openglrenderer->Draw();
 		
 		glfwPollEvents();    

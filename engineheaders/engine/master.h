@@ -165,7 +165,7 @@ struct alignas(sizeof(float) * 4) mat4 {
 #endif
 
 private:
-    inline float multiplySlot(const mat4& other, int row, int column) {
+    inline float multiplySlot(const mat4& other, int column, int row) {
         return data[0][row] * other.data[column][0] + data[1][row] * other.data[column][1] + data[2][row] * other.data[column][2] + data[3][row] * other.data[column][3];
     } 
 
@@ -175,7 +175,7 @@ private:
 struct alignas(sizeof(float) * 4) quat {
     float w, x, y, z;
 
-    quat(float W, float X, float Y, float Z) { w = W; x = X; y = Y; z = Z; }
+    quat(float W, float X, float Y, float Z) { w = W; x = X; y = Y; z = Z; Norm(); }
     quat(vec3 angles) {
         const float anglestoradians = 0.017453293;
 
