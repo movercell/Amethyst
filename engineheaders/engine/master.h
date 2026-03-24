@@ -172,6 +172,80 @@ private:
     float data[4][4];
 };
 
+struct alignas(sizeof(float) * 4) quat {
+    float w, x, y, z;
+
+    quat(float W, float X, float Y, float Z) { w = W; x = X; y = Y; z = Z; }
+    quat(vec3 angles) {
+        const float anglestoradians = 0.017453293;
+
+        float pitchradian = (-angles.x * anglestoradians) / 2; //pitch and yaw are inverted because source
+        float yawradian = (-angles.y * anglestoradians) / 2;
+        float rollradian = (angles.z * anglestoradians) / 2;
+
+        quat yaw = quat(cos(yawradian), 0, 0, sin(yawradian));
+        quat pitch = quat(cos(pitchradian), 0, sin(pitchradian), 0);
+        quat roll = quat(cos(rollradian), sin(rollradian), 0, 0);
+
+        *this = yaw * (pitch * roll);
+        Norm();
+    }
+
+    void Norm() {
+        float squaremagnitude = w*w + x*x + y*y + z*z;
+        float scalefactor;
+
+        if (abs(1 - squaremagnitude) < 2.107342e-08) {
+            scalefactor = 2 / (1 + squaremagnitude);
+        } else {
+            scalefactor = 1 / sqrt(squaremagnitude);
+        }
+
+        w *= scalefactor;
+        x *= scalefactor;
+        y *= scalefactor;
+        z *= scalefactor;
+    }
+
+    //https://www.songho.ca/opengl/gl_quaternion.html
+    mat4 MakeRotationMatrix() {
+        return mat4(
+           1 - 2 * pow(y, 2) - 2 * pow(z, 2),   2 * x * y - 2 * w * z,              2 * x * z + 2 * w * y, 0,
+           2 * x * y + 2 * w * z,               1 - 2 * pow(x, 2) - 2 * pow(z, 2),  2 * y * z - 2 * w * x, 0,
+           2 * x * z - 2 * w * y,               2 * y * z + 2 * w * x,              1 - 2 * pow(x, 2) - 2 * pow(y, 2), 0,
+           0, 0, 0, 1
+        );
+    }
+
+    mat4 MakeInvRotationMatrix() {
+        return mat4(
+            1 - 2 * pow(y, 2) - 2 * pow(z, 2),  2 * x * y + 2 * w * z,              2 * x * z - 2 * w * y, 0,
+            2 * x * y - 2 * w * z,              1 - 2 * pow(x, 2) - 2 * pow(z, 2),  2 * y * z + 2 * w * x, 0,
+            2 * x * z + 2 * w * y,              2 * y * z - 2 * w * x,              1 - 2 * pow(x, 2) - 2 * pow(y, 2), 0,
+            0, 0, 0, 1
+        );
+    }
+
+
+    quat operator*(const quat& other) {
+        return quat(
+            w * other.w + x * other.x + y * other.y + z * other.z,
+            w * other.x - x * other.w - y * other.z + z * other.y,
+            w * other.y + x * other.z - y * other.w - z * other.x,
+            w * other.z - x * other.y + y * other.x - z * other.w
+        );
+    }
+    quat& operator*=(const quat& other) {
+        
+        w = w * other.w + x * other.x + y * other.y + z * other.z;
+        x = w * other.x - x * other.w - y * other.z + z * other.y;
+        y = w * other.y + x * other.z - y * other.w - z * other.x;
+        z = w * other.z - x * other.y + y * other.x - z * other.w;
+        
+        return *this;
+    }
+};
+
 
 namespace Shapes {
     struct AABB {
