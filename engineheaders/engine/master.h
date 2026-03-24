@@ -179,11 +179,11 @@ struct alignas(sizeof(float) * 4) quat {
     quat(vec3 angles) {
         const float anglestoradians = 0.017453293;
 
-        float pitchradian = (-angles.x * anglestoradians) / 2; //pitch and yaw are inverted because source
-        float yawradian = (-angles.y * anglestoradians) / 2;
-        float rollradian = (angles.z * anglestoradians) / 2;
+        float pitchradian = (angles.x * anglestoradians) / 2;
+        float yawradian   = (angles.y * anglestoradians) / 2;
+        float rollradian  = (angles.z * anglestoradians) / 2;
 
-        quat yaw = quat(cos(yawradian), 0, 0, sin(yawradian));
+        quat yaw = quat(cos(yawradian), 0, 0, -sin(yawradian)); // Seemingly I screwed something up and now I have to invert the thing here
         quat pitch = quat(cos(pitchradian), 0, sin(pitchradian), 0);
         quat roll = quat(cos(rollradian), sin(rollradian), 0, 0);
 

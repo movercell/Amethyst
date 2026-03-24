@@ -4,20 +4,21 @@
 
 void STDGLCamera::UpdateCameraVectors() {
     // calculate the new Front vector
-    glm::vec3 front;
+    vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     front.z = sin(glm::radians(Pitch));
     front.y = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Front = glm::normalize(front);
+    front.norm();
+    Front = front;
     // also re-calculate the Right and Up vector
-    Right = glm::normalize(Front.cross(WorldUp).toglm());  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    Up    = glm::normalize(Right.cross(Front).toglm());
-
+    // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    Right = Front.cross(WorldUp).norm();
+    Up    = Right.cross(Front).norm();
 }
 
 void STDGLCamera::Bind() {
-    glm::mat4 view = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-    glm::mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
+    mat4 view = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
+    mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
     Info.ViewProjection = projection * view;
     glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
