@@ -15,14 +15,14 @@ Geometry::Model::Model(std::string path) {
     Assimp::Importer importer;
     const aiScene* scene;
     {
-        auto buffer = std::vector<char>((std::istreambuf_iterator<char>(modelfile)), (std::istreambuf_iterator<char>()));
+        auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
         scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
     };
     // check for errors
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
         modelfile = Filesystem::GetFile("models/error.glb", std::ios::in | std::ios_base::binary);
 
-        auto buffer = std::vector<char>((std::istreambuf_iterator<char>(modelfile)), (std::istreambuf_iterator<char>()));
+        auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
         scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
 
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
