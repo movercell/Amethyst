@@ -13,6 +13,7 @@
 
 class STDGLModel {
 public:
+    void Bind();
     void Draw();
     void DrawDepth();
 
@@ -42,15 +43,19 @@ public:
     GLuint InstanceBuffer = 0;
     std::queue<uint16_t> FreedIndeces;
     uint16_t NextIndex = 0;
-    uint16_t InstanceMaxCount; // Used to limit the amount of static model instances to just what's needed.
     std::shared_ptr<STDGLModel> Model;
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
 
-    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount = STDGLMODEL_INSTANCE_MAX_COUNT);
+    struct InstanceArrayBuffer {
+        char InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT * sizeof(mat4)];
+    };
+
+    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model);
 
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
+    void Bind();
     void Draw();
 
     friend class GLModelInstance;

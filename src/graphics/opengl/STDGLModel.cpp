@@ -70,9 +70,13 @@ STDGLModel::~STDGLModel() {
     glDeleteBuffers(3, &VBO);
 }
 
-void STDGLModel::Draw() {
+
+void STDGLModel::Bind() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ModelInfo);
     glBindVertexArray(VAO);
+}
+
+void STDGLModel::Draw() {
     for (auto mesh : Meshes) {
         glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, (void*)(mesh.BaseIndex * sizeof(GLuint)), 4096, mesh.BaseVertex);
     }
@@ -96,6 +100,25 @@ STDGLModelInstance::~STDGLModelInstance() {
     parent->FreedIndeces.push(index);
 }
 
+
+
+
+STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model) {
+    rendererData = data;
+    Model = model;
+
+    glCreateBuffers(1, &InstanceBuffer);
+    std::unique_ptr<InstanceArrayBuffer> Buffer = std::make_unique<InstanceArrayBuffer>();
+    std::fill(Buffer->InstanceMatrices, Buffer->InstanceMatrices + STDGLMODEL_INSTANCE_MAX_COUNT * sizeof(mat4), 0xFF);
+    glNamedBufferData(InstanceBuffer, sizeof(InstanceArrayBuffer), Buffer.get(), GL_DYNAMIC_DRAW);
+}
+
+STDGLModelInstanceArray::~STDGLModelInstanceArray() {
+    glfwMakeContextCurrent(rendererData);
+
+    glDeleteBuffers(1, &InstanceBuffer);
+}
+
 std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     uint16_t index;
     if (FreedIndeces.empty()) {
@@ -108,28 +131,17 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     return std::make_unique<STDGLModelInstance>(index, selfRef.lock());
 }
 
-void STDGLModelInstanceArray::Draw() {
+
+void STDGLModelInstanceArray::Bind() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, InstanceBuffer);
+    Model->Bind();
+}
+
+void STDGLModelInstanceArray::Draw() {
     Model->Draw();
 }
 
-STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, uint16_t instancemaxcount) {
-    rendererData = data;
-    InstanceMaxCount = instancemaxcount;
-    Model = model;
 
-    glCreateBuffers(1, &InstanceBuffer);
-    uint8_t* temparr = new uint8_t[InstanceMaxCount * sizeof(mat4)]; // To init buffer to all NaN
-    std::fill(temparr, temparr + InstanceMaxCount * sizeof(mat4), 0xFF);
-    glNamedBufferData(InstanceBuffer, InstanceMaxCount * sizeof(mat4), temparr, GL_DYNAMIC_DRAW);
-    delete[] temparr;
-}
-
-STDGLModelInstanceArray::~STDGLModelInstanceArray() {
-    glfwMakeContextCurrent(rendererData);
-
-    glDeleteBuffers(1, &InstanceBuffer);
-}
 
 
 std::shared_ptr<STDGLModel> STDGLModelSystem::GetModel(std::string path) {

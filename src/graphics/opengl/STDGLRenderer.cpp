@@ -72,6 +72,7 @@ void STDGLRenderer::Draw() {
             tmpshader.use();
             
             for (auto& iarray : SharedInstanceArraysVec) {
+                iarray->Bind();
                 iarray->Draw();
             }
             
