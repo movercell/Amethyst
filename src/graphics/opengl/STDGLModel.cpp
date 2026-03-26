@@ -92,10 +92,10 @@ void STDGLModelInstance::SetMatrix(mat4 Matrix) {
 }
 
 STDGLModelInstance::~STDGLModelInstance() {
-    mat4 temp = mat4(NAN);
+    float temp = NAN;
     glfwMakeContextCurrent(parent->rendererData);
 
-    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(mat4), &temp);
+    glNamedBufferSubData(parent->InstanceBuffer, index * sizeof(mat4), sizeof(float), &temp);
 
     parent->FreedIndeces.push(index);
 }
