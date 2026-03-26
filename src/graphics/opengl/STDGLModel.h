@@ -1,12 +1,15 @@
 #pragma once
 
 #define STDGLMODEL_INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_LOD_MAX_COUNT 1
 #define STDGLMODEL_MESH_MAX_COUNT 8
 
+#include <glad/glad.h>
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
 #include "engine/geometry/Model.h"
 #include "GLFW/glfw3.h"
+#include "InderectDrawBuffer.h"
 #include <cstdint>
 #include <memory>
 #include <queue>
@@ -25,6 +28,7 @@ public:
         Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
     };
     struct ModelInfo_t {
+        DrawElementsIndirectCommandSTD140 IndirectBufferTemplates[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT];
         float Radius = 0.0f;
     };
 
@@ -47,6 +51,7 @@ public:
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
 
     struct InstanceArrayBuffer {
+        DrawElementsIndirectCommand IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
         char InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT * sizeof(mat4)];
     };
 
@@ -56,7 +61,6 @@ public:
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
     void Bind();
-    void Draw();
 
     friend class GLModelInstance;
 };

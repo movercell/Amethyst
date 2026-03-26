@@ -73,7 +73,8 @@ void STDGLRenderer::Draw() {
             
             for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
-                iarray->Draw();
+                iarray->Model->Bind();
+                iarray->Model->Draw();
             }
             
         }

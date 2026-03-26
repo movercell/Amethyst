@@ -7,8 +7,21 @@ layout (std140, binding = 0) uniform Camera {
     mat4 CameraMatrix;
 };
 
-layout (std140, binding = 0) buffer Instances {
-    mat4 InstanceMatrices[4096];
+#define STDGLMODEL_INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_LOD_MAX_COUNT 1
+#define STDGLMODEL_MESH_MAX_COUNT 8
+
+struct IndirectDrawBuffer {
+    uint count;
+    uint instanceCount;
+    uint firstIndex;
+    int baseVertex;
+    uint baseInstance;
+};
+
+layout (std430, binding = 0) buffer Instances {
+    IndirectDrawBuffer IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
+    mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
 };
 
 void main() {
