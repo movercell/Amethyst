@@ -10,6 +10,7 @@
 #ifdef AMETHYSTENGINESRC
     #include "../src/graphics/opengl/STDGLWindow.h"
     #include "../src/graphics/opengl/STDGLModel.h"
+    #include "../src/graphics/opengl/STDGLShaderSystem.h"
 #endif
 
 /*!
@@ -22,6 +23,7 @@ protected:
     weak_vector<RWorld> RWorldVec;
     weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
     STDGLModelSystem ModelSystem;
+    STDGLShaderSystem ShaderSystem;
 #endif
 public:
     ~STDGLRenderer();

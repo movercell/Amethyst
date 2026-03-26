@@ -31,6 +31,8 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->rendererData = data;
 
+    tempRendererRef->ShaderSystem.Init();
+
     glfwDefaultWindowHints();
     return tempRendererRef;
 }

@@ -11,6 +11,8 @@ Shaders {
         }
     }
     Compute {
-        
+        STDGLModel_InstancePreprocess {
+            Source "STDGLModel_InstancePreprocess.cs"
+        }
     }
 }
