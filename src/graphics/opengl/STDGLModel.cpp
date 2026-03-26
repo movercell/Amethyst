@@ -128,6 +128,8 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
         index = FreedIndeces.front();
         FreedIndeces.pop();
     }
+    if (index >= STDGLMODEL_INSTANCE_MAX_COUNT)
+        exit(-1);
     return std::make_unique<STDGLModelInstance>(index, selfRef.lock());
 }
 
