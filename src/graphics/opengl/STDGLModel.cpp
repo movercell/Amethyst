@@ -6,9 +6,7 @@ STDGLModel::STDGLModel(std::string path = "error.glb") {
     Geometry::Model model(path);
     Path = path;
 
-    int meshcount = std::min((int)model.Meshes.size(), STDGLMODEL_MESH_MAX_COUNT);
-
-    Meshes.reserve(meshcount);
+    MeshCount = std::min((int)model.Meshes.size(), STDGLMODEL_MESH_MAX_COUNT);
 
     ModelInfo_t Info;
     glCreateBuffers(3, &VBO);
@@ -32,13 +30,13 @@ STDGLModel::STDGLModel(std::string path = "error.glb") {
     int mesh_base_vertex = 0;
     int mesh_base_index = 0;
 
-    for (int meshindex = 0; meshindex < meshcount; meshindex++) {
+    for (int meshindex = 0; meshindex < MeshCount; meshindex++) {
         const auto& mesh = model.Meshes[meshindex];
         Info.IndirectBufferTemplates[0][meshindex].firstIndex = mesh_base_index;
         Info.IndirectBufferTemplates[0][meshindex].baseVertex = mesh_base_vertex;
         Info.IndirectBufferTemplates[0][meshindex].count      = (unsigned int)mesh.Indeces.size();
 
-        Meshes.emplace_back((unsigned int)mesh.Indeces.size(), mesh_base_vertex, mesh_base_index);
+        Meshes[0][meshindex] = Mesh();
 
         // Concatenate the vectors
         std::copy(mesh.Vertices.cbegin(), mesh.Vertices.cend(), std::back_inserter(vertices));
@@ -81,8 +79,8 @@ void STDGLModel::Bind() {
 }
 
 void STDGLModel::Draw() {
-    for (auto mesh : Meshes) {
-        glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh.IndexCount, GL_UNSIGNED_INT, (void*)(mesh.BaseIndex * sizeof(GLuint)), 4096, mesh.BaseVertex);
+    for (int mesh = 0; mesh < MeshCount; mesh++) {
+        glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)(sizeof(DrawElementsIndirectCommand) * mesh));
     }
 }
 
@@ -140,6 +138,7 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
 
 void STDGLModelInstanceArray::Bind() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, InstanceBuffer);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, InstanceBuffer);
 }
 
 

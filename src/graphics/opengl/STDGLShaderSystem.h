@@ -9,4 +9,8 @@ class STDGLShaderSystem {
     void InitCompute(VdfParser::KeyValue Shaderdefs);
 public:
     void Init();
+
+    inline GLuint GetComputeShader(std::string name) {
+        return ComputeShaders.at(name);
+    }
 };

@@ -36,6 +36,8 @@ void STDGLShaderSystem::InitCompute(VdfParser::KeyValue Shaderdefs) {
             exit(-1);
         }
 
+        ComputeShaders.emplace(shader.first, computeProgram);
+
     }
 }
 

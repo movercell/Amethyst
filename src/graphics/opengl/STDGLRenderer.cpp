@@ -33,6 +33,9 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->ShaderSystem.Init();
 
+    tempRendererRef->ModelIndirectReplicationShader = 
+                    tempRendererRef->ShaderSystem.GetComputeShader("STGLModel_IndirectBufferReplicator");
+
     glfwDefaultWindowHints();
     return tempRendererRef;
 }
@@ -71,11 +74,14 @@ void STDGLRenderer::Draw() {
             camera->Bind();
             glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-            tmpshader.use();
             
             for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
                 iarray->Model->Bind();
+                glUseProgram(ModelIndirectReplicationShader);
+                glDispatchCompute(1, 1, 1);
+                tmpshader.use();
+
                 iarray->Model->Draw();
             }
             

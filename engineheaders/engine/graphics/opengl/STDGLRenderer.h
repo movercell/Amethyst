@@ -24,6 +24,8 @@ protected:
     weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
+    GLuint ModelIndirectReplicationShader;
+    
 #endif
 public:
     ~STDGLRenderer();

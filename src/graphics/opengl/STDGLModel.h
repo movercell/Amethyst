@@ -21,11 +21,9 @@ public:
     void DrawDepth();
 
     struct Mesh {
-        unsigned int IndexCount;
-        unsigned int BaseVertex;
-        unsigned int BaseIndex;
+        int stub; // Needs to store the material pointer at the very least
 
-        Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
+        Mesh() {}
     };
     struct ModelInfo_t {
         DrawElementsIndirectCommandSTD140 IndirectBufferTemplates[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT];
@@ -35,7 +33,8 @@ public:
     STDGLModel(std::string path);
     ~STDGLModel();
 
-    std::vector<Mesh> Meshes;
+    uint8_t MeshCount;
+    Mesh Meshes[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT];
     std::string Path;
     GLuint VAO;
     GLuint VBO, EBO, ModelInfo;
