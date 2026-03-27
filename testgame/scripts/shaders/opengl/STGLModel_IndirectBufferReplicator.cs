@@ -8,5 +8,5 @@ layout(local_size_x = STDGLMODEL_LOD_MAX_COUNT, local_size_y = STDGLMODEL_MESH_M
 
 void main() {
     BUFFER.instanceCount = STDGLMODEL_INSTANCE_MAX_COUNT;
-    BUFFER.baseInstance = gl_LocalInvocationID.x;
+    BUFFER.baseInstance  = gl_LocalInvocationID.x;
 }

@@ -16,8 +16,11 @@
 
 class STDGLModel {
 public:
-    void Bind();
-    void Draw();
+    void Draw() {
+        for (int mesh = 0; mesh < MeshCount; mesh++) {
+            glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)(sizeof(DrawElementsIndirectCommand) * mesh));
+        }
+    }
     void DrawDepth();
 
     struct Mesh {
@@ -64,7 +67,6 @@ public:
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
-    void Bind();
 
     friend class GLModelInstance;
 };

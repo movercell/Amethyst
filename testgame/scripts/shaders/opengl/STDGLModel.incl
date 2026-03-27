@@ -13,6 +13,7 @@ struct IndirectDrawBuffer {
 layout (std430, binding = 0) buffer InstanceBuffer {
     IndirectDrawBuffer IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
     mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
+    int  Instanceindeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
 };
 
 layout (std140, binding = 1) uniform ModelInfo {

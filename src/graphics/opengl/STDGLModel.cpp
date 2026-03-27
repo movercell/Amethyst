@@ -71,18 +71,6 @@ STDGLModel::~STDGLModel() {
 }
 
 
-void STDGLModel::Bind() {
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ModelInfo);
-    glBindVertexArray(VAO);
-}
-
-void STDGLModel::Draw() {
-    for (int mesh = 0; mesh < MeshCount; mesh++) {
-        glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)(sizeof(DrawElementsIndirectCommand) * mesh));
-    }
-}
-
-
 
 
 void STDGLModelInstance::SetMatrix(mat4 Matrix) {
@@ -145,11 +133,6 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     return std::make_unique<STDGLModelInstance>(index, selfRef.lock());
 }
 
-
-void STDGLModelInstanceArray::Bind() {
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, InstanceBuffer);
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, InstanceBuffer);
-}
 
 
 

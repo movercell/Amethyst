@@ -25,6 +25,7 @@ protected:
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
     GLuint ModelIndirectReplicationShader;
+    GLuint ModelInstancePreprocessShader;
     
 #endif
 public:

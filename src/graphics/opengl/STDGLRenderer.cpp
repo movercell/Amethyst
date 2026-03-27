@@ -35,6 +35,8 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->ModelIndirectReplicationShader = 
                     tempRendererRef->ShaderSystem.GetComputeShader("STGLModel_IndirectBufferReplicator");
+    tempRendererRef->ModelInstancePreprocessShader = 
+                    tempRendererRef->ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
 
     glfwDefaultWindowHints();
     return tempRendererRef;
@@ -69,6 +71,12 @@ void STDGLRenderer::Draw() {
             continue;
         auto SharedCameraVec = rworld->CameraVec.lock();
         auto SharedInstanceArraysVec = rworld->InstanceArrays.lock();
+
+        // Flush the writes
+        for (auto& iarray : SharedInstanceArraysVec) {
+            glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, offsetof(STDGLModelInstanceArray::InstanceArrayBuffer, InstanceIndeces));
+        }
+
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
 
             camera->Bind();
@@ -78,14 +86,26 @@ void STDGLRenderer::Draw() {
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, camera->Name.c_str());
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, offsetof(STDGLModelInstanceArray::InstanceArrayBuffer, InstanceIndeces));
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
+                glBindBufferBase(GL_UNIFORM_BUFFER, 1, iarray->Model->ModelInfo);
+                glUseProgram(ModelInstancePreprocessShader);
+                glDispatchCompute(STDGLMODEL_INSTANCE_MAX_COUNT / 128, 1, 1);
             }
 
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
             for (auto& iarray : SharedInstanceArraysVec) {
-                iarray->Bind();
-                iarray->Model->Bind();
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
                 glUseProgram(ModelIndirectReplicationShader);
                 glDispatchCompute(1, 1, 1);
+            }
+
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+            for (auto& iarray : SharedInstanceArraysVec) {
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iarray->InstanceBuffer);
+                glBindVertexArray(iarray->Model->VAO);
                 tmpshader.use();
 
                 iarray->Model->Draw();
@@ -99,12 +119,10 @@ void STDGLRenderer::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Draw windows.
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Dear ImGUI UI passes");
     auto SharedWindowVector = WindowVector.lock();
     for (auto& window : SharedWindowVector) {
         window->Draw();
     }
-    glPopDebugGroup();
     
 }
 
