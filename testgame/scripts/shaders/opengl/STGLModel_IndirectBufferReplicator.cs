@@ -7,6 +7,6 @@ layout(local_size_x = STDGLMODEL_LOD_MAX_COUNT, local_size_y = STDGLMODEL_MESH_M
 #define BUFFER IndirectBuffers[gl_LocalInvocationID.x][gl_LocalInvocationID.y]
 
 void main() {
-    BUFFER.instanceCount = STDGLMODEL_INSTANCE_MAX_COUNT;
-    BUFFER.baseInstance  = gl_LocalInvocationID.x;
+    if (gl_LocalInvocationID.y != 0)
+        BUFFER.instanceCount = IndirectBuffers[gl_LocalInvocationID.x][0].instanceCount;
 }

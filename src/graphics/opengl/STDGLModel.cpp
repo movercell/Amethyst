@@ -104,9 +104,10 @@ STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_p
 
     for (int LOD = 0; LOD < Model->LODCount; LOD++) {
         for (int Mesh = 0; Mesh < Model->MeshCount; Mesh++) {
-            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].count      = Model->Meshes[LOD][Mesh].IndexCount;
-            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].firstIndex = Model->Meshes[LOD][Mesh].BaseIndex;
-            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].baseVertex = Model->Meshes[LOD][Mesh].BaseVertex;
+            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].count        = Model->Meshes[LOD][Mesh].IndexCount;
+            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].firstIndex   = Model->Meshes[LOD][Mesh].BaseIndex;
+            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].baseVertex   = Model->Meshes[LOD][Mesh].BaseVertex;
+            InstanceBufferMapped->IndirectBuffers[LOD][Mesh].baseInstance = LOD;
         }
     }
 

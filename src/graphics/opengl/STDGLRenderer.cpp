@@ -100,7 +100,7 @@ void STDGLRenderer::Draw() {
                 glDispatchCompute(1, 1, 1);
             }
 
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
             for (auto& iarray : SharedInstanceArraysVec) {
                 glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
