@@ -75,6 +75,8 @@ void STDGLRenderer::Draw() {
             glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, camera->Name.c_str());
+
             for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
                 iarray->Model->Bind();
@@ -84,6 +86,8 @@ void STDGLRenderer::Draw() {
 
                 iarray->Model->Draw();
             }
+
+            glPopDebugGroup();
             
         }
         
@@ -91,10 +95,12 @@ void STDGLRenderer::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Draw windows.
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Dear ImGUI UI passes");
     auto SharedWindowVector = WindowVector.lock();
     for (auto& window : SharedWindowVector) {
         window->Draw();
     }
+    glPopDebugGroup();
     
 }
 
