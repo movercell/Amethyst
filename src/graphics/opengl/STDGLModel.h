@@ -21,18 +21,21 @@ public:
     void DrawDepth();
 
     struct Mesh {
-        int stub; // Needs to store the material pointer at the very least
+        unsigned int IndexCount;
+        unsigned int BaseVertex;
+        unsigned int BaseIndex;
 
-        Mesh() {}
+        Mesh() {};
+        Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
     };
     struct ModelInfo_t {
-        DrawElementsIndirectCommandSTD140 IndirectBufferTemplates[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT];
         float Radius = 0.0f;
     };
 
     STDGLModel(std::string path);
     ~STDGLModel();
 
+    uint8_t LODCount;
     uint8_t MeshCount;
     Mesh Meshes[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT];
     std::string Path;
@@ -42,17 +45,19 @@ public:
 
 class STDGLModelInstanceArray {
 public:
+    struct InstanceArrayBuffer {
+        DrawElementsIndirectCommand IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
+        mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
+        GLuint InstanceIndeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
+    };
+
     GLFWwindow* rendererData;
     GLuint InstanceBuffer = 0;
     std::queue<uint16_t> FreedIndeces;
     uint16_t NextIndex = 0;
     std::shared_ptr<STDGLModel> Model;
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
-
-    struct InstanceArrayBuffer {
-        DrawElementsIndirectCommand IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
-        char InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT * sizeof(mat4)];
-    };
+    InstanceArrayBuffer* InstanceBufferMapped;
 
     STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model);
 

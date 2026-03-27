@@ -78,6 +78,10 @@ void STDGLRenderer::Draw() {
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, camera->Name.c_str());
 
             for (auto& iarray : SharedInstanceArraysVec) {
+                glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, offsetof(STDGLModelInstanceArray::InstanceArrayBuffer, InstanceIndeces));
+            }
+
+            for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
                 iarray->Model->Bind();
                 glUseProgram(ModelIndirectReplicationShader);
