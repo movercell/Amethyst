@@ -31,6 +31,8 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
     GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL);
     glfwMakeContextCurrent(data);
 
+    glfwSwapInterval(1);
+
     tempRendererRef->rendererData = data;
 
     tempRendererRef->ShaderSystem.Init();
@@ -39,8 +41,6 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
                     tempRendererRef->ShaderSystem.GetComputeShader("STGLModel_IndirectBufferReplicator");
     tempRendererRef->ModelInstancePreprocessShader = 
                     tempRendererRef->ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
-
-    glfwDefaultWindowHints();
     return tempRendererRef;
 }
 
