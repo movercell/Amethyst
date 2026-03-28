@@ -84,7 +84,9 @@ void STDGLRenderer::Draw() {
 
         // Flush the writes
         for (auto& iarray : SharedInstanceArraysVec) {
-            glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, sizeof(STDGLModelInstanceArray::InstanceArrayBuffer));
+            glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 
+                    sizeof(STDGLModelInstanceArray::InstanceArrayBuffer) * isFrameOdd,
+                    sizeof(STDGLModelInstanceArray::InstanceArrayBuffer));
         }
 
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
@@ -96,7 +98,9 @@ void STDGLRenderer::Draw() {
             
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer);
+                glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer,
+                        sizeof(STDGLModelInstanceArray::InstanceArrayBuffer) * isFrameOdd,
+                        sizeof(STDGLModelInstanceArray::InstanceArrayBuffer));
                 glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->Model->ModelInfo);
                 glUseProgram(ModelInstancePreprocessShader);
                 glDispatchCompute(STDGLMODEL_INSTANCE_MAX_COUNT / 128, 1, 1);
@@ -113,7 +117,9 @@ void STDGLRenderer::Draw() {
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer);
+                glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer,
+                        sizeof(STDGLModelInstanceArray::InstanceArrayBuffer) * isFrameOdd,
+                        sizeof(STDGLModelInstanceArray::InstanceArrayBuffer));
                 glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->Model->ModelInfo);
                 glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iarray->Model->ModelInfo);
                 glBindVertexArray(iarray->Model->VAO);

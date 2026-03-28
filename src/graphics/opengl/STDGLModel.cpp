@@ -81,14 +81,15 @@ STDGLModel::~STDGLModel() {
 void STDGLModelInstance::SetMatrix(mat4 Matrix) {
     glfwMakeContextCurrent(parent->rendererData);
 
-    parent->InstanceBufferMapped->InstanceMatrices[index] = Matrix;
+    parent->InstanceBufferMapped[Engine::FrameCount & 1].InstanceMatrices[index] = Matrix;
 }
 
 STDGLModelInstance::~STDGLModelInstance() {
     float temp = NAN;
     glfwMakeContextCurrent(parent->rendererData);
 
-    parent->InstanceBufferMapped->InstanceMatrices[index][0, 0] = NAN;
+    parent->InstanceBufferMapped[0].InstanceMatrices[index][0, 0] = NAN;
+    parent->InstanceBufferMapped[1].InstanceMatrices[index][0, 0] = NAN;
     parent->FreedIndeces.push(index);
 }
 
@@ -100,10 +101,10 @@ STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_p
     Model = model;
 
     glCreateBuffers(1, &InstanceBuffer);
-    glNamedBufferStorage(InstanceBuffer, sizeof(InstanceArrayBuffer), NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
-    InstanceBufferMapped = (InstanceArrayBuffer*)glMapNamedBufferRange(InstanceBuffer, 0, sizeof(InstanceArrayBuffer), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
+    glNamedBufferStorage(InstanceBuffer, sizeof(InstanceArrayBuffer[2]), NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
+    InstanceBufferMapped = (InstanceArrayBuffer*)glMapNamedBufferRange(InstanceBuffer, 0, sizeof(InstanceArrayBuffer[2]), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 
-    for (auto& instance : InstanceBufferMapped->InstanceMatrices) {
+    for (auto& instance : InstanceBufferMapped[Engine::FrameCount & 1].InstanceMatrices) {
         instance[0, 0] = NAN;
     }
 

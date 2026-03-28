@@ -119,10 +119,8 @@ int main() {
 	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
 	models[0] = rworld->MakeModelInstance("multimesh.glb");
-	models[0]->SetMatrix(mat4(1, 0, 0, -128));
 	models[1] = rworld->MakeModelInstance(".glb");
-	models[1]->SetMatrix(mat4());
-	models[2] = rworld->MakeModelInstance("cube.glb"); // The rotating one, no need to set the matrix in the initializer
+	models[2] = rworld->MakeModelInstance("cube.glb");
 
 	std::cout << "Hello, world!" << std::endl;
 
@@ -134,6 +132,10 @@ int main() {
         float rawdeltaTime = currentFrame - lastFrame;
 		deltaTime = std::lerp(deltaTime, rawdeltaTime, 0.1f);
         lastFrame = currentFrame;
+
+
+		models[0]->SetMatrix(mat4(1, 0, 0, -128));
+		models[1]->SetMatrix(mat4());
 
 		models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
 																					0, 10, 0, 0,
