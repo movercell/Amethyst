@@ -31,7 +31,7 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
     GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL);
     glfwMakeContextCurrent(data);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     tempRendererRef->rendererData = data;
 
