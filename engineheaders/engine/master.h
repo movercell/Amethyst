@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <array>
+#include <cstdint>
 //#include <glm/glm.hpp> // For error highlighting
 
 #ifdef GLMPresent 
@@ -19,6 +20,11 @@
     #define ENGINEEXPORT __attribute__ ((visibility ("default")))
     #define GAMEEXPORT __attribute__ ((visibility ("default")))
 #endif
+
+
+namespace Engine {
+    extern uint64_t FrameCount;
+}
 
 struct alignas(sizeof(float) * 4) vec3 {
     float x = 0, y = 0, z = 0;

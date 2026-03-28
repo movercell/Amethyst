@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <memory>
+#include <cstdint>
 
 #include "engine/master.h"
 
@@ -24,6 +25,9 @@ float lastFrame = 0.0f;
 
 bool EngineShouldNotTerminate = true;
 
+namespace Engine {
+	uint64_t FrameCount = 0;
+}
 
 std::array<std::unique_ptr<ModelInstance>, 3> models;
 
@@ -139,6 +143,7 @@ int main() {
 		if (position > 360.0f) position -= 360.0f;
 		openglrenderer->Draw();
 		
+		Engine::FrameCount++;
 		glfwPollEvents();    
 	}
 

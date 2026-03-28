@@ -39,6 +39,9 @@ void STDGLWindow::Update() {
 
 		glfwDestroyWindow(data);
     }
+
+    glfwDefaultWindowHints();
+
 	glfwWindowHint(GLFW_SAMPLES, 16);
     data = glfwCreateWindow(Resolution.x, Resolution.y, Name.c_str(), NULL, reinterpret_cast<GLFWwindow*>(rendererData));
 

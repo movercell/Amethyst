@@ -2,9 +2,9 @@
 #include <glad/glad.h>
 
 struct DrawElementsIndirectCommand {
-    GLuint count;
+    GLuint count = 0;
     GLuint instanceCount;
-    GLuint firstIndex;
-    GLuint baseVertex;
+    GLuint firstIndex = 0;
+    GLuint baseVertex = 0;
     GLuint baseInstance;
 };

@@ -21,6 +21,8 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->selfRef = std::static_pointer_cast<Renderer>(tempRendererRef);
 
+    glfwDefaultWindowHints();
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -56,6 +58,14 @@ std::shared_ptr<Window> STDGLRenderer::MakeWindow() {
 
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(rendererData);
+
+    bool isFrameOdd = Engine::FrameCount & 1;
+
+    if (DoubleBufferFences[isFrameOdd]) {
+        glClientWaitSync(DoubleBufferFences[isFrameOdd], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+        glDeleteSync(DoubleBufferFences[isFrameOdd]);
+    }
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
@@ -74,7 +84,7 @@ void STDGLRenderer::Draw() {
 
         // Flush the writes
         for (auto& iarray : SharedInstanceArraysVec) {
-            glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, offsetof(STDGLModelInstanceArray::InstanceArrayBuffer, InstanceIndeces));
+            glFlushMappedNamedBufferRange(iarray->InstanceBuffer, 0, sizeof(STDGLModelInstanceArray::InstanceArrayBuffer));
         }
 
         for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
@@ -86,8 +96,8 @@ void STDGLRenderer::Draw() {
             
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
-                glBindBufferBase(GL_UNIFORM_BUFFER, 1, iarray->Model->ModelInfo);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->Model->ModelInfo);
                 glUseProgram(ModelInstancePreprocessShader);
                 glDispatchCompute(STDGLMODEL_INSTANCE_MAX_COUNT / 128, 1, 1);
             }
@@ -95,7 +105,7 @@ void STDGLRenderer::Draw() {
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->Model->ModelInfo);
                 glUseProgram(ModelIndirectReplicationShader);
                 glDispatchCompute(1, 1, 1);
             }
@@ -103,13 +113,16 @@ void STDGLRenderer::Draw() {
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
             for (auto& iarray : SharedInstanceArraysVec) {
-                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->InstanceBuffer);
-                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iarray->InstanceBuffer);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, iarray->InstanceBuffer);
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, iarray->Model->ModelInfo);
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, iarray->Model->ModelInfo);
                 glBindVertexArray(iarray->Model->VAO);
                 tmpshader.use();
 
                 iarray->Model->Draw();
             }
+
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
             glPopDebugGroup();
             
@@ -123,6 +136,8 @@ void STDGLRenderer::Draw() {
     for (auto& window : SharedWindowVector) {
         window->Draw();
     }
+
+    DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
 }
 

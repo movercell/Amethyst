@@ -24,14 +24,13 @@ public:
     void DrawDepth();
 
     struct Mesh {
-        unsigned int IndexCount;
-        unsigned int BaseVertex;
-        unsigned int BaseIndex;
+        unsigned int stub;
 
         Mesh() {};
-        Mesh(unsigned int indexcount, unsigned int basevertex, unsigned int baseindex) : IndexCount(indexcount), BaseVertex(basevertex), BaseIndex(baseindex) {}
     };
     struct ModelInfo_t {
+        DrawElementsIndirectCommand IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
+        GLuint InstanceIndeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
         float Radius = 0.0f;
     };
 
@@ -49,9 +48,7 @@ public:
 class STDGLModelInstanceArray {
 public:
     struct InstanceArrayBuffer {
-        DrawElementsIndirectCommand IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
         mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
-        GLuint InstanceIndeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
     };
 
     GLFWwindow* rendererData;

@@ -24,6 +24,9 @@ protected:
     weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
+
+    GLsync DoubleBufferFences[2] = { nullptr, nullptr };
+
     GLuint ModelIndirectReplicationShader;
     GLuint ModelInstancePreprocessShader;
     

@@ -19,10 +19,14 @@ struct IndirectDrawBuffer {
     uint baseInstance;
 };
 
-layout (std430, binding = 0) buffer InstanceBuffer {
+layout (std430, binding = 0) buffer ModelInfo {
     IndirectDrawBuffer IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
-    mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
     uint InstanceIndeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
+    float Radius;
+};
+
+layout (std430, binding = 1) buffer InstanceBuffer {
+    mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
 };
 
 void main() {
