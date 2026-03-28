@@ -52,16 +52,13 @@ protected:
     struct Frustum
     {
         struct Plane{
-            // unit vector
-            vec3 Normal = vec3(0.f, 1.f, 0.f );
-            // distance from origin to the nearest point in the plane
-            float Distance = 0.f;    
+            // unit vector + distance from origin to the nearest point in the plane
+            vec4 Data = vec4(0.0f, 1.0f, 0.0f, 0.0f); 
             
             Plane() = default;
 
 	        Plane(const vec3& p1, const vec3& norm)
-	        	: Normal(norm.norm()),
-	        	Distance(Normal.dot(p1)) {}
+	        	: Data(norm.norm(), norm.norm().dot(p1)) {}
 
         };
     

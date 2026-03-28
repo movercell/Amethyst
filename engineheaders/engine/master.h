@@ -102,7 +102,7 @@ struct alignas(sizeof(float) * 4) vec4 {
     float x = 0, y = 0, z = 0, w = 0;
     vec4(const float& X, const float& Y, const float& Z, const float& W) { x = X; y = Y; z = Z; w = W; }
     vec4() {}
-    vec4(vec3 other) { x = other.x; y = other.y; z = other.z; }
+    vec4(vec3 other, float W = 1.0f) { x = other.x; y = other.y; z = other.z; w = W; }
     vec4 operator+(const vec4& other) { return vec4( x + other.x, y + other.y, z + other.z, w + other.w); }
     vec4 operator-(const vec4& other) { return vec4( x - other.x, y - other.y, z - other.z, w - other.w); }
     vec4 operator*(const vec4& other) { return vec4( x * other.x, y * other.y, z * other.z, w * other.w); }

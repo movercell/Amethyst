@@ -22,6 +22,7 @@ void STDGLCamera::Bind() {
     Info.ViewProjection = projection * view;
     glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffers[Engine::FrameCount & 1], 0);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 }
 
@@ -49,12 +50,13 @@ void STDGLCamera::ProcessMouseMovement(vec2 offset, bool constrainPitch)
 void STDGLCamera::CreateBuffers() {
     glCreateFramebuffers(1, &Framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
-    // Color buffer
-    glCreateTextures(GL_TEXTURE_2D, 1, &Colorbuffer);
-    glTextureStorage2D(Colorbuffer, 1, GL_RGB8, Resolution.x, Resolution.y);
-    glTextureParameteri(Colorbuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(Colorbuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffer, 0);
+    // Color buffers
+    glCreateTextures(GL_TEXTURE_2D, 2, Colorbuffers);
+    for (int buffer = 0; buffer < 2; buffer++) {
+        glTextureStorage2D(Colorbuffers[buffer], 1, GL_RGB8, Resolution.x, Resolution.y);
+        glTextureParameteri(Colorbuffers[buffer], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(Colorbuffers[buffer], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
     // Depth buffer
     glCreateTextures(GL_TEXTURE_2D, 1, &Depthbuffer);
     glTextureStorage2D(Depthbuffer, 1, GL_DEPTH_COMPONENT24, Resolution.x, Resolution.y);
@@ -68,7 +70,7 @@ void STDGLCamera::CreateBuffers() {
 }
 
 uint32_t STDGLCamera::GetTexture() {
-    return Colorbuffer;
+    return Colorbuffers[(~Engine::FrameCount) & 1];
 }
 
 uint32_t STDGLCamera::GetDepthTexture() {
@@ -79,6 +81,6 @@ STDGLCamera::~STDGLCamera() {
     glfwMakeContextCurrent(context);
 
     glDeleteFramebuffers(1, &Framebuffer);
-    glDeleteTextures(2, &Colorbuffer); // Also removes the depth buffer.
+    glDeleteTextures(3, Colorbuffers); // Also removes the depth buffer.
     glDeleteBuffers(1, &Infobuffer);
 }

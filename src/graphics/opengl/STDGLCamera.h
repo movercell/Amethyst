@@ -17,7 +17,7 @@ class STDGLCamera : public Camera {
 public:
 
     GLuint Framebuffer;
-    GLuint Colorbuffer, Depthbuffer;
+    GLuint Colorbuffers[2], Depthbuffer;
     GLuint Infobuffer;
     GLFWwindow* context;
 
