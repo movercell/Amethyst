@@ -3,6 +3,7 @@
 #define STDGLMODEL_INSTANCE_MAX_COUNT 4096
 #define STDGLMODEL_LOD_MAX_COUNT 1
 #define STDGLMODEL_MESH_MAX_COUNT 8
+#define STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE 128
 
 #include <glad/glad.h>
 #include "STDGLCamera.h"
@@ -17,11 +18,18 @@
 class STDGLModel {
 public:
     void Draw() {
+        glBindVertexArray(VAO);
         for (int mesh = 0; mesh < MeshCount; mesh++) {
             glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)(sizeof(DrawElementsIndirectCommand) * mesh));
         }
     }
     void DrawDepth();
+    inline void BindInfo() {
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ModelInfo);
+    }
+    inline void BindIndirectCommands() {
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, ModelInfo);
+    }
 
     struct Mesh {
         unsigned int stub;
@@ -64,6 +72,17 @@ public:
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
+    inline void Bind() {
+        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, InstanceBuffer,
+                        sizeof(InstanceArrayBuffer) * (Engine::FrameCount & 1),
+                        sizeof(InstanceArrayBuffer));
+    }
+
+    inline void Flush() {
+        glFlushMappedNamedBufferRange(InstanceBuffer, 
+                    sizeof(InstanceArrayBuffer) * (Engine::FrameCount & 1),
+                    sizeof(InstanceArrayBuffer));
+    }
 
     friend class GLModelInstance;
 };
