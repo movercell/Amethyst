@@ -30,6 +30,8 @@ public:
     virtual std::shared_ptr<RWorld> MakeRWorld() = 0;
     //! Gets a camera.(used for getting the camera's render result in window UI functions)
     virtual Camera* GetCamera(std::string name) = 0;
+    //! Gets a constant reference to the internal frame counter
+    virtual const uint64_t& GetFrameCounter() = 0;
     //! Draws everything.
     virtual void Draw() = 0;
 };

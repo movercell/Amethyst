@@ -59,7 +59,7 @@ std::shared_ptr<Window> STDGLRenderer::MakeWindow() {
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(rendererData);
 
-    bool isFrameOdd = Engine::FrameCount & 1;
+    bool isFrameOdd = FrameCounter & 1;
 
     if (DoubleBufferFences[isFrameOdd]) {
         glClientWaitSync(DoubleBufferFences[isFrameOdd], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
@@ -130,6 +130,8 @@ void STDGLRenderer::Draw() {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    FrameCounter++;
+
     // Draw windows.
     auto SharedWindowVector = WindowVector.lock();
     for (auto& window : SharedWindowVector) {
@@ -155,4 +157,8 @@ Camera* STDGLRenderer::GetCamera(std::string name) {
         if (temp) result = temp;
     }
     return result;
+}
+
+const uint64_t& STDGLRenderer::GetFrameCounter() {
+    return FrameCounter;
 }

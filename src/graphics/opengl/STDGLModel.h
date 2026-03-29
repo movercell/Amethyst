@@ -67,20 +67,21 @@ public:
     std::shared_ptr<STDGLModel> Model;
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
     InstanceArrayBuffer* InstanceBufferMapped;
+    const uint64_t *FrameCounterPtr;
 
-    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model);
+    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, const uint64_t* framecounterptr);
 
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
     inline void Bind() {
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, InstanceBuffer,
-                        sizeof(InstanceArrayBuffer) * (Engine::FrameCount & 1),
+                        sizeof(InstanceArrayBuffer) * (*FrameCounterPtr & 1),
                         sizeof(InstanceArrayBuffer));
     }
 
     inline void Flush() {
-        bool isFrameOdd = Engine::FrameCount & 1;
+        bool isFrameOdd = *FrameCounterPtr & 1;
         if (isBufferModified[isFrameOdd]) {
             glFlushMappedNamedBufferRange(InstanceBuffer, 
                         sizeof(InstanceArrayBuffer) * isFrameOdd,

@@ -8,7 +8,7 @@
 
 std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
     glfwMakeContextCurrent(context);
-    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(context, resolution, name, position, yaw, pitch);
+    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(context, &(renderer->GetFrameCounter()), resolution, name, position, yaw, pitch);
     CameraVec.push_back(result);
 
     return result;
@@ -32,7 +32,7 @@ std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string&
         if (array->Model->Path == path) return array->MakeModelInstance();
     }
 
-    auto array = std::make_shared<STDGLModelInstanceArray>(context, modelsystem->GetModel(path));
+    auto array = std::make_shared<STDGLModelInstanceArray>(context, modelsystem->GetModel(path), &(renderer->GetFrameCounter()));
     array->selfRef = array;
     InstanceArrays.push_back(array);
     return array->MakeModelInstance();

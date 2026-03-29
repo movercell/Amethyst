@@ -19,7 +19,8 @@ public:
     GLuint Framebuffer;
     GLuint Colorbuffers[2], Depthbuffer;
     GLuint Infobuffer;
-    GLFWwindow* context;
+    GLFWwindow* Context;
+    const uint64_t* FrameCounterPtr;
 
     struct Camerainfo_t {
         mat4 ViewProjection;
@@ -28,8 +29,9 @@ public:
 
 
     // Constructor with vectors.
-    STDGLCamera(GLFWwindow* Context, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
-        context = Context;
+    STDGLCamera(GLFWwindow* context, const uint64_t* framecounterptr, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+        Context = context;
+        FrameCounterPtr = framecounterptr;
         Resolution = resolution;
         Name = name;
         Position = position;

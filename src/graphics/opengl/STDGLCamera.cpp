@@ -22,7 +22,7 @@ void STDGLCamera::Bind() {
     Info.ViewProjection = projection * view;
     glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
-    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffers[Engine::FrameCount & 1], 0);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffers[*FrameCounterPtr & 1], 0);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 }
 
@@ -70,7 +70,7 @@ void STDGLCamera::CreateBuffers() {
 }
 
 uint32_t STDGLCamera::GetTexture() {
-    return Colorbuffers[(~Engine::FrameCount) & 1];
+    return Colorbuffers[*FrameCounterPtr & 1];
 }
 
 uint32_t STDGLCamera::GetDepthTexture() {
@@ -78,7 +78,7 @@ uint32_t STDGLCamera::GetDepthTexture() {
 }
 
 STDGLCamera::~STDGLCamera() {
-    glfwMakeContextCurrent(context);
+    glfwMakeContextCurrent(Context);
 
     glDeleteFramebuffers(1, &Framebuffer);
     glDeleteTextures(3, Colorbuffers); // Also removes the depth buffer.

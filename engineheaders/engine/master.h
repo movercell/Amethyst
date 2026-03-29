@@ -23,7 +23,7 @@
 
 
 namespace Engine {
-    extern uint64_t FrameCount;
+    
 }
 
 struct alignas(sizeof(float) * 4) vec3 {

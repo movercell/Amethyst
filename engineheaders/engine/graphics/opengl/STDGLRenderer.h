@@ -29,6 +29,8 @@ protected:
 
     GLuint ModelIndirectReplicationShader;
     GLuint ModelInstancePreprocessShader;
+
+    uint64_t FrameCounter = 0;
     
 #endif
 public:
@@ -37,6 +39,7 @@ public:
     static std::shared_ptr<Renderer> Make();
     std::shared_ptr<RWorld> MakeRWorld();
     Camera* GetCamera(std::string name);
+    const uint64_t& GetFrameCounter();
     void Draw();
     std::shared_ptr<Window> MakeWindow();
 };

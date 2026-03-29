@@ -79,7 +79,7 @@ STDGLModel::~STDGLModel() {
 
 
 void STDGLModelInstance::SetMatrix(mat4 Matrix) {
-    bool isFrameOdd = Engine::FrameCount & 1;
+    bool isFrameOdd = *(parent->FrameCounterPtr) & 1;
     parent->InstanceBufferMapped[isFrameOdd].InstanceMatrices[index] = Matrix;
     parent->isBufferModified[isFrameOdd] = true;
 }
@@ -95,9 +95,10 @@ STDGLModelInstance::~STDGLModelInstance() {
 
 
 
-STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model) {
+STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, const uint64_t* framecounterptr) {
     rendererData = data;
     Model = model;
+    FrameCounterPtr = framecounterptr;
 
     glCreateBuffers(1, &InstanceBuffer);
     glNamedBufferStorage(InstanceBuffer, sizeof(InstanceArrayBuffer[2]), NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
