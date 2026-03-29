@@ -63,6 +63,7 @@ public:
     GLuint InstanceBuffer = 0;
     std::queue<uint16_t> FreedIndeces;
     uint16_t NextIndex = 0;
+    bool isBufferModified[2] = { false, false };
     std::shared_ptr<STDGLModel> Model;
     std::weak_ptr<STDGLModelInstanceArray> selfRef;
     InstanceArrayBuffer* InstanceBufferMapped;
@@ -79,9 +80,13 @@ public:
     }
 
     inline void Flush() {
-        glFlushMappedNamedBufferRange(InstanceBuffer, 
-                    sizeof(InstanceArrayBuffer) * (Engine::FrameCount & 1),
-                    sizeof(InstanceArrayBuffer));
+        bool isFrameOdd = Engine::FrameCount & 1;
+        if (isBufferModified[isFrameOdd]) {
+            glFlushMappedNamedBufferRange(InstanceBuffer, 
+                        sizeof(InstanceArrayBuffer) * isFrameOdd,
+                        NextIndex * sizeof(mat4));
+            isBufferModified[isFrameOdd] = false;
+        }
     }
 
     friend class GLModelInstance;

@@ -133,8 +133,8 @@ int main() {
 		deltaTime = std::lerp(deltaTime, rawdeltaTime, 0.1f);
         lastFrame = currentFrame;
 
-
-		models[0]->SetMatrix(mat4(1, 0, 0, -128));
+		if (models[0])
+			models[0]->SetMatrix(mat4(1, 0, 0, -128));
 		models[1]->SetMatrix(mat4());
 
 		models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,

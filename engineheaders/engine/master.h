@@ -151,7 +151,7 @@ struct alignas(sizeof(float) * 4) mat4 {
         return data[column][row];
     }
 
-    mat4 operator*(const mat4& other) {
+    mat4 operator*(const mat4& other) const {
         mat4 result;
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
@@ -159,6 +159,21 @@ struct alignas(sizeof(float) * 4) mat4 {
             }
         }
         return result;
+    }
+
+    bool operator==(const mat4& other) const {
+        for (int col = 0; col < 4; col++) {
+            for (int row = 0; row < 4; row++) {
+                if (data[col][row] != other.data[col][row]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const mat4& other) const {
+        return !(*this == other);
     }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
@@ -171,7 +186,7 @@ struct alignas(sizeof(float) * 4) mat4 {
 #endif
 
 private:
-    inline float multiplySlot(const mat4& other, int column, int row) {
+    inline float multiplySlot(const mat4& other, int column, int row) const {
         return data[0][row] * other.data[column][0] + data[1][row] * other.data[column][1] + data[2][row] * other.data[column][2] + data[3][row] * other.data[column][3];
     } 
 
