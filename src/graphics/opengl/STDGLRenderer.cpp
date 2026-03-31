@@ -12,6 +12,8 @@
 #include "GLMisc.h"
 #include "STDGLWindow.h"
 
+#include "../src/shader.h"
+
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
 
@@ -37,7 +39,6 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->ModelInstancePreprocessShader = 
                     tempRendererRef->ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
-    tempRendererRef->tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
     return tempRendererRef;
 }
 
@@ -62,6 +63,8 @@ void STDGLRenderer::Draw() {
         glClientWaitSync(DoubleBufferFences[isFrameOdd], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
         glDeleteSync(DoubleBufferFences[isFrameOdd]);
     }
+
+    Shader tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
