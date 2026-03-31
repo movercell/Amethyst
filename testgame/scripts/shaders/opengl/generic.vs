@@ -24,7 +24,6 @@ struct IndirectDrawBuffer {
 layout (std430, binding = 0) buffer ModelInfo {
     IndirectDrawBuffer IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
     float ModelRadius;
-    uint Lock;
     uint InstanceIndeces[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
 };
 

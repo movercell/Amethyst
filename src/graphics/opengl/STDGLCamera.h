@@ -9,6 +9,7 @@
 
 #include "engine/graphics/Camera.h"
 #include "engine/graphics/opengl/STDGLRenderer.h"
+#include "engine/geometry/Frustum.h"
 
 const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 
@@ -25,7 +26,7 @@ public:
     struct Camerainfo_t {
         mat4 View;
         mat4 ViewProjection;
-        frustum Frustum;
+        Shapes::Frustum Frustum;
     };
     Camerainfo_t Info;
 

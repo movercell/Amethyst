@@ -15,8 +15,8 @@ endif()
 
 
 # Profiling stuff
-# add_compile_options(-pg -g)
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+ add_compile_options(-pg -g)
+ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 
 
 

@@ -11,6 +11,7 @@
     #include "../src/graphics/opengl/STDGLWindow.h"
     #include "../src/graphics/opengl/STDGLModel.h"
     #include "../src/graphics/opengl/STDGLShaderSystem.h"
+    #include "../src/shader.h"
 #endif
 
 /*!
@@ -30,6 +31,8 @@ protected:
     GLuint ModelInstancePreprocessShader;
 
     uint64_t FrameCounter = 0;
+
+    Shader tmpshader;
     
 #endif
 public:

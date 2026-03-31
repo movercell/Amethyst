@@ -8,7 +8,7 @@
 layout(local_size_x = STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 
 shared uint LocalAmounts[STDGLMODEL_LOD_MAX_COUNT];
-shared uint GroupIDs[4];
+shared uint GroupIDs[STDGLMODEL_LOD_MAX_COUNT];
 
 bool InvPlaneTest(vec3 center, float radius, vec4 plane) {
     float distance = dot(plane.xyz, center) + plane.w;
@@ -23,12 +23,18 @@ void main() {
     if (gl_GlobalInvocationID.x == 0)
         for (int LOD = 0; LOD < STDGLMODEL_LOD_MAX_COUNT; LOD++) {
             IndirectBuffers[LOD][0].instanceCount = 0;
+            for (int mesh = 0; mesh < STDGLMODEL_MESH_MAX_COUNT; mesh++)
+                IndirectBuffers[LOD][mesh].baseInstance = LOD; //temp
             LocalAmounts[LOD] = 0;
+            GroupIDs[LOD] = 0;
         }
 
-    // Instances with NaN in 0 0 are "disabled"
-    if (isnan(InstanceMatrices[gl_GlobalInvocationID.x][0][0])) return;
     barrier();
+
+    bool isActive = true;
+
+    // Instances with NaN in 0 0 are "disabled"
+    if (isnan(InstanceMatrices[gl_GlobalInvocationID.x][0][0])) isActive = false;
 
     vec3 position = InstanceMatrices[gl_GlobalInvocationID.x][3].xyz;
     float maxscale;
@@ -42,14 +48,16 @@ void main() {
     }
 
     float radius = ModelRadius * maxscale;
-    /*
+
     for (int i = 0; i < 6; i++)
         if (InvPlaneTest(position, radius, CameraFrustum[i]))
-            return;
-     */
+            isActive = false;
+
     int LOD = 0; //temp
 
-    uint LocalID = atomicAdd(LocalAmounts[LOD], 1u);
+    uint LocalID;
+    if (isActive)
+        uint LocalID = atomicAdd(LocalAmounts[LOD], 1u);
 
     barrier();
 
@@ -62,18 +70,15 @@ void main() {
     barrier();
 
     uint ID = GroupIDs[LOD] + LocalID;
-    InstanceIndeces[LOD][ID] = gl_GlobalInvocationID.x;
+    if (isActive)
+        InstanceIndeces[LOD][ID] = gl_GlobalInvocationID.x;
+
+    barrier();
 
     // Replicate the result into the draw buffers
-    if (!subgroupElect()) return;
-
-    uint currLock = atomicExchange(Lock, uint(false));
-    barrier();
-    if (currLock == 1u) {
-        for (int LOD = 0; LOD < STDGLMODEL_LOD_MAX_COUNT; LOD++)
-            for (int mesh = 1; mesh < STDGLMODEL_MESH_MAX_COUNT; mesh++)
-                IndirectBuffers[LOD][mesh].instanceCount = IndirectBuffers[LOD][0].instanceCount;
-
-        Lock = uint(true);
-    }
+    if (gl_GlobalInvocationID.x != 0) return;
+    
+    for (int LOD = 0; LOD < STDGLMODEL_LOD_MAX_COUNT; LOD++)
+        for (int mesh = 1; mesh < STDGLMODEL_MESH_MAX_COUNT; mesh++)
+            IndirectBuffers[LOD][mesh].instanceCount = IndirectBuffers[LOD][0].instanceCount;
 }

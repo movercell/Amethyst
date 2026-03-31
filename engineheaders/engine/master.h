@@ -151,6 +151,10 @@ struct alignas(sizeof(float) * 4) mat4 {
         return data[column][row];
     }
 
+    const float& operator[](int column, int row) const {
+        return data[column][row];
+    }
+
     mat4 operator*(const mat4& other) const {
         mat4 result;
         for (int y = 0; y < 4; y++) {

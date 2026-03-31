@@ -48,48 +48,5 @@ protected:
     float FOV = CAMERA_DEFAULT_FOV;
 
     vec2 Resolution;
-
-    struct frustum
-    {
-        struct plane{
-            // unit vector + distance from origin to the nearest point in the plane
-            vec4 Data = vec4(0.0f, 1.0f, 0.0f, 0.0f); 
-            
-            plane() = default;
-
-	        plane(const vec3& p1, const vec3& norm)
-	        	: Data(norm.norm(), -norm.norm().dot(p1)) {}
-
-        };
-    
-        plane TopFace;
-        plane BottomFace;
-
-        plane RightFace;
-        plane LeftFace;
-
-        plane FarFace;
-        plane NearFace;
-    };
-
-    frustum CreateFrustum() {
-        frustum     Frustum;
-        float halfVSide = CAMERA_DEFAULT_FAR * tanf(FOV * 0.5f);
-        float halfHSide = halfVSide * Resolution.x / Resolution.y;
-        vec3 frontMultFar = Front * CAMERA_DEFAULT_FAR;
-
-        Frustum.NearFace = { Position + Front * CAMERA_DEFAULT_NEAR, Front };
-        Frustum.FarFace = { Position + frontMultFar, Front * -1 };
-        Frustum.RightFace = { Position,
-                                (frontMultFar - Right * halfHSide).cross(Up) };
-        Frustum.LeftFace = { Position,
-                                Up.cross(frontMultFar + Right * halfHSide) };
-        Frustum.BottomFace = { Position,
-                                Right.cross(frontMultFar - Up * halfVSide) };
-        Frustum.BottomFace = { Position,
-                                (frontMultFar + Up * halfVSide).cross(Right) };
-
-        return Frustum;
-    }
     
 };

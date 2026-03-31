@@ -12,8 +12,6 @@
 #include "GLMisc.h"
 #include "STDGLWindow.h"
 
-#include "../../src/shader.h"
-
 std::shared_ptr<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
 
@@ -39,6 +37,7 @@ std::shared_ptr<Renderer> STDGLRenderer::Make() {
 
     tempRendererRef->ModelInstancePreprocessShader = 
                     tempRendererRef->ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
+    tempRendererRef->tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
     return tempRendererRef;
 }
 
@@ -69,8 +68,6 @@ void STDGLRenderer::Draw() {
     glClearDepth(1.0f);
     glClearColor(0, 0, 0, 1);
 
-    Shader tmpshader = Shader("scripts/shaders/opengl/generic.vs", "scripts/shaders/opengl/generic.fs");
-
     auto SharedRWorldVec = RWorldVec.lock();
     for (auto& rworldbase : SharedRWorldVec) {
 
@@ -100,7 +97,7 @@ void STDGLRenderer::Draw() {
                 glDispatchCompute(STDGLMODEL_INSTANCE_MAX_COUNT / STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE, 1, 1);
             }
 
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 
             for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
@@ -119,14 +116,14 @@ void STDGLRenderer::Draw() {
         
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    glUseProgram(0);
     FrameCounter++;
 
     // Draw windows.
-    auto SharedWindowVector = WindowVector.lock();
-    for (auto& window : SharedWindowVector) {
-        window->Draw();
-    }
+    //auto SharedWindowVector = WindowVector.lock();
+    //for (auto& window : SharedWindowVector) {
+    //    window->Draw();
+    //}
 
     DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     

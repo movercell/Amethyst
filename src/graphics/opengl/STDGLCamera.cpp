@@ -19,7 +19,7 @@ void STDGLCamera::Bind() {
     Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
     mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
     Info.ViewProjection = projection * Info.View;
-    Info.Frustum = CreateFrustum();
+    Info.Frustum = Shapes::Frustum(Info.ViewProjection);
     glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0, Colorbuffers[*FrameCounterPtr & 1], 0);
