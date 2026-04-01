@@ -119,14 +119,14 @@ void STDGLRenderer::Draw() {
         
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(0);
+
     FrameCounter++;
 
     // Draw windows.
-    //auto SharedWindowVector = WindowVector.lock();
-    //for (auto& window : SharedWindowVector) {
-    //    window->Draw();
-    //}
+    auto SharedWindowVector = WindowVector.lock();
+    for (auto& window : SharedWindowVector) {
+        window->Draw();
+    }
 
     DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
