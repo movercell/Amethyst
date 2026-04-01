@@ -128,7 +128,7 @@ void STDGLRenderer::Draw() {
         window->Draw();
     }
 
-    DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    //DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
 }
 

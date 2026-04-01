@@ -30,6 +30,7 @@ namespace Engine {
 }
 
 std::array<std::unique_ptr<ModelInstance>, 3> models;
+std::vector<std::unique_ptr<ModelInstance>> extramodels;
 
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
@@ -116,11 +117,15 @@ int main() {
 	//enginewindow->EatCursor(true);
 	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
-	cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
+	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
 	models[0] = rworld->MakeModelInstance("multimesh.glb");
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.glb");
+
+	for (int i = 0; i < 256; i++) {
+		extramodels.push_back(rworld->MakeModelInstance("Untitled2.glb"));
+	}
 
 	std::cout << "Hello, world!" << std::endl;
 
@@ -143,12 +148,18 @@ int main() {
 																					0, 0, 0, 1));
 		position += 32.0f * deltaTime;
 		if (position > 360.0f) position -= 360.0f;
+
+		for (auto& model : extramodels) {
+			model->SetMatrix(mat4());
+		}
+
 		openglrenderer->Draw();
 		
 		glfwPollEvents();    
 	}
 
 	for(auto& model : models) model.reset();
+	for(auto& model : extramodels) model.reset();
 }
 
 void exitfunc() {
