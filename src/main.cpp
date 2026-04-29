@@ -115,6 +115,8 @@ int main() {
 	BaseEntityHandler<BaseEntity> tmpentityhandler;
 	tmpentityhandler.PropertyInit();
 
+	tmpentityhandler.SetProperty("hi", ADFEntry::String("228"));
+
 	//std::cout << (std::get<int BaseEntity::*>(tmpentityhandler.Properties.at("position").data)) << std::endl;
 
 	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");

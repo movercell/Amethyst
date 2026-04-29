@@ -202,7 +202,7 @@ private:
 struct alignas(sizeof(float) * 4) quat {
     float w, x, y, z;
 
-    quat(float W, float X, float Y, float Z) { w = W; x = X; y = Y; z = Z; Norm(); }
+    quat(float W = 1.0f, float X = 0.0f, float Y = 0.0f, float Z = 0.0f) { w = W; x = X; y = Y; z = Z; Norm(); }
     quat(vec3 angles) {
         const float anglestoradians = 0.017453293;
 
