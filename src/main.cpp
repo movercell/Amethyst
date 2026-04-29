@@ -22,6 +22,7 @@
 #include "engine/master.h"
 
 #include "engine/filesystem/ADF.h"
+#include "engine/world/Entity.h"
 
 // Time between current frame and last frame
 float deltaTime = 0.0f;	
@@ -110,6 +111,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 int main() {
 	Engine::Init();
+
+	BaseEntityHandler<BaseEntity> tmpentityhandler;
+	tmpentityhandler.PropertyInit();
+
+	//std::cout << (std::get<int BaseEntity::*>(tmpentityhandler.Properties.at("position").data)) << std::endl;
 
 	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
