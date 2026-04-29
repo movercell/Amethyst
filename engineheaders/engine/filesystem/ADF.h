@@ -51,7 +51,7 @@ class ADFEntry {
         Token ReadToken();
     };
 
-    void ADFError(const std::string& error) const;
+    [[noreturn]] void ADFError(const std::string& error) const;
 
     ADFEntry(ADFType Type, Tokenizer& Tokenizer, std::shared_ptr<std::string> filename);
     ADFEntry(std::string content, std::shared_ptr<std::string> filename) { data = std::move(content); filename = filename; }
@@ -142,6 +142,47 @@ public:
 
     inline bool HasElements() const {
         return !GetArray().empty();
+    }
+
+
+
+
+
+    inline vec2 GetVec2() const {
+        const auto& map = GetChildren();
+
+        if (map.contains("x") && map.contains("y")) {
+            return vec2(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()));
+        }
+
+        ADFError("Tried to get a vec2 from a different type of an ADF entry!");
+    }
+    inline vec3 GetVec3() const {
+        const auto& map = GetChildren();
+
+        if (map.contains("x") && map.contains("y") && map.contains("z")) {
+            return vec3(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()));
+        }
+
+        ADFError("Tried to get a vec3 from a different type of an ADF entry!");
+    }
+    inline vec4 GetVec4() const {
+        const auto& map = GetChildren();
+
+        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("2")) {
+            return vec4(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
+        }
+
+        ADFError("Tried to get a vec4 from a different type of an ADF entry!");
+    }
+    inline quat GetQuat() const {
+        const auto& map = GetChildren();
+
+        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("2")) {
+            return quat(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
+        }
+
+        ADFError("Tried to get a quaternion from a different type of an ADF entry!");
     }
 
 };
