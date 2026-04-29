@@ -20,6 +20,14 @@ template<typename T>
 class BaseEntityHandler : public iEntHandler {
     // This was gotten from the internet
     template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+protected:
+
+    using EntPropertyLocation = std::variant<int T::*, float T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
+
+    const std::string& classname;
+    static inline std::map<std::string, EntPropertyLocation> Properties;
+
+    static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
     inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
         return std::visit<ADFEntry>(overload {
@@ -35,14 +43,6 @@ class BaseEntityHandler : public iEntHandler {
         std::unreachable();
         assert(false);
     }
-protected:
-
-    using EntPropertyLocation = std::variant<int T::*, float T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
-
-    const std::string& classname;
-    static inline std::map<std::string, EntPropertyLocation> Properties;
-
-    static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
 public:
     T Entity;
