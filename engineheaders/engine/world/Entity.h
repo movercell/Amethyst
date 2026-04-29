@@ -8,9 +8,10 @@
 
 struct iEntHandler {
     virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
-    virtual ADFEntry GetProperty(const std::string& name) = 0;
+    virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
     virtual ADFEntry ToADF() = 0;
     virtual void InitEntity() = 0;
+    virtual void UpdateEntity() = 0;
     virtual ~iEntHandler() {};
     virtual const std::string& GetClassname() = 0;
 };
@@ -39,9 +40,6 @@ protected:
         [this](quat T::* entproperty)        {  return ADFEntry::Quaternion(Entity.*entproperty); },
         [this](std::string T::* entproperty) {  return ADFEntry::String(Entity.*entproperty); }
         }, Property);
-        
-        std::unreachable();
-        assert(false);
     }
 
 public:
@@ -56,19 +54,24 @@ public:
 
 
     void SetProperty(const std::string& Name, ADFEntry Property) {
-        std::visit(overload {
-        [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
-        [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
-        [this, Property](vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); },
-        [this, Property](vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); },
-        [this, Property](vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); },
-        [this, Property](quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); },
-        [this, Property](std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
-        }, Properties.at(Name));
+        try {
+            std::visit(overload {
+            [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
+            [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
+            [this, Property](vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); },
+            [this, Property](vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); },
+            [this, Property](vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); },
+            [this, Property](quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); },
+            [this, Property](std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
+        }, Properties.at(Name)); } catch(...) {}
     }
 
-    ADFEntry GetProperty(const std::string& name) {
-        return PropertyToADF(Properties[name]);
+    std::optional<ADFEntry> GetProperty(const std::string& name) {
+        try {
+            return PropertyToADF(Properties[name]);
+        } catch(...) {
+            return std::nullopt;
+        }
     }
 
     ADFEntry ToADF() {
@@ -89,6 +92,7 @@ public:
 
 
     void InitEntity() { Entity.Init(); }
+    void UpdateEntity() { Entity.Update(); }
     const std::string& GetClassname() { return classname; }
 
 
@@ -102,9 +106,10 @@ public:
 };
 
 struct BaseEntity {
-    virtual void Init() {};
-
     std::string targetname;
     vec3 position;
     quat rotation;
+
+    virtual void Init() {};
+    virtual void Update() {};
 };
