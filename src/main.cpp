@@ -115,11 +115,10 @@ int main() {
 	auto entityfile = ADFEntry::FromFile("testentity.adf");
 	BaseEntityHandler<BaseEntity>::PropertyInit();
 
-	BaseEntityHandler<BaseEntity> tmpentityhandler(*entityfile.GetChildren().begin());
+	BaseEntityHandler<BaseEntity> tmpentityhandler(entityfile["classname"].GetString(), entityfile["properties"]);
 
-
+	auto entitysaved = tmpentityhandler.ToADF();
 	//std::cout << (std::get<int BaseEntity::*>(tmpentityhandler.Properties.at("position").data)) << std::endl;
-
 	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
 	enginewindow->SetUIFunction(mainuifunction);

@@ -1,4 +1,6 @@
-"info_target" {
+"classname" "info_target"
+
+"properties" {
     "targetname" "hello"
     "position" { x 3 y 2 z 1 }
 }

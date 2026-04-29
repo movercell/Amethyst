@@ -145,8 +145,51 @@ public:
     }
 
 
+    //! Used for manual creation of map-type entries that represent a vec2.
+    inline static ADFEntry Vector2(const vec2 value) {
+        ADFEntry ret = Map();
+        auto& retmap = ret.GetChildren();
 
+        retmap.emplace("x", String(std::to_string(value.x)));
+        retmap.emplace("y", String(std::to_string(value.y)));
 
+        return ret;
+    } 
+    //! Used for manual creation of map-type entries that represent a vec3.
+    inline static ADFEntry Vector3(const vec3 value) {
+        ADFEntry ret = Map();
+        auto& retmap = ret.GetChildren();
+
+        retmap.emplace("x", String(std::to_string(value.x)));
+        retmap.emplace("y", String(std::to_string(value.y)));
+        retmap.emplace("z", String(std::to_string(value.z)));
+
+        return ret;
+    } 
+    //! Used for manual creation of map-type entries that represent a vec4.
+    inline static ADFEntry Vector4(const vec4 value) {
+        ADFEntry ret = Map();
+        auto& retmap = ret.GetChildren();
+
+        retmap.emplace("x", String(std::to_string(value.x)));
+        retmap.emplace("y", String(std::to_string(value.y)));
+        retmap.emplace("z", String(std::to_string(value.z)));
+        retmap.emplace("w", String(std::to_string(value.w)));
+
+        return ret;
+    } 
+    //! Used for manual creation of map-type entries that represent a quaternion.
+    inline static ADFEntry Quaternion(const quat value) {
+        ADFEntry ret = Map();
+        auto& retmap = ret.GetChildren();
+
+        retmap.emplace("x", String(std::to_string(value.x)));
+        retmap.emplace("y", String(std::to_string(value.y)));
+        retmap.emplace("z", String(std::to_string(value.z)));
+        retmap.emplace("w", String(std::to_string(value.w)));
+
+        return ret;
+    } 
 
     inline vec2 GetVec2() const {
         const auto& map = GetChildren();
