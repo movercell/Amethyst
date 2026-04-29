@@ -112,13 +112,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 int main() {
 	Engine::Init();
 
-	BaseEntityHandler<BaseEntity> tmpentityhandler("info_target");
-	tmpentityhandler.PropertyInit();
-
 	auto entityfile = ADFEntry::FromFile("testentity.adf");
-	for (const auto& property : entityfile.GetChildren()) {
-		tmpentityhandler.SetProperty(property.first, property.second);
-	}
+	BaseEntityHandler<BaseEntity>::PropertyInit();
+
+	BaseEntityHandler<BaseEntity> tmpentityhandler(*entityfile.GetChildren().begin());
+
 
 	//std::cout << (std::get<int BaseEntity::*>(tmpentityhandler.Properties.at("position").data)) << std::endl;
 

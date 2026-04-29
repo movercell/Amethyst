@@ -57,7 +57,12 @@ public:
     const std::string& GetClassname() { return classname; }
 
 
-    BaseEntityHandler(const std::string& Classname) : classname(Classname) {}
+    BaseEntityHandler(const std::pair<std::string, ADFEntry>& Saved) : classname(Saved.first) { 
+        const auto& Data = Saved.second.GetChildren();
+        for (const auto& property : Data) {
+            SetProperty(property.first, property.second);
+        }
+    }
     ~BaseEntityHandler() = default;
 };
 

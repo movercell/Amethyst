@@ -1,2 +1,4 @@
-targetname hello
-position { x 3 y 2 z 1 }
+"info_target" {
+    "targetname" "hello"
+    "position" { x 3 y 2 z 1 }
+}
