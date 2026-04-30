@@ -14,6 +14,14 @@
 *   - An array
 *   - A string
 *
+*   Four compoud (pseudo-)types exist as well:
+*   - A 2-component vector
+*   - A 3-component vector
+*   - A 4-component vector
+*   - A quaternion
+*
+*   These types are not real types and are implemented as map-type entries containing a string-type entry per each component, hovewer they have explicit support by the API and should be used when an entry of such type is required to be stored.  
+*
 *   Due to how annoying it could be to hunt down malformed/wrongly interpreted ADF trees the engine will raise an Engine::Error when attempting to read an entry as a different type than it is and will also show which file the error came from.
 */
 class ADFEntry {
@@ -145,7 +153,7 @@ public:
     }
 
 
-    //! Used for manual creation of map-type entries that represent a vec2.
+    //! Used for manual creation of map-type entries that represent a \ref vec2.
     inline static ADFEntry Vector2(const vec2 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetChildren();
@@ -155,7 +163,7 @@ public:
 
         return ret;
     } 
-    //! Used for manual creation of map-type entries that represent a vec3.
+    //! Used for manual creation of map-type entries that represent a \ref vec3.
     inline static ADFEntry Vector3(const vec3 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetChildren();
@@ -166,7 +174,7 @@ public:
 
         return ret;
     } 
-    //! Used for manual creation of map-type entries that represent a vec4.
+    //! Used for manual creation of map-type entries that represent a \ref vec4.
     inline static ADFEntry Vector4(const vec4 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetChildren();
@@ -178,7 +186,7 @@ public:
 
         return ret;
     } 
-    //! Used for manual creation of map-type entries that represent a quaternion.
+    //! Used for manual creation of map-type entries that represent a \ref quat.
     inline static ADFEntry Quaternion(const quat value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetChildren();

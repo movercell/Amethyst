@@ -18,6 +18,8 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
 
         currchar = filestream.get(); // Has to be like this as to not include the starting quotation mark.
         while (!(currchar == '\"' || currchar == -1)) {
+            if (currchar == '\\') currchar = filestream.get(); // For escaping special characters.
+
             TokenContent.push_back(currchar);
             currchar = filestream.get();
         }
@@ -42,6 +44,8 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
         TokenContent.reserve(256);
 
         do {
+            if (currchar == '\\') currchar = filestream.get(); // For escaping special characters.
+
             TokenContent.push_back(currchar);
             currchar = filestream.get();
         } while (std::isgraph(currchar) && currchar != '{' && currchar != '}' && currchar != '[' && currchar != ']' && currchar != '\"');
