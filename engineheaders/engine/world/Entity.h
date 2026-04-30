@@ -7,6 +7,9 @@
 #include <utility>
 
 struct iEntHandler {
+    // Set by the world once the entity is inserted into it
+    int slot = -1;
+
     virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
     virtual ADFEntry ToADF() = 0;
