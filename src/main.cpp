@@ -22,7 +22,7 @@
 #include "engine/master.h"
 
 #include "engine/filesystem/ADF.h"
-#include "engine/world/Entity.h"
+#include "engine/entities/Entity.h"
 
 // Time between current frame and last frame
 float deltaTime = 0.0f;	
