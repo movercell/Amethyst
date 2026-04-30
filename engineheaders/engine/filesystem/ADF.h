@@ -1,4 +1,5 @@
 #pragma once
+#include "engine/filesystem/Filesystem.h"
 #include "engine/master.h"
 #include <variant>
 #include <optional>

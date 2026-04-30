@@ -4,11 +4,12 @@
 #include <vector>
 #include <deque>
 #include "engine/filesystem/ADF.h"
+#include "engine/master.h"
 
 struct iEntHandler;
 
 
-class World {
+class ENGINEEXPORT World {
     std::vector<std::unique_ptr<iEntHandler>> EntityHandlers;
     std::deque<int> FreedIndices;
     int NextIndexToMake = 0;
@@ -24,4 +25,7 @@ public:
     void TakeEntityFromSlot(int Slot);
 
     void Update();
+    void Clear();
+
+    World();
 };
