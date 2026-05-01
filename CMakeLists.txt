@@ -40,7 +40,7 @@ endif()
 add_executable(amethyst
 	src/main.cpp
 	
-	src/EngineMisc.cpp
+	src/utils/EngineMisc.cpp
 	src/graphics/Rendering.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp
