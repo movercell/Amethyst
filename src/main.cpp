@@ -115,7 +115,9 @@ int main() {
 	auto entityfile = ADFEntry::FromFile("testentity.adf");
 	BaseEntityHandler<BaseEntity>::PropertyInit();
 
-	BaseEntityHandler<BaseEntity> tmpentityhandler(entityfile["classname"].GetString(), entityfile["properties"]);
+	BaseEntityHandler<BaseEntity> tmpentityhandler(entityfile["classname"].GetString());
+	tmpentityhandler.FromADF(entityfile["properties"]);
+	tmpentityhandler.InitEntity();
 
 	auto entitysaved = tmpentityhandler.ToADF();
 	//std::cout << (std::get<int BaseEntity::*>(tmpentityhandler.Properties.at("position").data)) << std::endl;

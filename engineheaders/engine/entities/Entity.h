@@ -5,6 +5,7 @@
 #include <map>
 #include <variant>
 #include <utility>
+#include <functional>
 #include "World.h"
 
 struct iEntHandler {
@@ -14,6 +15,7 @@ struct iEntHandler {
 
     virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
+    virtual void FromADF(const ADFEntry& Saved) = 0;
     virtual ADFEntry ToADF() = 0;
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
@@ -106,7 +108,7 @@ public:
     const std::string& GetClassname() { return classname; }
 
 
-    BaseEntityHandler(const std::string& Classname, const ADFEntry& Saved) : classname(Classname) {
+    void FromADF(const ADFEntry& Saved) {
         const auto& Data = Saved.GetChildren();
         for (const auto& property : Data) {
             SetProperty(property.first, property.second);
@@ -127,3 +129,18 @@ struct BaseEntity {
     virtual void Init() {};
     virtual void Update() {};
 };
+
+
+
+namespace Engine {
+    namespace Internal {
+        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>()> Lambda);
+    }
+}
+
+template<template <typename> typename Handler, typename Entity>
+void RegisterEntityType(const char* classname) {
+    Engine::Internal::RegisterEntityCreationLambda(classname, [classname]() {
+        return std::make_shared<Handler<Entity>>(classname);
+    });
+}

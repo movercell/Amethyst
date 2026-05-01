@@ -1,9 +1,13 @@
 #include <ranges>
+#include <map>
+#include <functional>
 
 #include "engine/entities/Entity.h"
 #include "engine/entities/World.h"
 
 #define WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT 4096
+
+static std::map<std::string, std::function<std::shared_ptr<iEntHandler>()>> EntityCreationLambdas;
 
 
 std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
@@ -47,4 +51,11 @@ void World::Clear() {
 
 World::World() {
     EntityHandlers.resize(WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
+}
+
+
+
+
+void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>()> Lambda) {
+    EntityCreationLambdas.emplace(classname, Lambda);
 }
