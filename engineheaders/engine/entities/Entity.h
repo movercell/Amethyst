@@ -20,7 +20,7 @@ struct iEntHandler {
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
     virtual ~iEntHandler() {};
-    virtual const std::string& GetClassname() = 0;
+    virtual const char* GetClassname() = 0;
 
     //! Removes the entity from the world, resulting in destruction when not owned by anything else.
     virtual void Remove() {
@@ -37,7 +37,7 @@ protected:
 
     using EntPropertyLocation = std::variant<int T::*, float T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
 
-    const std::string& classname;
+    const char* classname;
     static inline std::map<std::string, EntPropertyLocation> Properties;
 
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
@@ -105,7 +105,7 @@ public:
 
     void InitEntity() { Entity.handler = this; Entity.world = world; Entity.Init(); }
     void UpdateEntity() { Entity.Update(); }
-    const std::string& GetClassname() { return classname; }
+    const char* GetClassname() { return classname; }
 
 
     void FromADF(const ADFEntry& Saved) {
@@ -114,7 +114,7 @@ public:
             SetProperty(property.first, property.second);
         }
     }
-    BaseEntityHandler(const std::string& Classname) : classname(Classname) {}
+    BaseEntityHandler(const char* Classname) : classname(Classname) {}
     ~BaseEntityHandler() = default;
 };
 
@@ -140,6 +140,7 @@ namespace Engine {
 
 template<template <typename> typename Handler, typename Entity>
 void RegisterEntityType(const char* classname) {
+    Handler<Entity>::PropertyInit();
     Engine::Internal::RegisterEntityCreationLambda(classname, [classname]() {
         return std::make_shared<Handler<Entity>>(classname);
     });

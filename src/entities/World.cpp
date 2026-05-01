@@ -12,7 +12,7 @@ static std::map<std::string, std::function<std::shared_ptr<iEntHandler>()>> Enti
 
 std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
 
-    std::shared_ptr<iEntHandler> Entity = static_cast<std::shared_ptr<iEntHandler>>(std::make_shared<BaseEntityHandler<BaseEntity>>("info_target"));
+    std::shared_ptr<iEntHandler> Entity = EntityCreationLambdas[classname]();
     Entity->world = this;
 
     int index;
@@ -29,7 +29,7 @@ std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
     }
 
     Entity->slot = index;
-    EntityHandlers[index] = std::move(Entity);
+    EntityHandlers[index] = Entity;
 
     return Entity;
 }
