@@ -5,10 +5,12 @@
 #include <map>
 #include <variant>
 #include <utility>
+#include "World.h"
 
 struct iEntHandler {
-    // Set by the world once the entity is inserted into it
+    // Set by the world once the entity is made.
     int slot = -1;
+    World* world = nullptr;
 
     virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
@@ -17,6 +19,11 @@ struct iEntHandler {
     virtual void UpdateEntity() = 0;
     virtual ~iEntHandler() {};
     virtual const std::string& GetClassname() = 0;
+
+    //! Removes the entity from the world, resulting in destruction when not owned by anything else.
+    virtual void Remove() {
+        world->RemoveEntityInSlot(slot);
+    }
 };
 
 
@@ -94,21 +101,25 @@ public:
 
 
 
-    void InitEntity() { Entity.Init(); }
+    void InitEntity() { Entity.handler = this; Entity.world = world; Entity.Init(); }
     void UpdateEntity() { Entity.Update(); }
     const std::string& GetClassname() { return classname; }
 
 
-    BaseEntityHandler(const std::string& Classname, const ADFEntry& Saved) : classname(Classname) { 
+    BaseEntityHandler(const std::string& Classname, const ADFEntry& Saved) : classname(Classname) {
         const auto& Data = Saved.GetChildren();
         for (const auto& property : Data) {
             SetProperty(property.first, property.second);
         }
     }
+    BaseEntityHandler(const std::string& Classname) : classname(Classname) {}
     ~BaseEntityHandler() = default;
 };
 
 struct BaseEntity {
+    World* world;
+    BaseEntityHandler<BaseEntity>* handler;
+
     std::string targetname;
     vec3 position;
     quat rotation;

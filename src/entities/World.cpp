@@ -6,7 +6,11 @@
 #define WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT 4096
 
 
-void World::AddEntity(std::unique_ptr<iEntHandler> Entity) {
+std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
+
+    std::shared_ptr<iEntHandler> Entity = static_cast<std::shared_ptr<iEntHandler>>(std::make_shared<BaseEntityHandler<BaseEntity>>("info_target"));
+    Entity->world = this;
+
     int index;
     if (FreedIndices.empty()) {
         index = NextIndexToMake++;
@@ -19,7 +23,11 @@ void World::AddEntity(std::unique_ptr<iEntHandler> Entity) {
     if (EntityHandlers.size() < EntityCount) {
         EntityHandlers.resize(EntityHandlers.size() + WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
     }
+
+    Entity->slot = index;
     EntityHandlers[index] = std::move(Entity);
+
+    return Entity;
 }
 
 
