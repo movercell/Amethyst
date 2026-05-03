@@ -103,21 +103,11 @@ public:
     std::shared_ptr<STDGLModelInstanceArray> parent;
     uint16_t index;
 
-    inline void SetMatrix(mat4 Matrix) {
-        bool isFrameOdd = *(parent->FrameCounterPtr) & 1;
-        parent->InstanceBufferMapped[isFrameOdd].InstanceMatrices[index] = Matrix;
-    }
+    void SetMatrix(mat4 Matrix);
 
-    inline ~STDGLModelInstance() {
-        parent->InstanceBufferMapped[0].InstanceMatrices[index][0, 0] = NAN;
-        parent->InstanceBufferMapped[1].InstanceMatrices[index][0, 0] = NAN;
-        parent->FreedIndices.push(index);
-    }
+    ~STDGLModelInstance();
 
-    inline STDGLModelInstance(uint16_t Index, std::shared_ptr<STDGLModelInstanceArray> Parent) {
-        index = Index;
-        parent = Parent;
-    }
+    STDGLModelInstance(uint16_t Index, std::shared_ptr<STDGLModelInstanceArray> Parent) { index = Index; parent = Parent; }
 };
 
 
