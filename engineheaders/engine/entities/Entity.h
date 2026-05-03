@@ -63,7 +63,8 @@ public:
     static void PropertyInit() {
         AddProperty("targetname", &T::targetname);
         AddProperty("position",   &T::position);
-        AddProperty("rotation",   &T::rotation);
+        AddProperty("angles",     &T::angles);
+        AddProperty("scale",      &T::scale);
     }
 
 
@@ -126,10 +127,21 @@ struct BaseEntity {
 
     std::string targetname;
     vec3 position;
-    quat rotation;
+    vec3 angles;
+    vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
     virtual void Init() {};
     virtual void Update() {};
+
+    mat4 MakeTransformationMatrix() {
+        mat4 result = mat4(scale.x, 0.0f, 0.0f, 0.0f,
+                           0.0f, scale.y, 0.0f, 0.0f,
+                           0.0f, 0.0f, scale.z, 0.0f,
+                           0.0f, 0.0f, 0.0f, 1.0f);
+        result *= quat(angles).MakeRotationMatrix();
+        result[3] = position;
+        return result;
+    }
 };
 
 

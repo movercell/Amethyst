@@ -4,8 +4,10 @@
             "classname" "prop_dynamic"
             "properties" {
                 "targetname" not\ quoted
-                "position" { x 3 y 2 z 1 }
+                "position" { x 128 y 0 z 128 }
                 "model" "multimesh.adf"
+                "angles" { x 0 y 90 z 0 }
+                "scale" { x 1 y 3 z 5 }
             }
         }
     }

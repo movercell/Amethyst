@@ -6,5 +6,5 @@ void DynamicProp::Init() {
 }
 
 void DynamicProp::Update() {
-    modelinstance->SetMatrix(mat4());
+    modelinstance->SetMatrix(MakeTransformationMatrix());
 }
