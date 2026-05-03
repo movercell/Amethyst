@@ -1,4 +1,3 @@
-#include <ranges>
 #include <map>
 #include <functional>
 
@@ -32,6 +31,25 @@ std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
     EntityHandlers[index] = Entity;
 
     return Entity;
+}
+
+void World::AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot) {
+    if (EntityHandlers[Slot]) {
+        Engine::Warning("Attempted to add an entity to a slot that's already occupied!(call bumped)");
+        return;
+    }
+    if (Slot >= EntityHandlers.size()) {
+        Engine::Warning("Attempted to add an entity into a non-existent slot!(call bumped)");
+        return;
+    }
+
+        
+    auto indexfound = std::find(FreedIndices.begin(), FreedIndices.end(), Slot);
+    if (indexfound != FreedIndices.end()) {
+        FreedIndices.erase(indexfound);
+    }
+    
+    EntityHandlers[Slot] = Entity;
 }
 
 
