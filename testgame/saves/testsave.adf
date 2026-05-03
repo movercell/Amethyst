@@ -1,0 +1,12 @@
+"Savefile" {
+    "Entities" {
+        "0" {
+            "classname" "info_target"
+            "properties" {
+                "targetname" not\ quoted
+                "position" { x 3 y 2 z 1 }
+                "model" "sphere.adf"
+            }
+        }
+    }
+}

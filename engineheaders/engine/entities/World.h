@@ -16,14 +16,17 @@ class ENGINEEXPORT World {
     int NextIndexToMake = 0;
     int EntityCount = 0;
 
+    void EntitiesFromADF(const ADFEntry& Saved);
+
 public:
     ADFEntry ToADF();
-    void FromADF(ADFEntry Saved);
+    void FromADF(const ADFEntry& Saved);
 
     // Returns an uninitalized entity.
     std::shared_ptr<iEntHandler> MakeEntity(std::string classname);
     void AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot);
-    
+    std::shared_ptr<iEntHandler> GetEntityInSlot(int Slot);
+
     inline void RemoveEntityInSlot(int Slot) {
         if (EntityHandlers[Slot]) {
             EntityHandlers[Slot].reset();

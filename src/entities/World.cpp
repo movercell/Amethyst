@@ -9,6 +9,32 @@
 static std::map<std::string, std::function<std::shared_ptr<iEntHandler>()>> EntityCreationLambdas;
 
 
+void World::EntitiesFromADF(const ADFEntry& Saved) {
+    const auto& entmap = Saved.GetChildren();
+
+    for (const auto& SavedEntity : entmap) {
+        auto Handler = EntityCreationLambdas[SavedEntity.second["classname"].GetString()]();
+        Handler->FromADF(SavedEntity.second["properties"]);
+        Handler->InitEntity();
+        EntityHandlers[std::stoi(SavedEntity.first)] = Handler;
+    }
+}
+
+void World::FromADF(const ADFEntry& Saved) {
+    // TODO: add map file loading here
+    EntitiesFromADF(Saved["Savefile"]["Entities"]);
+}
+
+
+
+
+
+
+
+
+
+
+
 std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
 
     std::shared_ptr<iEntHandler> Entity = EntityCreationLambdas[classname]();
@@ -51,7 +77,13 @@ void World::AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot) {
     
     EntityHandlers[Slot] = Entity;
 }
-
+std::shared_ptr<iEntHandler> World::GetEntityInSlot(int Slot) {
+    if (Slot >= EntityHandlers.size()) {
+        Engine::Warning("Attempted to get an entity from a non-existent slot!(returned null pointer)");
+        return nullptr;
+    }
+    return EntityHandlers[Slot];
+}
 
 
 void World::Update() {

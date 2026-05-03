@@ -113,9 +113,10 @@ int main() {
 	Engine::Init();
 
 	World tmpworld;
-	auto entityfile = ADFEntry::FromFile("testentity.adf");
-	auto tmpentityhandler = std::reinterpret_pointer_cast<BaseEntityHandler<BaseEntity>>(tmpworld.MakeEntity(entityfile["classname"].GetString()));
-	tmpentityhandler->FromADF(entityfile["properties"]);
+	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
+	tmpworld.FromADF(savefile);
+
+	auto tmpentityhandler = tmpworld.GetEntityInSlot(0);
 
 	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
