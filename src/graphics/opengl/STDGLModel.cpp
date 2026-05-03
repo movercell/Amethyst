@@ -120,20 +120,6 @@ STDGLModel::~STDGLModel() {
 
 
 
-void STDGLModelInstance::SetMatrix(mat4 Matrix) {
-    bool isFrameOdd = *(parent->FrameCounterPtr) & 1;
-    parent->InstanceBufferMapped[isFrameOdd].InstanceMatrices[index] = Matrix;
-}
-
-STDGLModelInstance::~STDGLModelInstance() {
-    parent->InstanceBufferMapped[0].InstanceMatrices[index][0, 0] = NAN;
-    parent->InstanceBufferMapped[1].InstanceMatrices[index][0, 0] = NAN;
-    parent->FreedIndices.push(index);
-}
-
-
-
-
 STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model, const uint64_t* framecounterptr) {
     rendererData = data;
     Model = model;
