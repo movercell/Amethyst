@@ -37,7 +37,7 @@ class BaseEntityHandler : public iEntHandler {
     template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 protected:
 
-    using EntPropertyLocation = std::variant<int T::*, float T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
+    using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
 
     const char* classname;
     static inline std::map<std::string, EntPropertyLocation> Properties;
@@ -48,6 +48,7 @@ protected:
         return std::visit<ADFEntry>(overload {
         [this](int T::* entproperty)         {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
         [this](float T::* entproperty)       {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
+        [this](bool T::* entproperty)        {  return ADFEntry::String(Entity.*entproperty ? "1" : "0"); },
         [this](vec2 T::* entproperty)        {  return ADFEntry::Vector2(Entity.*entproperty); },
         [this](vec3 T::* entproperty)        {  return ADFEntry::Vector3(Entity.*entproperty); },
         [this](vec4 T::* entproperty)        {  return ADFEntry::Vector4(Entity.*entproperty); },
@@ -61,10 +62,15 @@ public:
     
 
     static void PropertyInit() {
-        AddProperty("targetname", &T::targetname);
-        AddProperty("position",   &T::position);
-        AddProperty("angles",     &T::angles);
-        AddProperty("scale",      &T::scale);
+        // Public-facing properties.
+        AddProperty("targetname",            &T::targetname);
+        AddProperty("position",              &T::position);
+        AddProperty("angles",                &T::angles);
+        AddProperty("scale",                 &T::scale);
+
+        // Internal properties.
+        AddProperty("rotation",              &T::rotation);
+        AddProperty("isFirstInitialization", &T::isFirstInitialization);
     }
 
 
@@ -73,6 +79,7 @@ public:
             std::visit(overload {
             [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
             [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
+            [this, Property](bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; },
             [this, Property](vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); },
             [this, Property](vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); },
             [this, Property](vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); },
@@ -90,6 +97,8 @@ public:
     }
 
     ADFEntry ToADF() {
+        Entity.OnSave();
+
         ADFEntry ret = ADFEntry::Map();
         auto& retmap = ret.GetChildren();
 
@@ -106,7 +115,7 @@ public:
 
 
 
-    void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Init(); }
+    void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Initialize(); }
     void UpdateEntity() { Entity.Update(); }
     const char* GetClassname() { return classname; }
 
@@ -130,15 +139,23 @@ struct BaseEntity {
     vec3 angles;
     vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
-    virtual void Init() {};
-    virtual void Update() {};
+    quat rotation;
+    bool isFirstInitialization = true;
+
+    virtual void Initialize() {
+        rotation = quat(angles);
+
+        isFirstInitialization = false;
+    }
+    virtual void Update() {}
+    virtual void OnSave() {}
 
     mat4 MakeTransformationMatrix() {
         mat4 result = mat4(scale.x, 0.0f, 0.0f, 0.0f,
                            0.0f, scale.y, 0.0f, 0.0f,
                            0.0f, 0.0f, scale.z, 0.0f,
                            0.0f, 0.0f, 0.0f, 1.0f);
-        result *= quat(angles).MakeRotationMatrix();
+        result *= rotation.MakeRotationMatrix();
         result[3] = position;
         return result;
     }

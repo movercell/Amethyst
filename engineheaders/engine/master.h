@@ -208,7 +208,7 @@ struct alignas(sizeof(float) * 4) mat4 {
     }
 
     mat4 operator*=(const mat4& other) {
-        *this = *this * other;
+        *this = other * *this;
         return *this;
     }
 
@@ -249,9 +249,9 @@ private:
 };
 
 struct alignas(sizeof(float) * 4) quat {
-    float w, x, y, z;
+    float x, y, z, w;
 
-    quat(float W = 1.0f, float X = 0.0f, float Y = 0.0f, float Z = 0.0f) { w = W; x = X; y = Y; z = Z; Norm(); }
+    quat(float X = 0.0f, float Y = 0.0f, float Z = 0.0f, float W = 1.0f) { x = X; y = Y; z = Z; w = W; Norm(); }
     quat(vec3 angles) {
         const float anglestoradians = 0.017453293;
 
@@ -259,9 +259,9 @@ struct alignas(sizeof(float) * 4) quat {
         float yawradian   = (angles.y * anglestoradians) / 2;
         float rollradian  = (angles.z * anglestoradians) / 2;
 
-        quat yaw = quat(cos(yawradian), 0, 0, -sin(yawradian)); // Seemingly I screwed something up and now I have to invert the thing here
-        quat pitch = quat(cos(pitchradian), 0, sin(pitchradian), 0);
-        quat roll = quat(cos(rollradian), sin(rollradian), 0, 0);
+        quat yaw = quat(0, 0, -sin(yawradian), cos(yawradian)); // Seemingly I screwed something up and now I have to invert the thing here
+        quat pitch = quat(0, sin(pitchradian), 0, cos(pitchradian));
+        quat roll = quat(sin(rollradian), 0, 0, cos(rollradian));
 
         *this = yaw * (pitch * roll);
         Norm();
@@ -305,18 +305,17 @@ struct alignas(sizeof(float) * 4) quat {
 
     quat operator*(const quat& other) {
         return quat(
-            w * other.w + x * other.x + y * other.y + z * other.z,
             w * other.x - x * other.w - y * other.z + z * other.y,
             w * other.y + x * other.z - y * other.w - z * other.x,
-            w * other.z - x * other.y + y * other.x - z * other.w
+            w * other.z - x * other.y + y * other.x - z * other.w,
+            w * other.w + x * other.x + y * other.y + z * other.z
         );
     }
     quat& operator*=(const quat& other) {
-        
-        w = w * other.w + x * other.x + y * other.y + z * other.z;
         x = w * other.x - x * other.w - y * other.z + z * other.y;
         y = w * other.y + x * other.z - y * other.w - z * other.x;
         z = w * other.z - x * other.y + y * other.x - z * other.w;
+        w = w * other.w + x * other.x + y * other.y + z * other.z;
         
         return *this;
     }

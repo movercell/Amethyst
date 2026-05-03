@@ -21,6 +21,6 @@ struct DynamicProp : public BaseEntity {
     std::string model;
     std::unique_ptr<ModelInstance> modelinstance;
 
-    void Init();
+    void Initialize();
     void Update();
 };
