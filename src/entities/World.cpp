@@ -14,23 +14,21 @@ void World::EntitiesFromADF(const ADFEntry& Saved) {
 
     for (const auto& SavedEntity : entmap) {
         auto Handler = EntityCreationLambdas[SavedEntity.second["classname"].GetString()]();
+        Handler->world = this;
         Handler->FromADF(SavedEntity.second["properties"]);
         Handler->InitEntity();
         EntityHandlers[std::stoi(SavedEntity.first)] = Handler;
     }
 }
 
-void World::FromADF(const ADFEntry& Saved) {
-    // TODO: add map file loading here
-    EntitiesFromADF(Saved["Savefile"]["Entities"]);
+void World::Load(const ADFEntry& Saved) {
+    const auto& Savefile = Saved["Savefile"];
+    if (Savefile.HasChild("Mapname")) {
+        MapName = Savefile["Mapname"].GetString();
+        // TODO: add map file loading here
+    }
+    EntitiesFromADF(Savefile["Entities"]);
 }
-
-
-
-
-
-
-
 
 
 
@@ -95,14 +93,17 @@ void World::Clear() {
     for (auto& Handler : EntityHandlers) {
         Handler.reset();
     }
+    MapName = "";
 }
 
 
 
-World::World() {
+World::World(std::shared_ptr<RWorld> Renderworld) : RenderWorld(Renderworld) {
     EntityHandlers.resize(WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
 }
-
+World::World(std::shared_ptr<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
+    EntityHandlers.resize(WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
+}
 
 
 

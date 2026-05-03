@@ -10,7 +10,7 @@ layout (std140, binding = 0) uniform Camera {
 };
 
 #define STDGLMODEL_INSTANCE_MAX_COUNT 4096
-#define STDGLMODEL_LOD_MAX_COUNT 1
+#define STDGLMODEL_LOD_MAX_COUNT 4
 #define STDGLMODEL_MESH_MAX_COUNT 8
 
 struct IndirectDrawBuffer {
@@ -24,11 +24,12 @@ struct IndirectDrawBuffer {
 layout (std430, binding = 0) buffer ModelInfo {
     IndirectDrawBuffer IndirectBuffers[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_MESH_MAX_COUNT]; 
     float ModelRadius;
+    float LODDistances[STDGLMODEL_LOD_MAX_COUNT];
     uint InstanceIndices[STDGLMODEL_LOD_MAX_COUNT][STDGLMODEL_INSTANCE_MAX_COUNT];
 };
 
 layout (std430, binding = 1) buffer InstanceBuffer {
-    mat4 InstanceMatrices[STDGLMODEL_INSTANCE_MAX_COUNT];
+    mat4 InstanceMatrices[];
 };
 
 void main() {

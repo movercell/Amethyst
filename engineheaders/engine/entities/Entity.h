@@ -29,6 +29,8 @@ struct iEntHandler {
 };
 
 
+struct BaseEntity;
+
 template<typename T>
 class BaseEntityHandler : public iEntHandler {
     // This was gotten from the internet
@@ -103,7 +105,7 @@ public:
 
 
 
-    void InitEntity() { Entity.handler = this; Entity.world = world; Entity.Init(); }
+    void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Init(); }
     void UpdateEntity() { Entity.Update(); }
     const char* GetClassname() { return classname; }
 

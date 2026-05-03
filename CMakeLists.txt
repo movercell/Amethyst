@@ -54,6 +54,7 @@ add_executable(amethyst
 	src/filesystem/Filesystem.cpp
 	src/filesystem/ADFParser.cpp
 	src/entities/World.cpp
+	src/entities/BasicEntities.cpp
 	)
 
 target_link_libraries(amethyst glad)

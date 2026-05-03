@@ -112,16 +112,17 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 int main() {
 	Engine::Init();
 
-	World tmpworld;
+	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
+	auto rworld = openglrenderer->MakeRWorld();
+
+	World tmpworld(rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
-	tmpworld.FromADF(savefile);
+	tmpworld.Load(savefile);
 
 	auto tmpentityhandler = tmpworld.GetEntityInSlot(0);
 
-	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
 	enginewindow->SetUIFunction(mainuifunction);
-	auto rworld = openglrenderer->MakeRWorld();
 	std::array<std::shared_ptr<Camera>, 2> cameras;
 	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
@@ -158,6 +159,8 @@ int main() {
 		for (auto& model : extramodels) {
 			model->SetMatrix(mat4());
 		}
+
+		tmpworld.Update();
 
 		openglrenderer->Draw();
 		

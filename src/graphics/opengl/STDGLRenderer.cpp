@@ -100,7 +100,6 @@ void STDGLRenderer::Draw() {
             
             for (auto& iarray : SharedInstanceArraysVec) {
                 iarray->Bind();
-                iarray->Model->BindInfo();
                 glUseProgram(ModelInstanceBlankerShader);
                 glDispatchCompute(1, 1, 1);
             }
