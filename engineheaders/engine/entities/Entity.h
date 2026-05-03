@@ -116,7 +116,7 @@ public:
             SetProperty(property.first, property.second);
         }
     }
-    BaseEntityHandler(const char* Classname) : classname(Classname) {}
+    BaseEntityHandler(const char* Classname, World* World) : classname(Classname) { world = World; }
     ~BaseEntityHandler() = default;
 };
 
@@ -136,14 +136,14 @@ struct BaseEntity {
 
 namespace Engine {
     namespace Internal {
-        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>()> Lambda);
+        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*)> Lambda);
     }
 }
 
 template<template <typename> typename Handler, typename Entity>
 void RegisterEntityType(const char* classname) {
     Handler<Entity>::PropertyInit();
-    Engine::Internal::RegisterEntityCreationLambda(classname, [classname]() {
-        return std::make_shared<Handler<Entity>>(classname);
+    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world) {
+        return std::make_shared<Handler<Entity>>(classname, world);
     });
 }

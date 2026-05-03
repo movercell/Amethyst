@@ -6,15 +6,21 @@
 
 #define WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT 4096
 
-static std::map<std::string, std::function<std::shared_ptr<iEntHandler>()>> EntityCreationLambdas;
+static std::map<std::string, std::function<std::shared_ptr<iEntHandler>(World*)>> EntityCreationLambdas;
 
 
 void World::EntitiesFromADF(const ADFEntry& Saved) {
     const auto& entmap = Saved.GetChildren();
 
     for (const auto& SavedEntity : entmap) {
-        auto Handler = EntityCreationLambdas[SavedEntity.second["classname"].GetString()]();
-        Handler->world = this;
+        std::shared_ptr<iEntHandler> Handler;
+        
+        try {
+            Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this);
+        } catch(const std::out_of_range& e) {
+            continue;
+        }
+
         Handler->FromADF(SavedEntity.second["properties"]);
         Handler->InitEntity();
         EntityHandlers[std::stoi(SavedEntity.first)] = Handler;
@@ -35,8 +41,13 @@ void World::Load(const ADFEntry& Saved) {
 
 std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
 
-    std::shared_ptr<iEntHandler> Entity = EntityCreationLambdas[classname]();
-    Entity->world = this;
+    std::shared_ptr<iEntHandler> Handler;
+
+    try {
+        Handler = EntityCreationLambdas.at(classname)(this);
+    } catch(const std::out_of_range& e) {
+        return nullptr;
+    }
 
     int index;
     if (FreedIndices.empty()) {
@@ -51,10 +62,10 @@ std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
         EntityHandlers.resize(EntityHandlers.size() + WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
     }
 
-    Entity->slot = index;
-    EntityHandlers[index] = Entity;
+    Handler->slot = index;
+    EntityHandlers[index] = Handler;
 
-    return Entity;
+    return Handler;
 }
 
 void World::AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot) {
@@ -107,6 +118,6 @@ World::World(std::shared_ptr<Renderer> Renderer) : RenderWorld(Renderer->MakeRWo
 
 
 
-void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>()> Lambda) {
+void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*)> Lambda) {
     EntityCreationLambdas.emplace(classname, Lambda);
 }

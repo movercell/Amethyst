@@ -14,5 +14,5 @@ void Engine::Init() {
     Renderer::AddRenderer("STDGLRenderer", &STDGLRenderer::Make);
 
     RegisterEntityType<BaseEntityHandler, BaseEntity>("info_target");
-    RegisterEntityType<DynamicPropHandler, DynamicProp>("prop_dynamic");
+    RegisterEntityType<BasicVisiblePropHandler, DynamicProp>("prop_dynamic");
 }

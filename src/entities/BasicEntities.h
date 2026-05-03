@@ -5,14 +5,15 @@
 
 
 template<typename T>
-struct DynamicPropHandler : public BaseEntityHandler<T> {
+struct BasicVisiblePropHandler : public BaseEntityHandler<T> {
     using BaseEntityHandler<T>::BaseEntityHandler;
     using Base = BaseEntityHandler<T>;
+    using Parent = BaseEntityHandler<T>;
 
     static void PropertyInit() {
         Base::AddProperty("model", &T::model);
 
-        Base::PropertyInit();
+        Parent::PropertyInit();
     }
 };
 

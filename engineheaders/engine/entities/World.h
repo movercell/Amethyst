@@ -27,7 +27,7 @@ public:
     void Load(const ADFEntry& Saved);
     ADFEntry Save();
 
-    // Returns an uninitalized entity.
+    //! Returns an uninitalized entity, or nullptr if classname is not valid.
     std::shared_ptr<iEntHandler> MakeEntity(std::string classname);
     void AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot);
     std::shared_ptr<iEntHandler> GetEntityInSlot(int Slot);
