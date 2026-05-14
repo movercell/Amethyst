@@ -24,6 +24,7 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
 
         Handler->FromADF(SavedEntity.second["properties"]);
         int slot = std::stoi(SavedEntity.first);
+        for (const auto& tag : SavedEntity.second["tags"].GetArray()) { Handler->AddTag(tag.GetString()); }
         (*Storage)[slot] = Handler;
         Handler->slot = slot;
         EntityStorageFromADF(SavedEntity.second["children"], Handler.get(), Handler.get());
@@ -98,7 +99,7 @@ void EntityStorage::AddEntityBack(std::shared_ptr<iEntHandler> Entity) {
 int EntityStorage::GetFreeIndex() {
     auto iterator = std::find(begin(), end(), nullptr);
     int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
-    
+
     if (iterator == end()) {
         EntityHandlers.resize(size() + ResizeAdditionalSlotAmount);
     }

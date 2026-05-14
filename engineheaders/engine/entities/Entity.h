@@ -17,11 +17,18 @@ struct iEntHandler : public EntityStorage {
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
     virtual void FromADF(const ADFEntry& Saved) = 0;
     virtual ADFEntry ToADF() = 0;
+
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
-    virtual ~iEntHandler() {};
+
     virtual const char* GetClassname() const = 0;
     virtual std::optional<iEntHandler*> GetParent() const = 0;
+
+    virtual void AddTag(const std::string& tag) = 0;
+    virtual bool HasTag(const std::string& tag) = 0;
+    virtual ADFEntry TagsToADF() const = 0;
+
+    virtual ~iEntHandler() {};
 
     //! Removes the entity from it's slot, resulting in destruction when not owned by anything else.
     virtual void Remove() {
@@ -47,6 +54,8 @@ protected:
 
     const char* classname;
     const std::optional<iEntHandler*> parent;
+    std::vector<std::string> tags;
+
     static inline std::map<std::string, EntPropertyLocation> Properties;
 
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
@@ -77,7 +86,6 @@ public:
 
         // Internal properties.
         AddProperty("rotation",              &T::rotation);
-        AddProperty("isFirstInitialization", &T::isFirstInitialization);
     }
 
 
@@ -124,8 +132,22 @@ public:
 
     void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Initialize(); }
     void UpdateEntity() { Entity.Update(); }
+
     const char* GetClassname() const { return classname; }
     std::optional<iEntHandler*> GetParent() const { return parent; }
+
+    inline void AddTag(const std::string& tag) { tags.push_back(tag); }
+    inline bool HasTag(const std::string& tag) { return std::find(tags.begin(), tags.end(), tag) != tags.end(); }
+    inline ADFEntry TagsToADF() const {
+        ADFEntry ret = ADFEntry::Array();
+        auto& retarr = ret.GetArray();
+
+        for (const auto& tag : tags) {
+            retarr.emplace_back(ADFEntry::String(tag));
+        }
+
+        return ret;
+    }
 
 
     void FromADF(const ADFEntry& Saved) {
@@ -148,12 +170,13 @@ struct BaseEntity {
     vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
     quat rotation;
-    bool isFirstInitialization = true;
 
     virtual void Initialize() {
-        rotation = quat(angles);
+        if (!HasTag("WasAlreadyInitializedOnce")) {
+            rotation = quat(angles);
 
-        isFirstInitialization = false;
+            AddTag("WasAlreadyInitializedOnce");
+        }
     }
     virtual void Update() {}
     virtual void OnSave() {}
@@ -167,6 +190,12 @@ struct BaseEntity {
         result[3] = position;
         return result;
     }
+
+    // Handler wrapper functions
+    inline const char* GetClassname() const { return handler->GetClassname(); }
+    inline std::optional<iEntHandler*> GetParent() const { return handler->GetParent(); };
+    inline void AddTag(const std::string& tag) { handler->AddTag(tag); };
+    inline bool HasTag(const std::string& tag) { return handler->HasTag(tag); };
 };
 
 
