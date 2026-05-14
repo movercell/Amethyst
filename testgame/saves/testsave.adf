@@ -9,6 +9,7 @@
                 "angles" { x 45 y 180 z 45 }
                 "scale" { x 1 y 3 z 5 }
             }
+            "children" {}
         }
     }
 }

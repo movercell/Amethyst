@@ -4,26 +4,30 @@
 #include "engine/entities/Entity.h"
 #include "engine/entities/World.h"
 
-#define WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT 4096
+#define WORLD_DEFAULT_SLOT_AMOUNT 4096
 
-static std::map<std::string, std::function<std::shared_ptr<iEntHandler>(World*)>> EntityCreationLambdas;
+static std::map<std::string, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
 
 
-void World::EntitiesFromADF(const ADFEntry& Saved) {
+void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent) {
     const auto& entmap = Saved.GetChildren();
+    Storage->resize(Saved.GetChildren().size());
 
     for (const auto& SavedEntity : entmap) {
         std::shared_ptr<iEntHandler> Handler;
         
         try {
-            Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this);
+            Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this, parent);
         } catch(const std::out_of_range& e) {
             continue;
         }
 
         Handler->FromADF(SavedEntity.second["properties"]);
+        int slot = std::stoi(SavedEntity.first);
+        (*Storage)[slot] = Handler;
+        Handler->slot = slot;
+        EntityStorageFromADF(SavedEntity.second["children"], Handler.get(), Handler.get());
         Handler->InitEntity();
-        EntityHandlers[std::stoi(SavedEntity.first)] = Handler;
     }
 }
 
@@ -33,91 +37,84 @@ void World::Load(const ADFEntry& Saved) {
         MapName = Savefile["Mapname"].GetString();
         // TODO: add map file loading here
     }
-    EntitiesFromADF(Savefile["Entities"]);
+    EntityStorageFromADF(Savefile["Entities"], this);
 }
 
 
 
 
-std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname) {
+std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname, std::optional<iEntHandler*> parent) {
 
     std::shared_ptr<iEntHandler> Handler;
 
     try {
-        Handler = EntityCreationLambdas.at(classname)(this);
+        Handler = EntityCreationLambdas.at(classname)(this, parent);
     } catch(const std::out_of_range& e) {
         return nullptr;
     }
 
     int index;
-    if (FreedIndices.empty()) {
-        index = NextIndexToMake++;
+    if (parent) {
+        index = parent.value()->GetFreeIndex();
+        (*parent.value())[index] = Handler;
     } else {
-        index = FreedIndices.front();
-        FreedIndices.pop_front();
-    }
-
-    EntityCount++;
-    if (EntityHandlers.size() < EntityCount) {
-        EntityHandlers.resize(EntityHandlers.size() + WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
+        index = GetFreeIndex();
+        (*this)[index] = Handler;
     }
 
     Handler->slot = index;
-    EntityHandlers[index] = Handler;
 
     return Handler;
 }
 
-void World::AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot) {
-    if (EntityHandlers[Slot]) {
-        Engine::Warning("Attempted to add an entity to a slot that's already occupied!(call bumped)");
-        return;
-    }
-    if (Slot >= EntityHandlers.size()) {
-        Engine::Warning("Attempted to add an entity into a non-existent slot!(call bumped)");
-        return;
-    }
 
-        
-    auto indexfound = std::find(FreedIndices.begin(), FreedIndices.end(), Slot);
-    if (indexfound != FreedIndices.end()) {
-        FreedIndices.erase(indexfound);
-    }
-    
-    EntityHandlers[Slot] = Entity;
-}
-std::shared_ptr<iEntHandler> World::GetEntityInSlot(int Slot) {
-    if (Slot >= EntityHandlers.size()) {
-        Engine::Warning("Attempted to get an entity from a non-existent slot!(returned null pointer)");
-        return nullptr;
-    }
-    return EntityHandlers[Slot];
-}
-
-
-void World::Update() {
-    for (auto& Handler : EntityHandlers) {
-        if (Handler) Handler->UpdateEntity();
-    }
-}
 void World::Clear() {
-    for (auto& Handler : EntityHandlers) {
-        Handler.reset();
-    }
+    EntityStorage::Clear();
     MapName = "";
 }
 
 
 
 World::World(std::shared_ptr<RWorld> Renderworld) : RenderWorld(Renderworld) {
-    EntityHandlers.resize(WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
+    resize(WORLD_DEFAULT_SLOT_AMOUNT);
 }
 World::World(std::shared_ptr<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
-    EntityHandlers.resize(WORLD_RESIZE_ADDITIONAL_SLOT_AMOUNT);
+    resize(WORLD_DEFAULT_SLOT_AMOUNT);
 }
 
 
 
-void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*)> Lambda) {
+void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda) {
     EntityCreationLambdas.emplace(classname, Lambda);
+}
+
+
+
+
+void EntityStorage::AddEntityBack(std::shared_ptr<iEntHandler> Entity) {
+    EntityHandlers[Entity->slot] = Entity;
+}
+
+int EntityStorage::GetFreeIndex() {
+    int ret;
+    if (FreedIndices.empty()) {
+        ret = NextIndexToMake++;
+        if (ret >= size()) resize(size() + ResizeAdditionalSlotAmount);
+        return ret;
+    }
+    
+    ret = FreedIndices.front();
+    FreedIndices.pop_front();
+    return ret;
+}
+
+void EntityStorage::Update() {
+    for (auto& Handler : (*this)) {
+        if (Handler) Handler->UpdateEntity();
+    }
+}
+void EntityStorage::Clear() {
+    for (auto& Handler : (*this)) {
+        Handler.reset();
+    }
 }

@@ -119,7 +119,7 @@ int main() {
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
 	tmpworld.Load(savefile);
 
-	auto tmpentityhandler = tmpworld.GetEntityInSlot(0);
+	auto tmpentityhandler = tmpworld[0];
 
 	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
 	enginewindow->SetUIFunction(mainuifunction);

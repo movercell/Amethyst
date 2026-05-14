@@ -8,7 +8,7 @@
 #include <functional>
 #include "World.h"
 
-struct iEntHandler {
+struct iEntHandler : public EntityStorage {
     // Set by the world once the entity is made.
     int slot = -1;
     World* world = nullptr;
@@ -20,11 +20,19 @@ struct iEntHandler {
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
     virtual ~iEntHandler() {};
-    virtual const char* GetClassname() = 0;
+    virtual const char* GetClassname() const = 0;
+    virtual std::optional<iEntHandler*> GetParent() const = 0;
 
-    //! Removes the entity from the world, resulting in destruction when not owned by anything else.
+    //! Removes the entity from it's slot, resulting in destruction when not owned by anything else.
     virtual void Remove() {
-        world->RemoveEntityInSlot(slot);
+        auto parent = GetParent();
+        if (parent) {
+            (*parent.value())[slot] = nullptr;
+            parent.value()->ReturnIndex(slot);
+            return;
+        }
+        (*world)[slot] = nullptr;
+        world->ReturnIndex(slot);
     }
 };
 
@@ -40,6 +48,7 @@ protected:
     using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
 
     const char* classname;
+    const std::optional<iEntHandler*> parent;
     static inline std::map<std::string, EntPropertyLocation> Properties;
 
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
@@ -117,7 +126,8 @@ public:
 
     void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Initialize(); }
     void UpdateEntity() { Entity.Update(); }
-    const char* GetClassname() { return classname; }
+    const char* GetClassname() const { return classname; }
+    std::optional<iEntHandler*> GetParent() const { return parent; }
 
 
     void FromADF(const ADFEntry& Saved) {
@@ -126,7 +136,7 @@ public:
             SetProperty(property.first, property.second);
         }
     }
-    BaseEntityHandler(const char* Classname, World* World) : classname(Classname) { world = World; }
+    BaseEntityHandler(const char* Classname, World* World, std::optional<iEntHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
     ~BaseEntityHandler() = default;
 };
 
@@ -165,14 +175,14 @@ struct BaseEntity {
 
 namespace Engine {
     namespace Internal {
-        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*)> Lambda);
+        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda);
     }
 }
 
 template<template <typename> typename Handler, typename Entity>
 void RegisterEntityType(const char* classname) {
     Handler<Entity>::PropertyInit();
-    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world) {
-        return std::make_shared<Handler<Entity>>(classname, world);
+    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world, std::optional<iEntHandler*> parent) {
+        return std::make_shared<Handler<Entity>>(classname, world, parent);
     });
 }

@@ -11,35 +11,48 @@
 
 struct iEntHandler;
 
+class EntityStorage {
+    static inline constexpr int ResizeAdditionalSlotAmount = 16;
 
-class ENGINEEXPORT World {
     std::vector<std::shared_ptr<iEntHandler>> EntityHandlers;
     std::deque<int> FreedIndices;
     int NextIndexToMake = 0;
     int EntityCount = 0;
+
+public:
+    void AddEntityBack(std::shared_ptr<iEntHandler> Entity);
+
+    inline std::shared_ptr<iEntHandler>& operator[](int i) { return EntityHandlers[i]; }
+    inline const std::shared_ptr<iEntHandler>& operator[](int i) const { return EntityHandlers[i]; }
+
+    inline auto begin() { return EntityHandlers.begin(); }
+    inline auto end() { return EntityHandlers.end(); }
+    inline auto rbegin() { return EntityHandlers.rbegin(); }
+    inline auto rend() { return EntityHandlers.rend(); }
+    inline auto size() { return EntityHandlers.size(); }
+
+    inline void resize(int amount) { EntityHandlers.resize(amount); }
+
+    int GetFreeIndex();
+    inline void ReturnIndex(int index) { FreedIndices.push_front(index); }
+
+    void Update();
+    void Clear();
+};
+
+
+class ENGINEEXPORT World : public EntityStorage {
     std::shared_ptr<RWorld> RenderWorld;
-
     std::string MapName = "";
-
-    void EntitiesFromADF(const ADFEntry& Saved);
+    void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent = std::nullopt);
 
 public:
     void Load(const ADFEntry& Saved);
     ADFEntry Save();
 
     //! Returns an uninitalized entity, or nullptr if classname is not valid.
-    std::shared_ptr<iEntHandler> MakeEntity(std::string classname);
-    void AddEntityToSlot(std::shared_ptr<iEntHandler> Entity, int Slot);
-    std::shared_ptr<iEntHandler> GetEntityInSlot(int Slot);
+    std::shared_ptr<iEntHandler> MakeEntity(std::string classname, std::optional<iEntHandler*> parent = std::nullopt);
 
-    inline void RemoveEntityInSlot(int Slot) {
-        if (EntityHandlers[Slot]) {
-            EntityHandlers[Slot].reset();
-            EntityCount--;
-        }
-    }
-
-    void Update();
     void Clear();
 
     World(std::shared_ptr<RWorld> Renderworld);
