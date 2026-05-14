@@ -42,9 +42,10 @@ class ENGINEEXPORT World : public EntityStorage {
     std::shared_ptr<RWorld> RenderWorld;
     std::string MapName = "";
     void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent = std::nullopt);
+    ADFEntry EntityStorageToADF(EntityStorage* Storage);
 
 public:
-    void Load(const ADFEntry& Saved);
+    void Restore(const ADFEntry& Saved);
     ADFEntry Save();
 
     //! Returns an uninitalized entity, or nullptr if classname is not valid.

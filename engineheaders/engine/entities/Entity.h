@@ -15,8 +15,8 @@ struct iEntHandler : public EntityStorage {
 
     virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
-    virtual void FromADF(const ADFEntry& Saved) = 0;
-    virtual ADFEntry ToADF() = 0;
+    virtual void PropertiesFromADF(const ADFEntry& Saved) = 0;
+    virtual ADFEntry PropertiesToADF() = 0;
 
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
@@ -111,18 +111,14 @@ public:
         }
     }
 
-    ADFEntry ToADF() {
+    ADFEntry PropertiesToADF() {
         Entity.OnSave();
 
         ADFEntry ret = ADFEntry::Map();
         auto& retmap = ret.GetChildren();
 
-        retmap.emplace("classname", ADFEntry::String(classname));
-
-        auto& propertymap = retmap.emplace("properties", ADFEntry::Map()).first->second.GetChildren();
-
         for (auto property : Properties) {
-            propertymap.emplace(property.first, PropertyToADF(Properties.at(property.first)));
+            retmap.emplace(property.first, PropertyToADF(Properties.at(property.first)));
         }
 
         return ret;
@@ -150,7 +146,7 @@ public:
     }
 
 
-    void FromADF(const ADFEntry& Saved) {
+    void PropertiesFromADF(const ADFEntry& Saved) {
         const auto& Data = Saved.GetChildren();
         for (const auto& property : Data) {
             SetProperty(property.first, property.second);

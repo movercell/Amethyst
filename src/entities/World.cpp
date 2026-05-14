@@ -8,7 +8,25 @@
 
 static std::map<std::string, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
 
+ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
+    ADFEntry ret = ADFEntry::Map();
+    auto& retmap = ret.GetChildren();
 
+    for (int i = 0; i < Storage->size(); i++) {
+        auto& Handler = (*Storage)[i];
+        if (!Handler) continue;
+
+        auto slotstring = std::to_string(i);
+        auto& Saved = retmap.emplace(slotstring, ADFEntry::Map()).first->second.GetChildren();
+
+        Saved.emplace("classname",  ADFEntry::String(Handler->GetClassname()));
+        Saved.emplace("properties", Handler->PropertiesToADF());
+        Saved.emplace("children",   EntityStorageToADF(Handler.get()));
+        Saved.emplace("tags",       Handler->TagsToADF());
+    }
+
+    return ret;
+}
 void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent) {
     const auto& entmap = Saved.GetChildren();
     Storage->resize(Saved.GetChildren().size());
@@ -22,7 +40,7 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
             continue;
         }
 
-        Handler->FromADF(SavedEntity.second["properties"]);
+        Handler->PropertiesFromADF(SavedEntity.second["properties"]);
         int slot = std::stoi(SavedEntity.first);
         for (const auto& tag : SavedEntity.second["tags"].GetArray()) { Handler->AddTag(tag.GetString()); }
         (*Storage)[slot] = Handler;
@@ -32,7 +50,18 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
     }
 }
 
-void World::Load(const ADFEntry& Saved) {
+
+ADFEntry World::Save() {
+    ADFEntry ret = ADFEntry::Map();
+    ret.GetChildren().emplace("Savefile", ADFEntry::Map());
+    auto& savemap = ret["Savefile"].GetChildren();
+
+    savemap.emplace("MapName", ADFEntry::String(MapName));
+    savemap.emplace("Entities", EntityStorageToADF(this));
+
+    return ret;
+}
+void World::Restore(const ADFEntry& Saved) {
     const auto& Savefile = Saved["Savefile"];
     if (Savefile.HasChild("Mapname")) {
         MapName = Savefile["Mapname"].GetString();

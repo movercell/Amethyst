@@ -117,7 +117,9 @@ int main() {
 
 	World tmpworld(rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
-	tmpworld.Load(savefile);
+	tmpworld.Restore(savefile);
+
+	auto newsavefile = tmpworld.Save();
 
 	auto tmpentityhandler = tmpworld[0];
 
