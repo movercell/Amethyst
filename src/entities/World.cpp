@@ -76,10 +76,10 @@ void World::Clear() {
 
 
 World::World(std::shared_ptr<RWorld> Renderworld) : RenderWorld(Renderworld) {
-    resize(WORLD_DEFAULT_SLOT_AMOUNT);
+    reserve(WORLD_DEFAULT_SLOT_AMOUNT);
 }
 World::World(std::shared_ptr<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
-    resize(WORLD_DEFAULT_SLOT_AMOUNT);
+    reserve(WORLD_DEFAULT_SLOT_AMOUNT);
 }
 
 
@@ -96,15 +96,13 @@ void EntityStorage::AddEntityBack(std::shared_ptr<iEntHandler> Entity) {
 }
 
 int EntityStorage::GetFreeIndex() {
-    int ret;
-    if (FreedIndices.empty()) {
-        ret = NextIndexToMake++;
-        if (ret >= size()) resize(size() + ResizeAdditionalSlotAmount);
-        return ret;
-    }
+    auto iterator = std::find(begin(), end(), nullptr);
+    int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
     
-    ret = FreedIndices.front();
-    FreedIndices.pop_front();
+    if (iterator == end()) {
+        EntityHandlers.resize(size() + ResizeAdditionalSlotAmount);
+    }
+
     return ret;
 }
 

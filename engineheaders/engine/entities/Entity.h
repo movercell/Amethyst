@@ -28,11 +28,9 @@ struct iEntHandler : public EntityStorage {
         auto parent = GetParent();
         if (parent) {
             (*parent.value())[slot] = nullptr;
-            parent.value()->ReturnIndex(slot);
             return;
         }
         (*world)[slot] = nullptr;
-        world->ReturnIndex(slot);
     }
 };
 

@@ -15,9 +15,6 @@ class EntityStorage {
     static inline constexpr int ResizeAdditionalSlotAmount = 16;
 
     std::vector<std::shared_ptr<iEntHandler>> EntityHandlers;
-    std::deque<int> FreedIndices;
-    int NextIndexToMake = 0;
-    int EntityCount = 0;
 
 public:
     void AddEntityBack(std::shared_ptr<iEntHandler> Entity);
@@ -32,9 +29,9 @@ public:
     inline auto size() { return EntityHandlers.size(); }
 
     inline void resize(int amount) { EntityHandlers.resize(amount); }
+    inline void reserve(int amount) { EntityHandlers.reserve(amount); }
 
     int GetFreeIndex();
-    inline void ReturnIndex(int index) { FreedIndices.push_front(index); }
 
     void Update();
     void Clear();
