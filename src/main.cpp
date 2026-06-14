@@ -121,6 +121,7 @@ int main() {
 
 	auto newsavefile = tmpworld.Save();
 	newsavefile.ToFile("saves/hi.adf");
+	newsavefile.ToFile("saves/hicompacted.adf", true);
 
 	auto tmpentityhandler = tmpworld[0];
 

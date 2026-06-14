@@ -35,7 +35,7 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
         return Token(TokenType::EndMap);
     case ']':
         return Token(TokenType::EndArray);
-    case -1:
+    case eof:
         return Token(TokenType::EndFile);
     }
 
@@ -76,8 +76,9 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, std::shared_ptr<std::stri
                 key = std::move(KeyToken.content.value());
                 break;
             case TokenType::StartMap:
+                ADFError("A Map-type entry cannot be a key!");
             case TokenType::StartArray:
-                ADFError("An ADF entry cannot be a key!");
+                ADFError("An Array-type entry cannot be a key!");
             case TokenType::EndArray:
                 ADFError("Mismatched ADF closing brackets!(Tried to end a map with a square bracket)");
             case TokenType::EndMap:
@@ -125,8 +126,9 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, std::shared_ptr<std::stri
                     arraydata.emplace_back(ADFEntry(ADFType::array, Tokenizer, filename));
                 break;
                 case TokenType::EndArray:
-                case TokenType::EndFile:
                     return;
+                case TokenType::EndFile:
+                    ADFError("Incomplete ADF array!");
                 case TokenType::EndMap:
                     ADFError("Mismatched ADF closing brackets!(Tried to end an array with a curly brace)");
             }
@@ -158,59 +160,114 @@ ENGINEEXPORT ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
     return ADFEntry(ADFType::map, Tokenizer, filename);
 }
 
-void ADFEntry::ToFileObjectFormatHelper(std::ofstream& stream, int IndentationLevel) const {
+void ADFEntry::ToFileStringFormatHelper(std::filebuf* buffer, const std::string& str) const {
+    buffer->sputc('\"');
+    for (char character : str) {
+        if (character == '\"' || character == '\\') {
+            buffer->sputc('\\');
+        }
+        buffer->sputc(character);
+    }
+    buffer->sputc('\"');
+}
+
+void ADFEntry::ToFileObjectFormatHelper(std::filebuf* buffer, int IndentationLevel) const {
     if (IsString()) {
-        stream << '\"' << std::get<std::string>(data) << '\"';
+        ToFileStringFormatHelper(buffer, std::get<std::string>(data));
     } else if (IsMap()) {
-        stream << '{';
+        buffer->sputc('{');
         if (HasChildren()) {
-            stream << '\n';
-            ToFile(stream, IndentationLevel + 1);
+            buffer->sputc('\n');
+            ToFile(buffer, IndentationLevel + 1);
 
             for (int i = 0; i < IndentationLevel; i++) {
-                stream << '\t';
+                buffer->sputc('\t');
             }
         }
 
-        stream << '}';
+        buffer->sputc('}');
     } else {
-        stream << '[';
+        buffer->sputc('[');
         if (HasElements()) {
-            stream << '\n';
-            ToFile(stream, IndentationLevel + 1);
+            buffer->sputc('\n');
+            ToFile(buffer, IndentationLevel + 1);
 
             for (int i = 0; i < IndentationLevel; i++) {
-                stream << '\t';
+                buffer->sputc('\t');
             }
         }
 
-        stream << ']';
+        buffer->sputc(']');
     }
 }
 
-ENGINEEXPORT void ADFEntry::ToFile(std::ofstream& stream, int IndentationLevel) const {
+ENGINEEXPORT void ADFEntry::ToFile(std::filebuf* buffer, int IndentationLevel) const {
     if (IsArray()) {
         const auto& array = GetArray();
 
         for (const auto& element : array) {
             for (int i = 0; i < IndentationLevel; i++) {
-                stream << '\t';
+                buffer->sputc('\t');
             }
 
-            element.ToFileObjectFormatHelper(stream, IndentationLevel);
-            stream << '\n';
+            element.ToFileObjectFormatHelper(buffer, IndentationLevel);
+            buffer->sputc('\n');
         }
     } else {
         const auto& map = GetMap();
 
         for (const auto& kvpair : map) {
             for (int i = 0; i < IndentationLevel; i++) {
-                stream << '\t';
+                buffer->sputc('\t');
             }
 
-            stream << '\"' << kvpair.first << "\" ";
-            kvpair.second.ToFileObjectFormatHelper(stream, IndentationLevel);
-            stream << '\n';
+            ToFileStringFormatHelper(buffer, kvpair.first);
+            buffer->sputc(' ');
+            
+            kvpair.second.ToFileObjectFormatHelper(buffer, IndentationLevel);
+            buffer->sputc('\n');
+        }
+    }
+}
+
+
+
+
+// Compacted exporting, with no formatting
+void ADFEntry::ToFileCompactObjectFormatHelper(std::filebuf* buffer) const {
+    if (IsString()) {
+        ToFileStringFormatHelper(buffer, std::get<std::string>(data));
+    } else if (IsMap()) {
+        buffer->sputc('{');
+        if (HasChildren()) {
+            ToFileCompact(buffer);
+        }
+
+        buffer->sputc('}');
+    } else {
+        buffer->sputc('[');
+        if (HasElements()) {
+            ToFileCompact(buffer);
+        }
+
+        buffer->sputc(']');
+    }
+}
+
+ENGINEEXPORT void ADFEntry::ToFileCompact(std::filebuf* buffer) const {
+    if (IsArray()) {
+        const auto& array = GetArray();
+
+        for (const auto& element : array) {
+            element.ToFileCompactObjectFormatHelper(buffer);
+        }
+    } else {
+        const auto& map = GetMap();
+
+        for (const auto& kvpair : map) {
+            ToFileStringFormatHelper(buffer, kvpair.first);
+            
+            kvpair.second.ToFileCompactObjectFormatHelper(buffer);
         }
     }
 }
