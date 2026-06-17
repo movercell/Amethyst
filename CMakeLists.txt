@@ -28,6 +28,7 @@ file(GLOB_RECURSE imgui_sources      libs/imgui/*.cpp)
 add_library(imgui ${imgui_sources})
 target_include_directories(imgui PRIVATE "libs/imgui")
 target_include_directories(imgui PRIVATE "include")
+target_link_libraries(imgui glfw)
 
 add_library(assimp SHARED IMPORTED)
 if(WIN32)
@@ -82,5 +83,9 @@ endif()
 
 if(WIN32)
 	set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
-    target_link_options(amethyst PRIVATE "-Wl,--out-implib,${CMAKE_CURRENT_BINARY_DIR}/libamethyst.dll.a")
+	target_link_options(amethyst PRIVATE "-Wl,--out-implib,${CMAKE_CURRENT_BINARY_DIR}/libamethyst.dll.a")
+endif()
+
+if(MSVC)
+	target_compile_options(amethyst PRIVATE "/Zc:lambda")
 endif()

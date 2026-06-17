@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/master.h"
+#include <bit>
 
 namespace Shapes {
     class Frustum;

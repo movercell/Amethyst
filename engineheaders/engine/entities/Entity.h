@@ -103,7 +103,7 @@ public:
 
     void SetProperty(const std::string& Name, ADFEntry Property) {
         try {
-            std::visit(overload {
+            std::visit<void>(overload {
             [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
             [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
             [this, Property](bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; },

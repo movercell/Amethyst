@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 template<typename T, typename Allocator = std::allocator<std::weak_ptr<T>>>
 class weak_vector {
