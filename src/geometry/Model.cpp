@@ -13,19 +13,29 @@ Geometry::Model::Model(std::string path) {
     }
 
     const aiScene* scene;
-    {
-        auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
-        scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
-    };
-    // check for errors
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
+    std::vector<char> buffer;
+    // Reserve the needed space.
+    modelfile.seekg(0, std::ios::end);
+    buffer.resize(modelfile.tellg());
+    modelfile.seekg(0, std::ios::beg);
+    
+    buffer.assign(std::istreambuf_iterator<char>{modelfile}, {});
+    scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
+    
+    // Check for errors.
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         aiReleaseImport(scene);
         modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
 
-        auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
+        // Reserve the needed space.
+        modelfile.seekg(0, std::ios::end);
+        buffer.resize(modelfile.tellg());
+        modelfile.seekg(0, std::ios::beg);
+
+        buffer.assign(std::istreambuf_iterator<char>{modelfile}, {});
         scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
 
-        if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
+        if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             Engine::Error(std::string("Error loading the error model: ") + aiGetErrorString());
         }
     }

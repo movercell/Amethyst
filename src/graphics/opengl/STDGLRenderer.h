@@ -33,7 +33,7 @@ protected:
 
     void Init();
 
-    template<typename Container, typename T>
+    template<typename Container, typename Interface, typename T>
     friend class Engine::ManagedInterfacedResource;
     void _unmanage_resource(Engine::Resource<Window>* res) {
         WindowVector.erase(std::find(WindowVector.begin(), WindowVector.end(), res));

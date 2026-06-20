@@ -23,7 +23,8 @@ namespace Geometry {
     class ENGINEEXPORT Model {
     public:
         std::vector<Mesh> Meshes;
-        Model(std::string path = "error.glb");
+        Model(std::string path);
+        Model() {};
     };
 
 }

@@ -7,6 +7,7 @@
 #include "engine/graphics/RWorld.h"
 #include "engine/graphics/Renderer.h"
 #include "engine/graphics/Window.h"
+#include "engine/Resource.h"
 #include "STDGLRenderer.h"
 #include "STDGLRWorld.h"
 #include "GLMisc.h"
@@ -38,7 +39,7 @@ void STDGLRenderer::Init() {
     glfwWindowHint(GLFW_NO_ERROR, GLFW_TRUE);
 #endif
 
-    GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", NULL, NULL);
+    GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", nullptr, nullptr);
     glfwMakeContextCurrent(data);
 
     glfwSwapInterval(1); // TODO: add a vsync setting

@@ -20,12 +20,17 @@ endif()
 
 
 # include the libraries
+set(GLFW_LIBRARY_TYPE STATIC CACHE STRING "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/glfw)
+
 add_library(glad STATIC src/one-off_libs/glad.c)
 target_include_directories(glad PRIVATE include)
 
 file(GLOB_RECURSE imgui_sources      libs/imgui/*.cpp)
-add_library(imgui ${imgui_sources})
+add_library(imgui STATIC ${imgui_sources})
 target_include_directories(imgui PRIVATE "libs/imgui")
 target_include_directories(imgui PRIVATE "include")
 target_link_libraries(imgui glfw)
