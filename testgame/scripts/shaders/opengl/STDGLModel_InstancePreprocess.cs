@@ -41,7 +41,7 @@ void main() {
     // Determine the LOD level
     float DistanceFromCamera = distance(CameraPos, vec3(InstanceMatrices[gl_GlobalInvocationID.x][3]));
     int LOD = STDGLMODEL_LOD_MAX_COUNT - 1;
-    while (DistanceFromCamera < LODDistances[LOD]) LOD--; 
+    while ((LOD != 0) && (DistanceFromCamera < (LODDistances[LOD] * maxscale))) LOD--;
 
     if (isActive) {
         uint ID = atomicAdd(IndirectBuffers[LOD][0].instanceCount, 1u);

@@ -35,7 +35,7 @@ namespace Engine {
 
     template<typename T>
     struct Reference {
-        Reference(Engine::Resource<T>* resource) : Resource(resource) { if (!Resource->IncrementReference()) Resource = nullptr; }
+        Reference(Engine::Resource<T>* resource) : Resource(resource) { if (!Resource || !Resource->IncrementReference()) Resource = nullptr; }
         Reference() { Resource = nullptr; }
         Reference(const Reference& other) { Resource = other.Resource; if (Resource) Resource->IncrementReference(); }
         Reference(Reference&& other) noexcept { Resource = other.Resource; other.Resource = nullptr; }

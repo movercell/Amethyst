@@ -6,9 +6,6 @@
 #include <list>
 
 namespace Helpers {
-    // This was gotten from the internet
-    template<class... Ts> struct OverloadedLambda : Ts... { using Ts::operator()...; };
-
     template <typename T>
     struct is_map : std::false_type {};
     template <typename K, typename V, typename C, typename A>

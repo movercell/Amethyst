@@ -16,7 +16,7 @@ struct iEntHandler {
 
     EntityStorage Children;
 
-    virtual void SetProperty(const std::string& name, ADFEntry property) = 0;
+    virtual void SetProperty(const std::string& name, const ADFEntry& property) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
     virtual void FromADF(const ADFEntry& Saved) = 0;
     virtual ADFEntry ToADF() = 0;
@@ -61,16 +61,21 @@ protected:
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
     inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
-        return std::visit<ADFEntry>(Helpers::OverloadedLambda {
-        [this](int T::* entproperty)         {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
-        [this](float T::* entproperty)       {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
-        [this](bool T::* entproperty)        {  return ADFEntry::String(Entity.*entproperty ? "1" : "0"); },
-        [this](vec2 T::* entproperty)        {  return ADFEntry::Vector2(Entity.*entproperty); },
-        [this](vec3 T::* entproperty)        {  return ADFEntry::Vector3(Entity.*entproperty); },
-        [this](vec4 T::* entproperty)        {  return ADFEntry::Vector4(Entity.*entproperty); },
-        [this](quat T::* entproperty)        {  return ADFEntry::Quaternion(Entity.*entproperty); },
-        [this](std::string T::* entproperty) {  return ADFEntry::String(Entity.*entproperty); }
-        }, Property);
+        struct Processor {
+            T& Entity;
+            Processor(T& entity) : Entity(entity) {}
+
+            ADFEntry operator()(int T::* entproperty)         {  return ADFEntry::String(std::to_string(Entity.*entproperty)); }
+            ADFEntry operator()(float T::* entproperty)       {  return ADFEntry::String(std::to_string(Entity.*entproperty)); }
+            ADFEntry operator()(bool T::* entproperty)        {  return ADFEntry::String(Entity.*entproperty ? "1" : "0"); }
+            ADFEntry operator()(vec2 T::* entproperty)        {  return ADFEntry::Vector2(Entity.*entproperty); }
+            ADFEntry operator()(vec3 T::* entproperty)        {  return ADFEntry::Vector3(Entity.*entproperty); }
+            ADFEntry operator()(vec4 T::* entproperty)        {  return ADFEntry::Vector4(Entity.*entproperty); }
+            ADFEntry operator()(quat T::* entproperty)        {  return ADFEntry::Quaternion(Entity.*entproperty); }
+            ADFEntry operator()(std::string T::* entproperty) {  return ADFEntry::String(Entity.*entproperty); }
+        };
+
+        return std::visit<ADFEntry>(Processor(Entity), Property);
     }
 
     inline ADFEntry TagsToADF() const {
@@ -100,18 +105,24 @@ public:
     }
 
 
-    void SetProperty(const std::string& Name, ADFEntry Property) {
+    void SetProperty(const std::string& Name, const ADFEntry& Property) {
+        struct Processor {
+            T& Entity;
+            const ADFEntry& Property;
+            Processor(T& entity, const ADFEntry& property) : Entity(entity), Property(property) {}
+
+            void operator()(int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); }
+            void operator()(float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); }
+            void operator()(bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; }
+            void operator()(vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); };
+            void operator()(vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); };
+            void operator()(vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); };
+            void operator()(quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); };
+            void operator()(std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
+        };
         try {
-            std::visit<void>(Helpers::OverloadedLambda {
-            [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
-            [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
-            [this, Property](bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; },
-            [this, Property](vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); },
-            [this, Property](vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); },
-            [this, Property](vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); },
-            [this, Property](quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); },
-            [this, Property](std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
-        }, Properties.at(Name)); } catch(...) {}
+            std::visit<void>(Processor(Entity, Property), Properties.at(Name));
+        } catch(...) {}
     }
 
     std::optional<ADFEntry> GetProperty(const std::string& name) {

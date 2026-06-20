@@ -117,7 +117,7 @@ void EntityStorage::AddEntityBack(Engine::Reference<iEntHandler> Entity) {
 }
 
 int EntityStorage::GetFreeIndex() {
-    auto iterator = std::find(begin(), end(), nullptr);
+    auto iterator = std::find(begin(), end(), Engine::Reference<iEntHandler>());
     int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
 
     if (iterator == end()) {
