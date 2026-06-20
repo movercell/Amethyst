@@ -2,7 +2,7 @@
 
 #include <assimp/scene.h>
 #include "engine/filesystem/Filesystem.h"
-#include <assimp/Importer.hpp>
+#include <assimp/cimport.h>
 #include <assimp/postprocess.h>
 #include <iostream>
 
@@ -12,21 +12,21 @@ Geometry::Model::Model(std::string path) {
         modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
     }
 
-    Assimp::Importer importer;
     const aiScene* scene;
     {
         auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
-        scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
+        scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
     };
     // check for errors
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
+        aiReleaseImport(scene);
         modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
 
         auto buffer = std::vector<char>{std::istreambuf_iterator<char>{modelfile}, {}};
-        scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
+        scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
 
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
-            Engine::Error(std::string("Error loading the error model: ") + importer.GetErrorString());
+            Engine::Error(std::string("Error loading the error model: ") + aiGetErrorString());
         }
     }
     
@@ -35,6 +35,7 @@ Geometry::Model::Model(std::string path) {
         Mesh mesh(reinterpret_cast<void*>(scene->mMeshes[meshindex]));
         Meshes.push_back(std::move(mesh));
     }
+    aiReleaseImport(scene);
 }
 
 Geometry::Mesh::Mesh(void* Meshdata) {
