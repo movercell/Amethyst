@@ -6,7 +6,7 @@
 
 #define WORLD_DEFAULT_SLOT_AMOUNT 4096
 
-static std::map<std::string, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
+static std::map<std::string, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
 
 ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
     ADFEntry ret = ADFEntry::Map();
@@ -26,7 +26,7 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
     Storage->resize(Saved.GetMap().size());
 
     for (const auto& SavedEntity : entmap) {
-        std::shared_ptr<iEntHandler> Handler;
+        Engine::Reference<iEntHandler> Handler;
         
         try {
             Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this, parent);
@@ -64,9 +64,9 @@ void World::Restore(const ADFEntry& Saved) {
 
 
 
-std::shared_ptr<iEntHandler> World::MakeEntity(std::string classname, std::optional<iEntHandler*> parent) {
+Engine::Reference<iEntHandler> World::MakeEntity(std::string classname, std::optional<iEntHandler*> parent) {
 
-    std::shared_ptr<iEntHandler> Handler;
+    Engine::Reference<iEntHandler> Handler;
 
     try {
         Handler = EntityCreationLambdas.at(classname)(this, parent);
@@ -96,23 +96,23 @@ void World::Clear() {
 
 
 
-World::World(std::shared_ptr<RWorld> Renderworld) : RenderWorld(Renderworld) {
+World::World(Engine::Reference<RWorld> Renderworld) : RenderWorld(Renderworld) {
     reserve(WORLD_DEFAULT_SLOT_AMOUNT);
 }
-World::World(std::shared_ptr<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
+World::World(Engine::Reference<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
     reserve(WORLD_DEFAULT_SLOT_AMOUNT);
 }
 
 
 
-void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda) {
+void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda) {
     EntityCreationLambdas.emplace(classname, Lambda);
 }
 
 
 
 
-void EntityStorage::AddEntityBack(std::shared_ptr<iEntHandler> Entity) {
+void EntityStorage::AddEntityBack(Engine::Reference<iEntHandler> Entity) {
     (*this)[Entity->slot] = Entity;
 }
 
@@ -137,6 +137,6 @@ void EntityStorage::Update() {
 }
 void EntityStorage::Clear() {
     for (auto& Handler : (*this)) {
-        Handler.reset();
+        Handler = Engine::Reference<iEntHandler>();
     }
 }

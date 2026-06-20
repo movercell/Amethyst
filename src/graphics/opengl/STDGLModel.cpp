@@ -4,7 +4,6 @@
 #include "engine/filesystem/ADF.h"
 
 STDGLModel::STDGLModel(std::string path) {
-    Path = path;
     ModelInfo_t Info;
     auto ModelADFFull = ADFEntry::FromFile("models/" + path);
 
@@ -111,7 +110,6 @@ STDGLModel::STDGLModel(std::string path) {
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)offsetof(Shapes::Vertex, TexCoords));
 }
-
 STDGLModel::~STDGLModel() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(3, &VBO);
@@ -129,12 +127,18 @@ STDGLModelInstance::~STDGLModelInstance() {
     parent->InstanceBufferMapped[0].InstanceMatrices[index][0, 0] = NAN;
     parent->InstanceBufferMapped[1].InstanceMatrices[index][0, 0] = NAN;
     parent->FreedIndices.push(index);
+
+    if (parent->FreedIndices.size() == parent->NextIndex) {
+        std::queue<uint16_t> empty;
+        parent->FreedIndices.swap(empty);
+        parent->NextIndex = 0;
+    }
 }
 
 
 
 
-STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model) {
+STDGLModelInstanceArray::STDGLModelInstanceArray(GLFWwindow* data, Engine::Reference<STDGLModel> model) {
     rendererData = data;
     Model = model;
 
@@ -167,21 +171,17 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
     }
     if (index >= STDGLMODEL_INSTANCE_MAX_COUNT)
         Engine::Error("Attempted to create more than STDGLMODEL_INSTANCE_MAX_COUNT instances of the same model!");
-    return std::make_unique<STDGLModelInstance>(index, selfRef.lock());
+    return std::make_unique<STDGLModelInstance>(index, selfResource);
 }
 
 
 
-
-
-std::shared_ptr<STDGLModel> STDGLModelSystem::GetModel(std::string path) {
-    auto sharedModels = Models.lock();
-
-    for (auto& model : sharedModels) {
-        if (model->Path == path) { return model; }
+Engine::Reference<STDGLModel> STDGLModelSystem::GetModel(std::string path) {
+    try {
+        return Engine::Reference(Models.at(path));
+    } catch(...) {
+        auto ModelResource = new Engine::ManagedResource<STDGLModelSystem, STDGLModel>(this, path);
+        Models.emplace(path, ModelResource);
+        return Engine::Reference(ModelResource);
     }
-
-    std::shared_ptr<STDGLModel> ret = std::make_shared<STDGLModel>(path);
-    Models.push_back(ret);
-    return ret;
 }

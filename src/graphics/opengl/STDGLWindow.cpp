@@ -93,9 +93,9 @@ STDGLWindow::~STDGLWindow() {
     }
 };
 
-STDGLWindow::STDGLWindow(std::weak_ptr<Renderer> RendererWeakPtr, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name) {
+STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name) {
     rendererData = RendererDataPtr;
-    rendererRef = RendererWeakPtr.lock();
+    rendererRef = Renderer;
     Width = ResX;
     Height = ResY;
     Name = name;

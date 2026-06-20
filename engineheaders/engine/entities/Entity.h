@@ -1,6 +1,7 @@
 #pragma once
 #include "engine/master.h"
 #include "engine/filesystem/ADF.h"
+#include "engine/Helpers.h"
 #include <string>
 #include <map>
 #include <variant>
@@ -35,10 +36,10 @@ struct iEntHandler {
     virtual void Remove() {
         auto parent = GetParent();
         if (parent) {
-            parent.value()->Children[slot] = nullptr;
+            parent.value()->Children[slot] = Engine::Reference<iEntHandler>();
             return;
         }
-        (*world)[slot] = nullptr;
+        (*world)[slot] = Engine::Reference<iEntHandler>();
     }
 };
 
@@ -47,8 +48,6 @@ struct BaseEntity;
 
 template<typename T>
 class BaseEntityHandler : public iEntHandler {
-    // This was gotten from the internet
-    template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 protected:
 
     using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
@@ -62,7 +61,7 @@ protected:
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
     inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
-        return std::visit<ADFEntry>(overload {
+        return std::visit<ADFEntry>(Helpers::OverloadedLambda {
         [this](int T::* entproperty)         {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
         [this](float T::* entproperty)       {  return ADFEntry::String(std::to_string(Entity.*entproperty)); },
         [this](bool T::* entproperty)        {  return ADFEntry::String(Entity.*entproperty ? "1" : "0"); },
@@ -103,7 +102,7 @@ public:
 
     void SetProperty(const std::string& Name, ADFEntry Property) {
         try {
-            std::visit<void>(overload {
+            std::visit<void>(Helpers::OverloadedLambda {
             [this, Property](int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); },
             [this, Property](float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); },
             [this, Property](bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; },
@@ -215,14 +214,14 @@ struct BaseEntity {
 
 namespace Engine {
     namespace Internal {
-        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<std::shared_ptr<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda);
+        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda);
     }
 }
 
 template<template <typename> typename Handler, typename Entity>
 void RegisterEntityType(const char* classname) {
     Handler<Entity>::PropertyInit();
-    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world, std::optional<iEntHandler*> parent) {
-        return std::make_shared<Handler<Entity>>(classname, world, parent);
+    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world, std::optional<iEntHandler*> parent) -> Engine::Reference<iEntHandler> {
+        return Engine::Reference(new Engine::UnmanagedInterfacedResource<iEntHandler, Handler<Entity>>(classname, world, parent));
     });
 }

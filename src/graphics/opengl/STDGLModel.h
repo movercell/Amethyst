@@ -3,17 +3,19 @@
 #define STDGLMODEL_INSTANCE_MAX_COUNT 4096
 #define STDGLMODEL_LOD_MAX_COUNT 4
 #define STDGLMODEL_MESH_MAX_COUNT 8
-#define STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE 256
+#define STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE 128
 
 #include <glad/glad.h>
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
 #include "engine/geometry/Model.h"
+#include "engine/Resource.h"
 #include "GLFW/glfw3.h"
 #include "IndirectDrawBuffer.h"
 #include <cstdint>
 #include <memory>
 #include <queue>
+#include <map>
 
 struct STDGLModel {
     void Draw() {
@@ -55,7 +57,6 @@ struct STDGLModel {
 
     uint8_t LODCount;
     std::array<LOD, STDGLMODEL_LOD_MAX_COUNT> LODs;
-    std::string Path;
     GLuint VAO;
     GLuint VBO, EBO, ModelInfo;
 };
@@ -67,8 +68,8 @@ struct STDGLModelInstanceArray {
 
     GLFWwindow* rendererData;
     std::queue<uint16_t> FreedIndices;
-    std::shared_ptr<STDGLModel> Model;
-    std::weak_ptr<STDGLModelInstanceArray> selfRef;
+    Engine::Reference<STDGLModel> Model;
+    Engine::Resource<STDGLModelInstanceArray>* selfResource;
     InstanceArrayBuffer* InstanceBufferMapped;
     GLuint InstanceBuffer = 0;
     uint16_t NextIndex = 0;
@@ -76,7 +77,7 @@ struct STDGLModelInstanceArray {
     bool ShouldUseOtherBuffer = false;
     
 
-    STDGLModelInstanceArray(GLFWwindow* data, std::shared_ptr<STDGLModel> model);
+    STDGLModelInstanceArray(GLFWwindow* data, Engine::Reference<STDGLModel> model);
 
     ~STDGLModelInstanceArray();
         
@@ -97,19 +98,32 @@ struct STDGLModelInstanceArray {
 };
 
 struct STDGLModelInstance : public ModelInstance {
-    std::shared_ptr<STDGLModelInstanceArray> parent;
+    Engine::Reference<STDGLModelInstanceArray> parent;
     uint16_t index;
 
     void SetMatrix(mat4 Matrix);
 
     ~STDGLModelInstance();
 
-    STDGLModelInstance(uint16_t Index, std::shared_ptr<STDGLModelInstanceArray> Parent) { index = Index; parent = Parent; }
+    STDGLModelInstance(uint16_t Index, Engine::Reference<STDGLModelInstanceArray> Parent) : index(Index), parent(Parent) {}
 };
 
-
 class STDGLModelSystem {
-    weak_vector<STDGLModel> Models;
+    std::map<std::string, Engine::ManagedResource<STDGLModelSystem, STDGLModel>*> Models;
+
+
+    template<typename Container, typename T>
+    friend class Engine::ManagedResource;
+    void _unmanage_resource(Engine::Resource<STDGLModel>* res) {
+        for (auto it = Models.begin(); it != Models.end(); ++it) {
+            if (it->second == res) {
+                Models.erase(it);
+                break;
+            }
+        }
+        delete res;
+    }
 public:
-    std::shared_ptr<STDGLModel> GetModel(std::string path);
+    Engine::Reference<STDGLModel> GetModel(std::string path);
+
 };

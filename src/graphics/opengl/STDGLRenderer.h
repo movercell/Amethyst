@@ -17,10 +17,12 @@
 class STDGLRenderer : public Renderer {
 protected:
     GLFWwindow* rendererData = nullptr;
-    weak_vector<RWorld> RWorldVec;
-    weak_vector<STDGLWindow> WindowVector = weak_vector<STDGLWindow>();
+    std::vector<Engine::Resource<RWorld>*> RWorldVec;
+    std::vector<Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>*> WindowVector;
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
+
+    Engine::UnmanagedInterfacedResource<Renderer, STDGLRenderer>* selfResource; // Stored to be able to make the Engine::Reference objects for objects that it gives out.
 
     std::array<GLsync, 2> DoubleBufferFences = { nullptr, nullptr };
 
@@ -30,12 +32,23 @@ protected:
     uint64_t FrameCounter = 0;
 
     void Init();
+
+    template<typename Container, typename T>
+    friend class Engine::ManagedInterfacedResource;
+    void _unmanage_resource(Engine::Resource<Window>* res) {
+        WindowVector.erase(std::find(WindowVector.begin(), WindowVector.end(), res));
+        delete res;
+    }
+    void _unmanage_resource(Engine::Resource<RWorld>* res) {
+        RWorldVec.erase(std::find(RWorldVec.begin(), RWorldVec.end(), res));
+        delete res;
+    }
 public:
     ~STDGLRenderer();
-    static std::shared_ptr<Renderer> Make();
-    std::shared_ptr<RWorld> MakeRWorld();
+    static Engine::Reference<Renderer> Make();
+    Engine::Reference<RWorld> MakeRWorld();
     Camera* GetCamera(std::string name);
     const uint64_t& GetFrameCounter();
     void Draw();
-    std::shared_ptr<Window> MakeWindow(int x, int y, std::string name);
+    Engine::Reference<Window> MakeWindow(int x, int y, std::string name);
 };

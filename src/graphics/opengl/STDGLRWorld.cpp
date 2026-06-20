@@ -6,36 +6,33 @@
 #include <memory>
 
 
-std::shared_ptr<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
+Engine::Reference<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, vec3 position, float yaw, float pitch) {
     glfwMakeContextCurrent(context);
-    std::shared_ptr<STDGLCamera> result = std::make_shared<STDGLCamera>(context, &(renderer->GetFrameCounter()), resolution, name, position, yaw, pitch);
+    auto result = new Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>(this, context, &(renderer->GetFrameCounter()), resolution, name, position, yaw, pitch);
     CameraVec.push_back(result);
 
     return result;
 }
 
 Camera* STDGLRWorld::GetCamera(const std::string& name) {
-    auto SharedCameraVec = CameraVec.lock();
-    for (std::shared_ptr<Camera> camera : SharedCameraVec) {
-        if (!camera) continue;
+    for (Engine::Resource<Camera>* camerares : CameraVec) {
+        auto camera = camerares->Get();
         if (camera->Name == name)
-            return camera.get();
+            return camera;
     }
     return nullptr;
 }
 
 std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string& path) {
-    glfwMakeContextCurrent(context);
-
-    auto InstanceArraysShared = InstanceArrays.lock();
-    for (auto& array : InstanceArraysShared) {
-        if (array->Model->Path == path) return array->MakeModelInstance();
+    try {
+        return InstanceArrays.at(path)->resource.MakeModelInstance();
+    } catch(...) {
+        glfwMakeContextCurrent(context);
+        auto array = new Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>(this, context, modelsystem->GetModel(path));
+        array->resource.selfResource = array;
+        InstanceArrays.emplace(path, array);
+        return array->resource.MakeModelInstance();
     }
-
-    auto array = std::make_shared<STDGLModelInstanceArray>(context, modelsystem->GetModel(path));
-    array->selfRef = array;
-    InstanceArrays.push_back(array);
-    return array->MakeModelInstance();
 }
 
 STDGLRWorld::~STDGLRWorld() {

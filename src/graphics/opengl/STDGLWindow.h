@@ -1,12 +1,13 @@
 #pragma once
 
+#include "engine/Resource.h"
 #include "engine/graphics/Window.h"
 #include <GLFW/glfw3.h>
 #include "imgui.h"
 
 class STDGLWindow : public Window {
 protected:
-    std::shared_ptr<Renderer> rendererRef = nullptr;
+    Engine::Reference<Renderer> rendererRef;
     GLFWwindow* rendererData = nullptr;
     ImGuiContext* UIData = nullptr;
     GLFWwindow* data = nullptr;
@@ -19,7 +20,7 @@ protected:
     friend class GLMisc;
 public:
     ~STDGLWindow();
-    STDGLWindow(std::weak_ptr<Renderer> RendererWeakPtr, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name);
+    STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name);
 
     void SetEatCursor(bool state);
     bool IsEatingCursor();

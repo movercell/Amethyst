@@ -3,26 +3,42 @@
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
 #include "engine/graphics/RWorld.h"
+#include "engine/Resource.h"
 #include "STDGLRenderer.h"
 #include <memory>
 #include <vector>
 #include "STDGLModel.h"
 
 struct STDGLRWorld : public RWorld {
-    std::shared_ptr<Camera> MakeCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH);
+    Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH);
     virtual Camera* GetCamera(const std::string& name);
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 
     ~STDGLRWorld();
-    STDGLRWorld(std::weak_ptr<Renderer> Renderer, GLFWwindow* Context, STDGLModelSystem* ModelSystem) {
-        renderer = Renderer.lock();
+    STDGLRWorld(Engine::Reference<Renderer> Renderer, GLFWwindow* Context, STDGLModelSystem* ModelSystem) {
+        renderer = Renderer;
         context = Context;
         modelsystem = ModelSystem;
     }
 
-    weak_vector<STDGLModelInstanceArray> InstanceArrays;
-    weak_vector<STDGLCamera> CameraVec;
-    std::shared_ptr<Renderer> renderer;
+
+    std::map<std::string, Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>*> InstanceArrays;
+    std::vector<Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>*> CameraVec;
+    Engine::Reference<Renderer> renderer;
     GLFWwindow* context;
     STDGLModelSystem* modelsystem;
+
+    void _unmanage_resource(Engine::Resource<Camera>* res) {
+        CameraVec.erase(std::find(CameraVec.begin(), CameraVec.end(), res));
+        delete res;
+    }
+    void _unmanage_resource(Engine::Resource<STDGLModelInstanceArray>* res) {
+        for (auto it = InstanceArrays.begin(); it != InstanceArrays.end(); ++it) {
+            if (it->second == res) {
+                InstanceArrays.erase(it);
+                break;
+            }
+        }
+        delete res;
+    }
 };

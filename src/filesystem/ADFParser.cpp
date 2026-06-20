@@ -58,7 +58,7 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
     Engine::Error("Unknown character in ADF file!(Is this even an ADF file?)(File: " + filepath + ")");
 }
 
-ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, std::shared_ptr<std::string> filename) {
+ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename) {
     Filename = filename;
 
     switch (Type) {
@@ -156,7 +156,7 @@ void ADFEntry::ADFError(const std::string& error) const {
 
 ENGINEEXPORT ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
     Tokenizer Tokenizer(FilePath);
-    auto filename = std::make_shared<std::string>(FilePath);
+    auto filename = new Engine::UnmanagedResource<std::string>(FilePath);
     return ADFEntry(ADFType::map, Tokenizer, filename);
 }
 

@@ -1,12 +1,12 @@
 #pragma once
 #include "engine/filesystem/Filesystem.h"
 #include "engine/master.h"
+#include "engine/Resource.h"
 #include <variant>
 #include <optional>
 #include <map>
 #include <string>
 #include <vector>
-#include <memory>
 #include <sstream>
 
 
@@ -50,7 +50,7 @@ class ADFEntry {
 
     std::variant<std::map<std::string, ADFEntry>, std::string, std::vector<ADFEntry>> data;
     // This is used for showing which file an error came from
-    std::shared_ptr<std::string> Filename = nullptr;
+    Engine::Reference<std::string> Filename;
 
 
     class Tokenizer {
@@ -73,8 +73,8 @@ class ADFEntry {
     ENGINEEXPORT void ToFileCompact(std::filebuf* buffer) const;
     void ToFileCompactObjectFormatHelper(std::filebuf* buffer) const;
 
-    ADFEntry(ADFType Type, Tokenizer& Tokenizer, std::shared_ptr<std::string> filename);
-    ADFEntry(std::string content, std::shared_ptr<std::string> filename) { data = std::move(content); filename = filename; }
+    ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename);
+    ADFEntry(std::string content, Engine::Reference<std::string> filename) { data = std::move(content); filename = filename; }
     ADFEntry() {};
 public:
     //! Creates an ADF tree from a .adf file.

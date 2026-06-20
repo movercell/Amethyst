@@ -14,16 +14,16 @@
 
 #include "../src/shader.h"
 
-std::shared_ptr<Renderer> STDGLRenderer::Make() {
+Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
 
-    std::shared_ptr<STDGLRenderer> tempRendererRef = std::make_shared<STDGLRenderer>();
+    auto tempres = new Engine::UnmanagedInterfacedResource<Renderer, STDGLRenderer>();
 
-    tempRendererRef->selfRef = std::static_pointer_cast<Renderer>(tempRendererRef);
+    tempres->resource.selfResource = tempres;
 
-    tempRendererRef->Init();
+    tempres->resource.Init();
 
-    return tempRendererRef;
+    return Engine::Reference(tempres);
 }
 
 void STDGLRenderer::Init() {
@@ -56,10 +56,10 @@ STDGLRenderer::~STDGLRenderer() {
 }
 
 
-std::shared_ptr<Window> STDGLRenderer::MakeWindow(int x, int y, std::string name) {
-    std::shared_ptr<STDGLWindow> tempRef = std::make_shared<STDGLWindow>(selfRef, rendererData, x, y, name);
-    WindowVector.push_back(tempRef);
-    return static_pointer_cast<Window>(tempRef);
+Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string name) {
+    auto res = new Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>(this, selfResource, rendererData, x, y, name);
+    WindowVector.push_back(res);
+    return Engine::Reference(res);
 }
 
 
@@ -80,25 +80,27 @@ void STDGLRenderer::Draw() {
     glClearDepth(1.0f);
     glClearColor(0, 0, 0, 1);
 
-    auto SharedRWorldVec = RWorldVec.lock();
-    for (auto& rworldbase : SharedRWorldVec) {
+    for (auto rworldres : RWorldVec) {
 
-        auto rworld = static_pointer_cast<STDGLRWorld>(rworldbase);
+        auto rworld = static_cast<STDGLRWorld*>(rworldres->Get());
         if (rworld->isSkippingRendering())
             continue;
-        auto SharedCameraVec = rworld->CameraVec.lock();
-        auto SharedInstanceArraysVec = rworld->InstanceArrays.lock();
 
-        for (std::shared_ptr<STDGLCamera>& camera : SharedCameraVec) {
+        // Get references to all instance arrays.
+        std::vector<Engine::Reference<STDGLModelInstanceArray>> InstanceArrayRefs;
+        InstanceArrayRefs.reserve(rworld->InstanceArrays.size());
+        for (auto& [_, iarray] : rworld->InstanceArrays)
+            InstanceArrayRefs.emplace_back(iarray);
 
-            GL_PUSH_DEBUG(camera->Name.c_str());
-            camera->Bind();
-            glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
+        for (auto camera : rworld->CameraVec) {
+
+            GL_PUSH_DEBUG(camera->resource.Name.c_str());
+            camera->resource.Bind();
+            glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             
-
             // Clear the instance counts.
-            for (auto& iarray : SharedInstanceArraysVec) {
+            for (auto& iarray : InstanceArrayRefs) {
                 auto* model = iarray->Model.get();
 
                 for (int i = 0; i < model->LODCount; i++) {
@@ -108,17 +110,18 @@ void STDGLRenderer::Draw() {
 
             // Cull instances.
             glUseProgram(ModelInstancePreprocessShader);
-            for (auto& iarray : SharedInstanceArraysVec) {
+            for (auto& iarray : InstanceArrayRefs) {
                 iarray->Bind();
                 iarray->Model->BindInfo();
-                glDispatchCompute(STDGLMODEL_INSTANCE_MAX_COUNT / STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE, 1, 1);
+                int groupcount = iarray->NextIndex / STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE;
+                glDispatchCompute(iarray->NextIndex % STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE ? groupcount + 1 : groupcount, 1, 1);
             }
 
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
             // Replicate the instance counts across all LOD meshes.
             glUseProgram(ModelInstanceReplicatorShader);
-            for (auto& iarray : SharedInstanceArraysVec) {
+            for (auto& iarray : InstanceArrayRefs) {
                 iarray->Model->BindInfo();
                 glDispatchCompute(1, 1, 1);
             }
@@ -128,7 +131,7 @@ void STDGLRenderer::Draw() {
             // Draw.
             glUseProgram(0);
             glBindProgramPipeline(tmpshader);
-            for (auto& iarray : SharedInstanceArraysVec) {
+            for (auto& iarray : InstanceArrayRefs) {
                 iarray->Bind();
                 iarray->Model->BindInfo();
                 iarray->Model->BindIndirectCommands();
@@ -148,27 +151,25 @@ void STDGLRenderer::Draw() {
     FrameCounter++;
 
     // Draw windows.
-    auto SharedWindowVector = WindowVector.lock();
-    for (auto& window : SharedWindowVector) {
-        window->Draw();
+    for (auto& window : WindowVector) {
+        window->resource.Draw();
     }
 
     DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
 }
 
-std::shared_ptr<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = make_shared<STDGLRWorld>(selfRef, rendererData, &ModelSystem);
+Engine::Reference<RWorld> STDGLRenderer::MakeRWorld() {
+    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, rendererData, &ModelSystem);
     RWorldVec.push_back(result);
 
-    return static_pointer_cast<RWorld>(result);
+    return Engine::Reference(result);
 }
 
 Camera* STDGLRenderer::GetCamera(std::string name) {
     Camera* result = nullptr;
-    auto SharedRWorldVec = RWorldVec.lock();
-    for (auto rworld : SharedRWorldVec) {
-        auto temp = rworld->GetCamera(name);
+    for (auto rworld : RWorldVec) {
+        auto temp = rworld->Get()->GetCamera(name);
         if (temp) result = temp;
     }
     return result;

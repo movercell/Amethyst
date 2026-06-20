@@ -112,7 +112,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 int main() {
 	Engine::Init();
 
-	std::shared_ptr<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
+	Engine::Reference<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	auto rworld = openglrenderer->MakeRWorld();
 
 	World tmpworld(rworld);
@@ -125,9 +125,9 @@ int main() {
 
 	auto tmpentityhandler = tmpworld[0];
 
-	std::shared_ptr<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
+	Engine::Reference<Window> enginewindow = openglrenderer->MakeWindow(800, 600, "Amethyst");
 	enginewindow->SetUIFunction(mainuifunction);
-	std::array<std::shared_ptr<Camera>, 2> cameras;
+	std::array<Engine::Reference<Camera>, 2> cameras;
 	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
 	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
