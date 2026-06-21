@@ -135,7 +135,7 @@ int main() {
 	models[2] = rworld->MakeModelInstance("cube.adf");
 
 	for (int i = 0; i < 256; i++) {
-		extramodels.push_back(rworld->MakeModelInstance(std::to_string(i)));
+		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
 	}
 
 	std::cout << "Hello, world!" << std::endl;
