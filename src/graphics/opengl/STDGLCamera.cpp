@@ -21,7 +21,7 @@ void STDGLCamera::Bind() {
 void STDGLCamera::CreateBuffers() {
     glCreateFramebuffers(1, &Framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
-    glCreateTextures(GL_TEXTURE_2D, 2, AllTextureBuffers);
+    glCreateTextures(GL_TEXTURE_2D, 4, AllTextureBuffers);
     // Color buffer
     glTextureStorage2D (Colorbuffer, 1, GL_RGBA8, Resolution.x, Resolution.y);
     glTextureParameteri(Colorbuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -33,6 +33,19 @@ void STDGLCamera::CreateBuffers() {
     glTextureParameteri(Depthbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
     glNamedFramebufferTexture(Framebuffer, GL_STENCIL_ATTACHMENT, Depthbuffer, 0);
+    // Normal buffer
+    glTextureStorage2D (Normalbuffer, 1, GL_RG16_SNORM, Resolution.x, Resolution.y);
+    glTextureParameteri(Normalbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(Normalbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT1, Normalbuffer, 0);
+    // Other PBR values buffer
+    glTextureStorage2D (PBROtherValuesbuffer, 1, GL_RG8_SNORM, Resolution.x, Resolution.y);
+    glTextureParameteri(PBROtherValuesbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(PBROtherValuesbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT2, PBROtherValuesbuffer, 0);
+
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, drawBuffers);
 
     // Information buffer
     glCreateBuffers(1, &Infobuffer);

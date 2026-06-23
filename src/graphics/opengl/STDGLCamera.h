@@ -20,9 +20,9 @@ public:
     GLuint Framebuffer;
     union {
         struct {
-            GLuint Colorbuffer, Depthbuffer;
+            GLuint Colorbuffer, Depthbuffer, Normalbuffer, PBROtherValuesbuffer;
         };
-        GLuint AllTextureBuffers[2];
+        GLuint AllTextureBuffers[4];
     };
     GLuint Infobuffer;
     GLFWwindow* Context;
