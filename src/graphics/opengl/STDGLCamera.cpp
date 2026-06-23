@@ -3,22 +3,18 @@
 #include "glm/geometric.hpp"
 
 void STDGLCamera::UpdateCameraVectors() {
-    // calculate the new Front vector
-    vec3 front;
-    front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    front.z = sin(glm::radians(Pitch));
-    front.y = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Front = front.norm();
-    // also re-calculate the Right and Up vector
-    // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    Right = Front.cross(WorldUp).norm();
-    Up    = Right.cross(Front).norm();
+    mat4 Rotation = quat(vec3(Pitch, Yaw, 0.0f)).MakeRotationMatrix();
+
+    Front = Rotation[0].ToVec3();
+    Left = Rotation[1].ToVec3();
+    Up = Rotation[2].ToVec3();
 }
 
 void STDGLCamera::Bind() {
     Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
     mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, CAMERA_DEFAULT_NEAR, CAMERA_DEFAULT_FAR);
     Info.ViewProjection = projection * Info.View;
+
     Info.Frustum = Shapes::Frustum(Info.ViewProjection);
     Info.CameraPos = Position;
     glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
@@ -32,7 +28,7 @@ void STDGLCamera::ProcessMouseMovement(vec2 offset, bool constrainPitch)
     offset.x *= MouseSensitivity;
     offset.y *= MouseSensitivity;
     Yaw   -= offset.x;
-    Pitch -= offset.y;
+    Pitch += offset.y;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
     if (constrainPitch) {

@@ -51,17 +51,17 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	vec3 direction;
 	if (isUsingCamera && window->IsWindowInFocus()) {
     	    if (ImGui::IsKeyDown(ImGuiKey_W))
-    	        direction  += camera->Front;
+    	        direction += camera->Front;
     	    if (ImGui::IsKeyDown(ImGuiKey_S))
-    	        direction  -= camera->Front;
+    	        direction -= camera->Front;
     	    if (ImGui::IsKeyDown(ImGuiKey_A))
-    	        direction  -= camera->Right;
+    	        direction += camera->Left;
     	    if (ImGui::IsKeyDown(ImGuiKey_D))
-    	        direction  += camera->Right;
+    	        direction -= camera->Left;
     	    if (ImGui::IsKeyDown(ImGuiKey_Space))
-    	        direction  += vec3(0, 0, 1);
+    	        direction += vec3(0, 0, 1);
     	    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-    	        direction += vec3(0, 0, -1);
+    	        direction -= vec3(0, 0, 1);
 		direction = direction.norm();
 		camera->Position += direction * velocity;
 		static vec2 lastmouse = vec2(0, 0);

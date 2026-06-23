@@ -157,6 +157,7 @@ struct alignas(sizeof(float) * 4) vec4 {
     float length() const { return std::sqrt(x*x + y*y + z*z + w*w); }
     vec4 norm() const { float Length = length(); if (Length == 0.0f) return vec4();  return vec4(x / Length, y / Length, z / Length, 2 / Length); }
 
+    vec3 ToVec3() { return vec3(x, y, z); }
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     vec4 (const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
     glm::vec4 toglm() const { return glm::vec4(x, y, z, w); }
@@ -227,6 +228,15 @@ struct alignas(sizeof(float) * 4) mat4 {
         return !(*this == other);
     }
 
+    mat4 Transpose() {
+        return mat4(
+            (*this)[0, 0], (*this)[0, 1], (*this)[0, 2], (*this)[0, 3],
+            (*this)[1, 0], (*this)[1, 1], (*this)[1, 2], (*this)[1, 3],
+            (*this)[2, 0], (*this)[2, 1], (*this)[2, 2], (*this)[2, 3],
+            (*this)[3, 0], (*this)[3, 1], (*this)[3, 2], (*this)[3, 3]
+        );
+    }
+
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     mat4(const glm::mat4& other) {
         *this = std::bit_cast<mat4>(other);
@@ -255,15 +265,22 @@ struct alignas(sizeof(float) * 4) quat {
     quat(vec3 angles) {
         const float anglestoradians = 0.017453293;
 
-        float pitchradian = (angles.x * anglestoradians) / 2;
-        float yawradian   = (angles.y * anglestoradians) / 2;
-        float rollradian  = (angles.z * anglestoradians) / 2;
+        float pitchvalue = (angles.x * anglestoradians) * 0.5f;
+        float yawvalue   = (angles.y * anglestoradians) * 0.5f;
+        float rollvalue  = (angles.z * anglestoradians) * 0.5f;
 
-        quat yaw = quat(0, 0, -sin(yawradian), cos(yawradian)); // Seemingly I screwed something up and now I have to invert the thing here
-        quat pitch = quat(0, sin(pitchradian), 0, cos(pitchradian));
-        quat roll = quat(sin(rollradian), 0, 0, cos(rollradian));
+        float cy = std::cos(yawvalue);
+        float sy = std::sin(yawvalue);
+        float cp = std::cos(pitchvalue);
+        float sp = std::sin(pitchvalue);
+        float cr = std::cos(rollvalue);
+        float sr = std::sin(rollvalue);
 
-        *this = yaw * (pitch * roll);
+        x = cy * cp * sr - sy * sp * cr;
+        y = cy * sp * cr + sy * cp * sr;
+        z = sy * cp * cr - cy * sp * sr;
+        w = cy * cp * cr + sy * sp * sr;
+
         Norm();
     }
 
