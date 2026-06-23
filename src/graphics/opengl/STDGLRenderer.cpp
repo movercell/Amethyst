@@ -13,8 +13,6 @@
 #include "GLMisc.h"
 #include "STDGLWindow.h"
 
-#include "../src/shader.h"
-
 Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
 
@@ -74,8 +72,6 @@ void STDGLRenderer::Draw() {
         glDeleteSync(DoubleBufferFences[isFrameOdd]);
     }
 
-    auto tmpshader = ShaderSystem.GetShaderPipeline("Generic", "UnlitGeneric").first;
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
@@ -100,47 +96,7 @@ void STDGLRenderer::Draw() {
             glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             
-            // Clear the instance counts.
-            for (auto& iarray : InstanceArrayRefs) {
-                auto* model = iarray->Model.get();
-
-                for (int i = 0; i < model->LODCount; i++) {
-                    glClearNamedBufferSubData(model->ModelInfo, GL_R32UI, i * STDGLMODEL_MESH_MAX_COUNT * sizeof(DrawElementsIndirectCommand) + offsetof(DrawElementsIndirectCommand, instanceCount), sizeof(GLuint), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
-                }
-            }
-
-            // Cull instances.
-            glUseProgram(ModelInstancePreprocessShader);
-            for (auto& iarray : InstanceArrayRefs) {
-                iarray->Bind();
-                iarray->Model->BindInfo();
-                int groupcount = iarray->NextIndex / STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE;
-                glDispatchCompute(iarray->NextIndex % STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE ? groupcount + 1 : groupcount, 1, 1);
-            }
-
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-            // Replicate the instance counts across all LOD meshes.
-            glUseProgram(ModelInstanceReplicatorShader);
-            for (auto& iarray : InstanceArrayRefs) {
-                iarray->Model->BindInfo();
-                glDispatchCompute(1, 1, 1);
-            }
-
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
-
-            // Draw.
-            glUseProgram(0);
-            glBindProgramPipeline(tmpshader);
-            for (auto& iarray : InstanceArrayRefs) {
-                iarray->Bind();
-                iarray->Model->BindInfo();
-                iarray->Model->BindIndirectCommands();
-
-                iarray->Model->Draw();
-            }
-
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+            DrawIArrays<false>(InstanceArrayRefs);
 
             GL_POP_DEBUG;
             
@@ -159,6 +115,59 @@ void STDGLRenderer::Draw() {
     DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
 }
+
+template<bool isDepth>
+void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
+    // Clear the instance counts.
+    for (auto& iarray : InstanceArrayRefs) {
+        auto* model = iarray->Model.get();
+
+        for (int i = 0; i < model->LODCount; i++) {
+            glClearNamedBufferSubData(model->ModelInfo, GL_R32UI, i * STDGLMODEL_MESH_MAX_COUNT * sizeof(DrawElementsIndirectCommand) + offsetof(DrawElementsIndirectCommand, instanceCount), sizeof(GLuint), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+        }
+    }
+
+    // Cull instances.
+    glUseProgram(ModelInstancePreprocessShader);
+    for (auto& iarray : InstanceArrayRefs) {
+        iarray->Bind();
+        iarray->Model->BindInfo();
+        int groupcount = iarray->NextIndex / STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE;
+        glDispatchCompute(iarray->NextIndex % STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE ? groupcount + 1 : groupcount, 1, 1);
+    }
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    // Replicate the instance counts across all LOD meshes.
+    glUseProgram(ModelInstanceReplicatorShader);
+    for (auto& iarray : InstanceArrayRefs) {
+        iarray->Model->BindInfo();
+        glDispatchCompute(1, 1, 1);
+    }
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+
+    // Draw.
+    glUseProgram(0);
+    auto tmpshader = ShaderSystem.GetShaderPipeline("Generic", "UnlitGeneric").first;
+    glBindProgramPipeline(tmpshader);
+    for (auto& iarray : InstanceArrayRefs) {
+        iarray->Bind();
+        
+        auto& Model = iarray->Model;
+        Model->BindInfo();
+        Model->BindIndirectCommands();
+
+        if constexpr (isDepth)
+            Model->DrawDepth();
+        else
+            Model->Draw();
+    }
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+
 
 Engine::Reference<RWorld> STDGLRenderer::MakeRWorld() {
     auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, rendererData, &ModelSystem);

@@ -43,6 +43,8 @@ protected:
         RWorldVec.erase(std::find(RWorldVec.begin(), RWorldVec.end(), res));
         delete res;
     }
+    template<bool isDepth>
+    void DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs);
 public:
     ~STDGLRenderer();
     static Engine::Reference<Renderer> Make();
