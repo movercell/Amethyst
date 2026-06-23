@@ -18,7 +18,12 @@ class STDGLCamera : public Camera {
 public:
 
     GLuint Framebuffer;
-    GLuint Colorbuffers[2], Depthbuffer;
+    union {
+        struct {
+            GLuint Colorbuffer, Depthbuffer;
+        };
+        GLuint AllTextureBuffers[2];
+    };
     GLuint Infobuffer;
     GLFWwindow* Context;
     const uint64_t* FrameCounterPtr;
@@ -33,24 +38,19 @@ public:
 
 
     // Constructor with vectors.
-    STDGLCamera(GLFWwindow* context, const uint64_t* framecounterptr, vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH) {
+    STDGLCamera(GLFWwindow* context, const uint64_t* framecounterptr, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
         Context = context;
         FrameCounterPtr = framecounterptr;
         Resolution = resolution;
         Name = name;
-        Position = position;
-        Yaw = yaw;
-        Pitch = pitch;
+        FOV = fov;
+        Near = near;
+        Far = far;
         CreateBuffers();
-
-        UpdateCameraVectors();
     }
 
     // Binds the camera into UBO slot 0.
     void Bind();
-
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(vec2 offset, bool constrainPitch = true);
 
     uint32_t GetTexture();
     uint32_t GetDepthTexture();
@@ -60,6 +60,4 @@ public:
 private:
     // Creates the buffers.
     void CreateBuffers();
-    // Calculates the front vector from the Camera's (updated) Euler Angles.
-    void UpdateCameraVectors();
 };

@@ -10,7 +10,7 @@
 #include "STDGLModel.h"
 
 struct STDGLRWorld : public RWorld {
-    Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, vec3 position = vec3(0.0f, 0.0f, 0.0f), float yaw = CAMERA_DEFAULT_YAW, float pitch = CAMERA_DEFAULT_PITCH);
+    Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, float FOV = CAMERA_DEFAULT_FOV, float Near = CAMERA_DEFAULT_NEAR, float Far = CAMERA_DEFAULT_FAR);
     virtual Camera* GetCamera(const std::string& name);
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 

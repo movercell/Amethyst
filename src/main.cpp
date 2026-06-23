@@ -40,6 +40,9 @@ std::vector<std::unique_ptr<ModelInstance>> extramodels;
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
 	static bool isUsingCamera = false;
+	static float Pitch = 0.0f;
+	static float Yaw = 0.0f;
+	static vec3 CameraPosition = vec3(1.0f, 1.0f, 1.0f);
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
 		isUsingCamera = !isUsingCamera;
@@ -51,27 +54,40 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	vec3 direction;
 	if (isUsingCamera && window->IsWindowInFocus()) {
     	    if (ImGui::IsKeyDown(ImGuiKey_W))
-    	        direction += camera->Front;
+    	        direction += camera->GetFront();
     	    if (ImGui::IsKeyDown(ImGuiKey_S))
-    	        direction -= camera->Front;
+    	        direction -= camera->GetFront();
     	    if (ImGui::IsKeyDown(ImGuiKey_A))
-    	        direction += camera->Left;
+    	        direction += camera->GetLeft();
     	    if (ImGui::IsKeyDown(ImGuiKey_D))
-    	        direction -= camera->Left;
+    	        direction -= camera->GetLeft();
     	    if (ImGui::IsKeyDown(ImGuiKey_Space))
     	        direction += vec3(0, 0, 1);
     	    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
     	        direction -= vec3(0, 0, 1);
 		direction = direction.norm();
-		camera->Position += direction * velocity;
+		CameraPosition += direction * velocity;
+
+
 		static vec2 lastmouse = vec2(0, 0);
 		vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
 		if (ImGui::IsKeyPressed(ImGuiKey_Z, false))
 			lastmouse = currmouse;
 		vec2 mouseoffset = currmouse - lastmouse;
 		lastmouse = currmouse;
-		camera->ProcessMouseMovement(mouseoffset, true);
+		
+		mouseoffset.x *= 7.5f * deltaTime;
+    	mouseoffset.y *= 7.5f * deltaTime;
+    	Yaw   -= mouseoffset.x;
+    	Pitch += mouseoffset.y;
+
+        if (Pitch > 89.0f)
+            Pitch = 89.0f;
+        if (Pitch < -89.0f)
+            Pitch = -89.0f;
 	}
+	camera->SetPosition(CameraPosition);
+	camera->SetAngles(vec3(Pitch, Yaw));
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
@@ -98,11 +114,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 	ImGui::Begin("Hello from ui function");
 		ImGui::Text("Delta		 : %f", deltaTime);
-		ImGui::Text("Camera pitch: %f", camera->Pitch);
-		ImGui::Text("Camera yaw  : %f", camera->Yaw);
-		ImGui::Text("Camera X	 : %f", camera->Position.x);
-		ImGui::Text("Camera Y	 : %f", camera->Position.y);
-		ImGui::Text("Camera Z	 : %f", camera->Position.z);
+		ImGui::Text("Camera pitch: %f", Pitch);
+		ImGui::Text("Camera yaw  : %f", Yaw);
+		ImGui::Text("Camera X	 : %f", CameraPosition.x);
+		ImGui::Text("Camera Y	 : %f", CameraPosition.y);
+		ImGui::Text("Camera Z	 : %f", CameraPosition.z);
 		if (ImGui::Button("Delete model 0"))
 			models[0].reset();
 	ImGui::End();
@@ -129,7 +145,7 @@ int main() {
 	enginewindow->SetUIFunction(mainuifunction);
 	std::array<Engine::Reference<Camera>, 2> cameras;
 	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
-	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2", vec3(1, 1, 1));
+	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2");
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.adf");
