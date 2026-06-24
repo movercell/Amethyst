@@ -21,17 +21,10 @@ namespace Engine {
                 Front = RotationMatrix[0].ToVec3();
                 Left = RotationMatrix[1].ToVec3();
                 Up = RotationMatrix[2].ToVec3();
-
-                wasChanged = true;
-            }
-            void SetAngles(vec3 Angle) {
-                SetRotation(quat(Angle));
             }
 
             void SetPosition(vec3 Pos) {
                 Position = Pos;
-
-                wasChanged = true;
             }
         protected:
             vec3 Position;
@@ -44,8 +37,6 @@ namespace Engine {
             float Near = CAMERA_DEFAULT_NEAR;
             float Far = CAMERA_DEFAULT_FAR;
             vec2 Resolution;
-
-            bool wasChanged = true;
         };
     }
 }
@@ -63,6 +54,18 @@ struct Camera : public Engine::Internal::BaseCameraOrLight {
     //! Gets the coordinate up axis.
     vec3 GetUp() { return Up; };
 
+    void SetRotation(quat Rotation) {
+        Engine::Internal::BaseCameraOrLight::SetRotation(Rotation);
+        wasChanged = true;
+    }
+    void SetAngles(vec3 Angle) {
+        SetRotation(quat(Angle));
+    }
+    void SetPosition(vec3 Pos) {
+        Engine::Internal::BaseCameraOrLight::SetPosition(Pos);
+        wasChanged = true;
+    }
+
     virtual uint32_t GetTexture() = 0;
     virtual uint32_t GetDepthTexture() = 0;
 
@@ -70,4 +73,7 @@ struct Camera : public Engine::Internal::BaseCameraOrLight {
 
 
     inline vec2 GetResolution() { return Resolution; };
+
+protected:
+    bool wasChanged = true;
 };
