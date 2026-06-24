@@ -83,12 +83,32 @@ void STDGLRenderer::Draw() {
         if (rworld->isSkippingRendering())
             continue;
 
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, rworld->lightsystem.LightDataBuffer);
+
         // Get references to all instance arrays.
         std::vector<Engine::Reference<STDGLModelInstanceArray>> InstanceArrayRefs;
         InstanceArrayRefs.reserve(rworld->InstanceArrays.size());
         for (auto& [_, iarray] : rworld->InstanceArrays)
             InstanceArrayRefs.emplace_back(iarray);
+        
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-2.0f, -0.7f);
+        glCullFace(GL_FRONT);
+        for (auto light : rworld->lightsystem.LightResources) {
+            if (!light) continue;
+            
+            GL_PUSH_DEBUG("Light");
+            light->resource.Bind();
+            glViewport(0, 0, light->resource.GetResolution().x, light->resource.GetResolution().y);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            
+            DrawIArrays<true>(InstanceArrayRefs);
 
+            GL_POP_DEBUG;
+        }
+
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glCullFace(GL_BACK);
         for (auto camera : rworld->CameraVec) {
 
             GL_PUSH_DEBUG(camera->resource.Name.c_str());
@@ -149,7 +169,11 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
 
     // Draw.
     glUseProgram(0);
-    auto tmpshader = ShaderSystem.GetShaderPipeline("Generic", "UnlitGeneric").first;
+    GLuint tmpshader;
+    if constexpr (isDepth)
+        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").second;
+    else
+        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").first;
     glBindProgramPipeline(tmpshader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
@@ -158,10 +182,7 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
         Model->BindInfo();
         Model->BindIndirectCommands();
 
-        if constexpr (isDepth)
-            Model->DrawDepth();
-        else
-            Model->Draw();
+        Model->Draw<isDepth>();
     }
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -170,7 +191,9 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
 
 
 Engine::Reference<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, rendererData, &ModelSystem);
+    glfwMakeContextCurrent(rendererData);
+    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, &ModelSystem);
+    result->resource.selfResource = result;
     RWorldVec.push_back(result);
 
     return Engine::Reference(result);

@@ -1,0 +1,17 @@
+#define LIGHT_TYPE_NONE 0
+#define LIGHT_TYPE_SPOT 1
+
+struct STDGLLightData {
+    mat4 ViewProjection;
+    uvec2 Texture;
+    int Type;
+    float FOV;
+    float Near;
+    float Far;
+    vec3 Color;
+    vec3 LightPos;
+};
+
+layout (std140, binding = 2) uniform _LightBuffer {
+    STDGLLightData Lights[];
+} LightBuffer;

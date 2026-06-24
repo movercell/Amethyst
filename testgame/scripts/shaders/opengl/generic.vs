@@ -12,14 +12,18 @@ out gl_PerVertex {
 };
 out VertexData {
     vec3 Position;
+    vec4 LocalPosition;
     vec3 Normal;
     vec2 UV;
 } toFrag;
 
 
 void main() {
+    mat4 InstanceMarix = InstanceBuffer.InstanceMatrices[ModelInfo.InstanceIndices[gl_BaseInstance][gl_InstanceID]];
     toFrag.Position = Position;
-    toFrag.Normal = Normal;
+    toFrag.Normal = transpose(inverse(mat3(InstanceMarix))) * Normal;
     toFrag.UV = UV;
-    gl_Position = Camera.ViewProjection * InstanceBuffer.InstanceMatrices[ModelInfo.InstanceIndices[gl_BaseInstance][gl_InstanceID]] * vec4(Position, 1.0f);
+    vec4 WorldPosition = InstanceMarix * vec4(Position, 1.0f);
+    toFrag.LocalPosition = Camera.ViewProjection * WorldPosition;
+    gl_Position = toFrag.LocalPosition;
 }

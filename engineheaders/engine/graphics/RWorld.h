@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Camera.h"
-#include "engine/graphics/ModelInstance.h"
+#include "Light.h"
+#include "ModelInstance.h"
 #include "engine/Resource.h"
 #include <memory>
 #include <string>
@@ -19,6 +20,8 @@ protected:
 public:
     //! Makes a camera.
     virtual Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, float FOV = CAMERA_DEFAULT_FOV, float Near = CAMERA_DEFAULT_NEAR, float Far = CAMERA_DEFAULT_FAR) = 0;
+    //! Makes a spotlight.
+    virtual Engine::Reference<Light> MakeSpotLight(vec2 resolution, float fov, vec3 color, float near, float far) = 0;
     //! Gets a camera.(used for getting the camera's render result in window UI functions)
     virtual Camera* GetCamera(const std::string& name) = 0;
     //! Adds a model instance to the scene.

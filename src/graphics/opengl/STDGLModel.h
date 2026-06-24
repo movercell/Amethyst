@@ -18,6 +18,7 @@
 #include <map>
 
 struct STDGLModel {
+    template<bool isDepth>
     void Draw() {
         glBindVertexArray(VAO);
         for (int LOD = 0; LOD < LODCount; LOD++) {
@@ -28,7 +29,6 @@ struct STDGLModel {
             }
         }
     }
-    void DrawDepth();
     inline void BindInfo() {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ModelInfo);
     }

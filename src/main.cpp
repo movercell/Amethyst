@@ -150,6 +150,14 @@ int main() {
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.adf");
 
+	std::array<Engine::Reference<Light>, 1> lights;
+	lights[0] = rworld->MakeSpotLight(vec2(512, 512), 90, vec3(1.0f, 1.0f, 1.0f), 1, 100);
+	//lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
+	//lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
+	lights[0]->SetPosition(vec3(0.0f, 30.0f, 0.0f));
+	lights[0]->SetAngles(vec3(0.0f, -90.0f, 0.0f));
+
+
 	for (int i = 0; i < 256; i++) {
 		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
 	}

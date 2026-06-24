@@ -18,9 +18,9 @@ struct STDGLCamera : public Camera {
     GLuint Framebuffer;
     union {
         struct {
-            GLuint Colorbuffer, Depthbuffer, Normalbuffer, PBROtherValuesbuffer;
+            GLuint Colorbuffer, Depthbuffer, NormalAndPBRbuffer;
         };
-        GLuint AllTextureBuffers[4];
+        GLuint AllTextureBuffers[3];
     };
     GLuint Infobuffer;
     GLFWwindow* Context;
@@ -35,10 +35,11 @@ struct STDGLCamera : public Camera {
     };
     Camerainfo_t Info;
 
-
+    Engine::Reference<RWorld> RWorldRef;
     // Constructor with vectors.
-    STDGLCamera(GLFWwindow* context, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
-        Context = context;
+    STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
+        Context = glfwGetCurrentContext();
+        RWorldRef = rworldref;
         Resolution = resolution;
         Name = name;
         FOV = fov;
