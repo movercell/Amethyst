@@ -18,9 +18,14 @@ struct Light : public Engine::Internal::BaseCameraOrLight {
         FOV = fov;
         HandleChange();
     }
+    void SetColor(vec3 color) {
+        Color = color;
+        HandleChange();
+    }
 
-    virtual ~Light() = 0;
+    virtual ~Light() {};
 
 protected:
+    vec3 Color;
     virtual void HandleChange() = 0;
 };

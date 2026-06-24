@@ -14,9 +14,7 @@
 const vec3 WorldUp = vec3(0.0f, 0.0f, 1.0f);
 
 
-class STDGLCamera : public Camera {
-public:
-
+struct STDGLCamera : public Camera {
     GLuint Framebuffer;
     union {
         struct {
@@ -26,11 +24,12 @@ public:
     };
     GLuint Infobuffer;
     GLFWwindow* Context;
-    const uint64_t* FrameCounterPtr;
 
     struct Camerainfo_t {
         mat4 View;
         mat4 ViewProjection;
+        mat4 InverseView;
+        mat4 InverseViewProjection;
         Shapes::Frustum Frustum;
         vec3 CameraPos;
     };
@@ -38,9 +37,8 @@ public:
 
 
     // Constructor with vectors.
-    STDGLCamera(GLFWwindow* context, const uint64_t* framecounterptr, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
+    STDGLCamera(GLFWwindow* context, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
         Context = context;
-        FrameCounterPtr = framecounterptr;
         Resolution = resolution;
         Name = name;
         FOV = fov;

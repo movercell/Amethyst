@@ -8,7 +8,7 @@
 
 Engine::Reference<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, float FOV, float Near, float Far) {
     glfwMakeContextCurrent(context);
-    auto result = new Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>(this, context, &(renderer->GetFrameCounter()), resolution, name, FOV, Near, Far);
+    auto result = new Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>(this, context, resolution, name, FOV, Near, Far);
     CameraVec.push_back(result);
 
     return result;

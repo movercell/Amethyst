@@ -8,6 +8,9 @@ void STDGLCamera::Bind() {
         mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
         Info.ViewProjection = projection * Info.View;
 
+        Info.InverseView = glm::inverse(Info.View.toglm());
+        Info.InverseViewProjection = glm::inverse(Info.ViewProjection.toglm());
+
         Info.Frustum = Shapes::Frustum(Info.ViewProjection);
         Info.CameraPos = Position;
         glNamedBufferSubData(Infobuffer, 0, sizeof(Camerainfo_t), &Info);
