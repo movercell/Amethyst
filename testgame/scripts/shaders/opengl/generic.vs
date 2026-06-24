@@ -21,5 +21,5 @@ void main() {
     toFrag.Position = Position;
     toFrag.Normal = Normal;
     toFrag.UV = UV;
-    gl_Position = CameraViewProjection * InstanceMatrices[InstanceIndices[gl_BaseInstance][gl_InstanceID]] * vec4(Position, 1.0f);
+    gl_Position = Camera.ViewProjection * InstanceBuffer.InstanceMatrices[ModelInfo.InstanceIndices[gl_BaseInstance][gl_InstanceID]] * vec4(Position, 1.0f);
 }

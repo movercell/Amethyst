@@ -1,6 +1,6 @@
-layout (std140, binding = 0) uniform Camera {
-    mat4 CameraView;
-    mat4 CameraViewProjection;
-    vec4 CameraFrustum[6];
-    vec3 CameraPos;
-};
+layout (std140, binding = 0) uniform _Camera {
+    mat4 View;
+    mat4 ViewProjection;
+    vec4 Frustum[6];
+    vec3 Pos;
+} Camera;

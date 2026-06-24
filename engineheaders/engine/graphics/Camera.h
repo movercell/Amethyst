@@ -66,6 +66,11 @@ struct Camera : public Engine::Internal::BaseCameraOrLight {
         wasChanged = true;
     }
 
+    virtual void SetFOV(float fov) {
+        FOV = fov;
+        wasChanged = true;
+    }
+
     virtual uint32_t GetTexture() = 0;
     virtual uint32_t GetDepthTexture() = 0;
 
