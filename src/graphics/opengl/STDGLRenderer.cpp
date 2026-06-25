@@ -48,7 +48,6 @@ void STDGLRenderer::Init() {
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
-    DeferredPassShader = ShaderSystem.GetShaderPipeline("Screenspace", "STDGLDeferredPass").first;
 }
 
 STDGLRenderer::~STDGLRenderer() {
@@ -92,7 +91,7 @@ void STDGLRenderer::Draw() {
             InstanceArrayRefs.emplace_back(iarray);
         
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(2.0f, 0.7f);
+        glPolygonOffset(1.7f, 1.2f);
         glDisable(GL_CULL_FACE);
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
@@ -116,17 +115,15 @@ void STDGLRenderer::Draw() {
             glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             
-            DrawIArrays<false>(InstanceArrayRefs);
+            // Z-Prepass.
+            DrawIArrays<true>(InstanceArrayRefs);
 
-            // Lighting
-            glTextureBarrier();
-            glDisable(GL_DEPTH_TEST);
-            glBindProgramPipeline(DeferredPassShader);
-            glBindTextureUnit(0, camera->resource.Colorbuffer);
-            glBindTextureUnit(1, camera->resource.NormalAndPBRbuffer);
-            glBindTextureUnit(2, camera->resource.Depthbuffer);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glEnable(GL_DEPTH_TEST);
+            // TODO: Cluster processing
+
+            // Normal rendering.
+            glDepthFunc(GL_EQUAL);
+            DrawIArrays<false>(InstanceArrayRefs);
+            glDepthFunc(GL_LESS);
 
             GL_POP_DEBUG;
             

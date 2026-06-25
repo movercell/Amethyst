@@ -33,7 +33,6 @@ void STDGLLight::CreateBuffers() {
     glTextureParameteri(Depthbuffer, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTextureParameteri(Depthbuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTextureParameteri(Depthbuffer, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTextureParameterf(Depthbuffer, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
 
 
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
