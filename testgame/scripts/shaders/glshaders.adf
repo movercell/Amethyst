@@ -3,11 +3,20 @@ Shaders {
         Generic {
             Source "generic.vs"
         }
+        Screenspace {
+            Source "screenspace.vs"
+        }
     }
     Fragment {
         Generic {
             Source "generic.fs"
             DepthSource "generic.ds"
+        }
+        STDGLDeferredPass {
+            Source "STDGLDeferredPass.fs"
+        }
+        STDGLLight0DebugDrawDepthToScreen {
+            Source "STDGLLight0DebugDrawDepthToScreen.fs"
         }
     }
     Compute {

@@ -28,6 +28,7 @@ protected:
 
     GLuint ModelInstancePreprocessShader;
     GLuint ModelInstanceReplicatorShader;
+    GLuint DeferredPassShader;
 
     uint64_t FrameCounter = 0;
 

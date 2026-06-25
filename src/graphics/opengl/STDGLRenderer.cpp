@@ -48,6 +48,7 @@ void STDGLRenderer::Init() {
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
+    DeferredPassShader = ShaderSystem.GetShaderPipeline("Screenspace", "STDGLDeferredPass").first;
 }
 
 STDGLRenderer::~STDGLRenderer() {
@@ -73,7 +74,6 @@ void STDGLRenderer::Draw() {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
     glClearDepth(1.0f);
     glClearColor(0, 0, 0, 1);
 
@@ -92,8 +92,8 @@ void STDGLRenderer::Draw() {
             InstanceArrayRefs.emplace_back(iarray);
         
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-2.0f, -0.7f);
-        glCullFace(GL_FRONT);
+        glPolygonOffset(2.0f, 0.7f);
+        glDisable(GL_CULL_FACE);
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
             
@@ -108,7 +108,7 @@ void STDGLRenderer::Draw() {
         }
 
         glDisable(GL_POLYGON_OFFSET_FILL);
-        glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
         for (auto camera : rworld->CameraVec) {
 
             GL_PUSH_DEBUG(camera->resource.Name.c_str());
@@ -117,6 +117,16 @@ void STDGLRenderer::Draw() {
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             
             DrawIArrays<false>(InstanceArrayRefs);
+
+            // Lighting
+            glTextureBarrier();
+            glDisable(GL_DEPTH_TEST);
+            glBindProgramPipeline(DeferredPassShader);
+            glBindTextureUnit(0, camera->resource.Colorbuffer);
+            glBindTextureUnit(1, camera->resource.NormalAndPBRbuffer);
+            glBindTextureUnit(2, camera->resource.Depthbuffer);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glEnable(GL_DEPTH_TEST);
 
             GL_POP_DEBUG;
             

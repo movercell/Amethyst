@@ -1,5 +1,9 @@
 #version 460 core
 
+#ifdef GLSLANGVALIDATOR
+#extension GL_GOOGLE_include_directive : require
+#endif
+
 #include "STDGLModel.incl"
 #include "STDGLCamera.incl"
 
@@ -11,7 +15,7 @@ out gl_PerVertex {
     float gl_PointSize;
 };
 out VertexData {
-    vec3 Position;
+    vec4 Position;
     vec4 LocalPosition;
     vec3 Normal;
     vec2 UV;
@@ -20,10 +24,9 @@ out VertexData {
 
 void main() {
     mat4 InstanceMarix = InstanceBuffer.InstanceMatrices[ModelInfo.InstanceIndices[gl_BaseInstance][gl_InstanceID]];
-    toFrag.Position = Position;
     toFrag.Normal = transpose(inverse(mat3(InstanceMarix))) * Normal;
     toFrag.UV = UV;
-    vec4 WorldPosition = InstanceMarix * vec4(Position, 1.0f);
-    toFrag.LocalPosition = Camera.ViewProjection * WorldPosition;
+    toFrag.Position = InstanceMarix * vec4(Position, 1.0f);
+    toFrag.LocalPosition = Camera.ViewProjection * toFrag.Position;
     gl_Position = toFrag.LocalPosition;
 }
