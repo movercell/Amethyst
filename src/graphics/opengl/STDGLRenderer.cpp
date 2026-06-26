@@ -101,6 +101,7 @@ void STDGLRenderer::Draw() {
             glViewport(0, 0, light->resource.GetResolution().x, light->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT);
             
+            PreprocessIArrays(InstanceArrayRefs);
             DrawIArrays<true>(InstanceArrayRefs);
 
             GL_POP_DEBUG;
@@ -114,6 +115,9 @@ void STDGLRenderer::Draw() {
             camera->resource.Bind();
             glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+            // Instance culling.
+            PreprocessIArrays(InstanceArrayRefs);
             
             // Z-Prepass.
             DrawIArrays<true>(InstanceArrayRefs);
@@ -143,8 +147,7 @@ void STDGLRenderer::Draw() {
     
 }
 
-template<bool isDepth>
-void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
+void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
     // Clear the instance counts.
     for (auto& iarray : InstanceArrayRefs) {
         auto* model = iarray->Model.get();
@@ -173,7 +176,10 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
     }
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+}
 
+template<bool isDepth>
+void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
     // Draw.
     glUseProgram(0);
     GLuint tmpshader;

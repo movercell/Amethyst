@@ -7,6 +7,10 @@ project(AMETHYST VERSION 1.0
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Amethyst build configuration
+set(AMETHYST_BUILD_PROFILE OFF)
+set(AMETHYST_BUILD_NVIDIA_NSIGHT OFF)
+
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX")
 elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
@@ -14,12 +18,14 @@ elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
 endif()
 
 
-# Profiling stuff
-# add_compile_options(-pg -g)
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+# Profiling
+if (AMETHYST_BUILD_PROFILE)
+add_compile_options(-pg -g)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+endif()
 
 
-# include the libraries
+# Include the libraries
 set(GLFW_LIBRARY_TYPE STATIC CACHE STRING "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -69,6 +75,15 @@ target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 target_link_libraries(amethyst assimp)
 
+if(AMETHYST_BUILD_NVIDIA_NSIGHT)
+target_link_libraries(amethyst
+    -Wl,--no-as-needed GL -Wl,--as-needed
+    X11 
+    pthread 
+    dl
+)
+endif()
+
 target_include_directories(amethyst PRIVATE include)
 target_include_directories(amethyst PRIVATE engineheaders)
 target_include_directories(amethyst PRIVATE "include")
@@ -84,7 +99,10 @@ endif()
 
 if(UNIX)
 	target_link_options(amethyst PRIVATE "-rdynamic" "-Wl,-rpath,./")
-	target_compile_options(amethyst PRIVATE "-fvisibility=hidden")
+
+	if(NOT AMETHYST_BUILD_NVIDIA_NSIGHT)
+		target_compile_options(amethyst PRIVATE "-fvisibility=hidden")
+	endif()
 endif()
 
 if(WIN32)
