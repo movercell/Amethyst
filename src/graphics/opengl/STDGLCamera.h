@@ -18,7 +18,7 @@ struct STDGLCamera : public Camera {
     GLuint Framebuffer;
     union {
         struct {
-            GLuint Colorbuffer, Depthbuffer, NormalAndPBRbuffer;
+            GLuint Colorbuffer, Depthbuffer, Normalbuffer;
         };
         GLuint AllTextureBuffers[3];
     };

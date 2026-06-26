@@ -37,10 +37,10 @@ void STDGLCamera::CreateBuffers() {
     glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
     glNamedFramebufferTexture(Framebuffer, GL_STENCIL_ATTACHMENT, Depthbuffer, 0);
     // Normal and other PBR values buffer(R+G is normal(octohedral mapped), B+A are metalness and roughness respectively)
-    glTextureStorage2D (NormalAndPBRbuffer, 1, GL_RGBA8_SNORM, Resolution.x, Resolution.y);
-    glTextureParameteri(NormalAndPBRbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTextureParameteri(NormalAndPBRbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT1, NormalAndPBRbuffer, 0);
+    glTextureStorage2D (Normalbuffer, 1, GL_RG8_SNORM, Resolution.x, Resolution.y);
+    glTextureParameteri(Normalbuffer, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(Normalbuffer, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT1, Normalbuffer, 0);
 
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, drawBuffers);

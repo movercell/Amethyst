@@ -10,7 +10,7 @@
 #include "OctahedralMapping.incl"
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 FragNormalAndPBR;
+layout (location = 1) out vec2 FragNormal;
 in VertexData {
     vec4 Position;
     vec4 LocalPosition;
@@ -84,5 +84,5 @@ void main()
     Shadow = min(1.0f, Shadow);
 
     FragColor = Albedo * vec4(Shadow, Shadow, Shadow, 1.0f);
-    FragNormalAndPBR = vec4(Octahedral_Map(normalize(Normal)), 0.0f, 0.0f);
+    FragNormal = Octahedral_Map(normalize(Normal));
 }
