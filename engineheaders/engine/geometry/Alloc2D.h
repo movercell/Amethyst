@@ -26,6 +26,11 @@ namespace Geometry {
 
             FreeBlocks.emplace_back(0, 0, SizeX, SizeY);
         }
+        ~Alloc2D() {
+            if ((FreeBlocks[0].SizeX != SizeX) || (FreeBlocks[0].SizeY != SizeY)) {
+                Engine::Error("Alloc2D: Attemped to destruct without freeing all the blocks!");
+            }
+        }
 
         Block ENGINEEXPORT Alloc(uint16_t sizex, uint16_t sizey);
         void ENGINEEXPORT Free(Block block);
