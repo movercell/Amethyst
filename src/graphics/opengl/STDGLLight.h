@@ -13,8 +13,8 @@ inline constexpr int STDGLLIGHT_ALLOC2D_PADDING = 4;
 struct STDGLLightSystem;
 
 enum class STDGLLightType : GLuint {
-    None,
-    Spot
+    None = 0,
+    Spot = 1
 };
 
 struct STDGLLightData {
@@ -45,6 +45,7 @@ struct STDGLLight : public Light {
         Owner = owner;
         RWorldRef = rworldref;
         ID = id;
+        Type = type;
         TextureSpace = texturespace;
         Resolution = vec2(TextureSpace.SizeX, TextureSpace.SizeY);
         FOV = fov;
