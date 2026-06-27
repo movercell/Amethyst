@@ -12,9 +12,6 @@ Shaders {
             Source "generic.fs"
             DepthSource "generic.ds"
         }
-        STDGLLight0DebugDrawDepthToScreen {
-            Source "STDGLLight0DebugDrawDepthToScreen.fs"
-        }
     }
     Compute {
         STDGLModel_InstancePreprocess {

@@ -19,29 +19,14 @@ void STDGLLight::Bind() {
     }
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+    glViewport(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
 }
 
 void STDGLLight::CreateBuffers() {
     glCreateFramebuffers(1, &Framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
-    // Depth buffer
-    glCreateTextures(GL_TEXTURE_2D, 1, &Depthbuffer);
-    glTextureStorage2D(Depthbuffer, 1, GL_DEPTH_COMPONENT16, Resolution.x, Resolution.y);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glTextureParameteri(Depthbuffer, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
-
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTextureParameterfv(Depthbuffer, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Depthbuffer, 0);
-
-    Depthhandle = glGetTextureHandleARB(Depthbuffer);
-    glMakeTextureHandleResidentARB(Depthhandle);
+    glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, Owner->LightDepthBuffer, 0);
 
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
@@ -59,7 +44,7 @@ void STDGLLight::UpdateData() {
     Data.Far = Far;
     Data.FOV = FOV;
     Data.Near = Near;
-    Data.Texture = Depthhandle;
+    Data.TextureSpace = TextureSpace;
     Data.LightPos = Position;
     glNamedBufferSubData(Owner->LightDataBuffer, sizeof(STDGLLightData) * ID, sizeof(STDGLLightData), &Data);
 }
@@ -68,9 +53,14 @@ STDGLLight::~STDGLLight() {
     glfwMakeContextCurrent(Owner->Context);
 
     glDeleteFramebuffers(1, &Framebuffer);
-    glMakeTextureHandleNonResidentARB(Depthhandle);
-    glDeleteTextures(1, &Depthbuffer);
     glDeleteBuffers(1, &Infobuffer);
+
+    // The block has padding that needs to be accounted for when freeing.
+    TextureSpace.PosX -= STDGLLIGHT_ALLOC2D_PADDING;
+    TextureSpace.PosY -= STDGLLIGHT_ALLOC2D_PADDING;
+    TextureSpace.SizeX += STDGLLIGHT_ALLOC2D_PADDING * 2;
+    TextureSpace.SizeY += STDGLLIGHT_ALLOC2D_PADDING * 2;
+    Owner->LightDepthBufferAllocator.Free(TextureSpace);
 }
 
 
@@ -85,7 +75,11 @@ Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> R
         FreedIndices.pop();
     }
 
-    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, resolution, fov, color, near, far);
+    // Don't forget to pad the block to prevent texture bleeding artifacts!
+    auto RawBlock = LightDepthBufferAllocator.Alloc(resolution.x + STDGLLIGHT_ALLOC2D_PADDING * 2, resolution.y + STDGLLIGHT_ALLOC2D_PADDING * 2);
+    auto Block = Geometry::Alloc2D::Block(RawBlock.PosX + STDGLLIGHT_ALLOC2D_PADDING, RawBlock.PosY + STDGLLIGHT_ALLOC2D_PADDING, resolution.x, resolution.y);
+
+    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, Block, fov, color, near, far);
     LightResources[ID] = Resource;
     return Engine::Reference(Resource);
 }

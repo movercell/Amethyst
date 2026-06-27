@@ -1,5 +1,4 @@
 #version 460 core
-#extension GL_ARB_bindless_texture : require
 
 #ifdef GLSLANGVALIDATOR
 #extension GL_GOOGLE_include_directive : require
@@ -74,7 +73,7 @@ void main()
     if (projCoords.z > 0.0f && projCoords.z < 1.0f) {
         for (int i = 0; i < 16; i++) {
             float bias = max(0.005 * (1.0f - NormalDotLightDir), 0.002);
-            Shadow += texture(sampler2DShadow(LightBuffer.Lights[0].Texture), projCoords - bias + vec3(poissonDisk[i] * 0.004f * (1.0f - LinearizeDepth(projCoords.z, LightBuffer.Lights[0].Near, LightBuffer.Lights[0].Far) * 0.7f), 0.0f)) * NormalDotLightDir;
+            Shadow += SampleLight(0, projCoords - bias + vec3(poissonDisk[i] * 0.004f * (1.0f - LinearizeDepth(projCoords.z, LightBuffer.Lights[0].Near, LightBuffer.Lights[0].Far) * 0.7f), 0.0f)) * NormalDotLightDir;
         }
         Shadow /= 16.0f;
     }

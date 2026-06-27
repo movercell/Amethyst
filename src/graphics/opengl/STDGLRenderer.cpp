@@ -82,7 +82,7 @@ void STDGLRenderer::Draw() {
         if (rworld->isSkippingRendering())
             continue;
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, rworld->lightsystem.LightDataBuffer);
+        rworld->lightsystem.Bind();
 
         // Get references to all instance arrays.
         std::vector<Engine::Reference<STDGLModelInstanceArray>> InstanceArrayRefs;
@@ -113,7 +113,6 @@ void STDGLRenderer::Draw() {
 
             GL_PUSH_DEBUG(camera->resource.Name.c_str());
             camera->resource.Bind();
-            glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
             // Instance culling.

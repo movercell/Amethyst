@@ -1,10 +1,14 @@
 #define LIGHT_TYPE_NONE 0
 #define LIGHT_TYPE_SPOT 1
 
+#define STDGLLIGHT_MAX_COUNT 4096
+#define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
+
 struct STDGLLightData {
     mat4 ViewProjection;
-    uvec2 Texture;
-    int Type;
+    uint TextureSpacePosition;
+    uint TextureSpaceSize;
+    uint Type;
     float FOV;
     float Near;
     float Far;
@@ -12,6 +16,23 @@ struct STDGLLightData {
     vec3 LightPos;
 };
 
-layout (std140, binding = 2) uniform _LightBuffer {
-    STDGLLightData Lights[];
+layout (std140, binding = 2) buffer _LightBuffer {
+    STDGLLightData Lights[STDGLLIGHT_MAX_COUNT];
 } LightBuffer;
+
+layout (binding = 15) uniform sampler2DShadow LightAtlas;
+
+float SampleLight(int light, vec3 point) {
+    while (point.x > 1.0f) point.x -= 1.0f;
+    while (point.y > 1.0f) point.y -= 1.0f;
+
+    float TexturePosX = float(LightBuffer.Lights[light].TextureSpacePosition & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+    float TexturePosY = float((LightBuffer.Lights[light].TextureSpacePosition >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+
+    float TextureSizeX = float(LightBuffer.Lights[light].TextureSpaceSize & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+    float TextureSizeY = float((LightBuffer.Lights[light].TextureSpaceSize >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+
+    vec3 TruePoint = vec3(TexturePosX + (TextureSizeX * point.x), TexturePosY + (TextureSizeY * point.y), point.z);
+
+    return texture(LightAtlas, TruePoint);
+}
