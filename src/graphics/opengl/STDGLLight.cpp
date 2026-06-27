@@ -56,11 +56,7 @@ STDGLLight::~STDGLLight() {
     glDeleteBuffers(1, &Infobuffer);
 
     // The block has padding that needs to be accounted for when freeing.
-    TextureSpace.PosX -= STDGLLIGHT_ALLOC2D_PADDING;
-    TextureSpace.PosY -= STDGLLIGHT_ALLOC2D_PADDING;
-    TextureSpace.SizeX += STDGLLIGHT_ALLOC2D_PADDING * 2;
-    TextureSpace.SizeY += STDGLLIGHT_ALLOC2D_PADDING * 2;
-    Owner->LightDepthBufferAllocator.Free(TextureSpace);
+    Owner->LightDepthBufferAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
 }
 
 
@@ -75,11 +71,8 @@ Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> R
         FreedIndices.pop();
     }
 
-    // Don't forget to pad the block to prevent texture bleeding artifacts!
-    auto RawBlock = LightDepthBufferAllocator.Alloc(resolution.x + STDGLLIGHT_ALLOC2D_PADDING * 2, resolution.y + STDGLLIGHT_ALLOC2D_PADDING * 2);
-    auto Block = Geometry::Alloc2D::Block(RawBlock.PosX + STDGLLIGHT_ALLOC2D_PADDING, RawBlock.PosY + STDGLLIGHT_ALLOC2D_PADDING, resolution.x, resolution.y);
-
-    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, Block, fov, color, near, far);
+    // Don't forget to pad the block to prevent texture bleeding artifacts! 
+    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING), fov, color, near, far);
     LightResources[ID] = Resource;
     return Engine::Reference(Resource);
 }
