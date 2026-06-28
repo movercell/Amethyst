@@ -152,7 +152,7 @@ int main() {
 	models[3] = rworld->MakeModelInstance("floor_plane.adf");
 
 	std::array<Engine::Reference<Light>, 1> lights;
-	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 90, vec3(1.0f, 1.0f, 1.0f), 1, 1024.0);
+	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 90, vec3(1.0f, 1.0f, 1.0f), 1, 2048.0);
 	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
 	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
 	//lights[0]->SetPosition(vec3(0.0f, 30.0f, 0.0f));
@@ -177,7 +177,10 @@ int main() {
 		if (models[0])
 			models[0]->SetMatrix(mat4(1, 0, 0, -128));
 		models[1]->SetMatrix(mat4());
-		models[3]->SetMatrix(mat4());
+		models[3]->SetMatrix(mat4(10, 0, 0, 0,
+								  0, 10, 0, 0,
+								  0, 0, 10, 0,
+								  0, 0, 0, 1));
 
 		models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
 																					0, 10, 0, 0,
