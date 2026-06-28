@@ -95,7 +95,7 @@ void STDGLRenderer::Draw() {
             InstanceArrayRefs.emplace_back(iarray);
         
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-1.3f, -0.9f);
+        glPolygonOffset(0.4f, 0.5f);
         glDisable(GL_CULL_FACE);
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
