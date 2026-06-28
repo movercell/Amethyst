@@ -3,7 +3,7 @@
 void STDGLLight::Bind() {
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
+        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
         Info.ViewProjection = projection * Info.View;
 
         Info.InverseView = glm::inverse(Info.View.toglm());
@@ -107,14 +107,14 @@ STDGLLightSystem::STDGLLightSystem() {
 
     // Depth buffer
     glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
-    glTextureStorage2D (LightDepthBuffer, 1, GL_DEPTH_COMPONENT16, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
+    glTextureStorage2D (LightDepthBuffer, 1, GL_DEPTH_COMPONENT32F, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
 
-    float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    glClearTexImage(LightDepthBuffer, 0, GL_RGBA, GL_FLOAT, clearColor);
+    float clearColor = 0.0f;
+    glClearTexImage(LightDepthBuffer, 0, GL_RGBA, GL_DEPTH_COMPONENT, &clearColor);
 }
 
 STDGLLightSystem::~STDGLLightSystem() {

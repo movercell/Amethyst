@@ -48,6 +48,12 @@ void STDGLRenderer::Init() {
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
+
+
+    glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+    glClearDepth(0.0f);
+    glClearColor(0, 0, 0, 1);
+    glDepthFunc(GL_GREATER);
 }
 
 STDGLRenderer::~STDGLRenderer() {
@@ -73,8 +79,6 @@ void STDGLRenderer::Draw() {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glClearDepth(1.0f);
-    glClearColor(0, 0, 0, 1);
 
     for (auto rworldres : RWorldVec) {
 
@@ -91,7 +95,7 @@ void STDGLRenderer::Draw() {
             InstanceArrayRefs.emplace_back(iarray);
         
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.3f, 0.9f);
+        glPolygonOffset(-1.3f, -0.9f);
         glDisable(GL_CULL_FACE);
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
@@ -126,7 +130,7 @@ void STDGLRenderer::Draw() {
             // Normal rendering.
             glDepthFunc(GL_EQUAL);
             DrawIArrays<false>(InstanceArrayRefs);
-            glDepthFunc(GL_LESS);
+            glDepthFunc(GL_GREATER);
 
             GL_POP_DEBUG;
             

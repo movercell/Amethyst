@@ -5,7 +5,7 @@
 void STDGLCamera::Bind() {
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
+        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
         Info.ViewProjection = projection * Info.View;
 
         Info.InverseView = glm::inverse(Info.View.toglm());
@@ -63,6 +63,6 @@ STDGLCamera::~STDGLCamera() {
     glfwMakeContextCurrent(Context);
 
     glDeleteFramebuffers(1, &Framebuffer);
-    glDeleteTextures(2, AllTextureBuffers);
+    glDeleteTextures(3, AllTextureBuffers);
     glDeleteBuffers(1, &Infobuffer);
 }
