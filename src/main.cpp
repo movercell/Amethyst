@@ -159,7 +159,7 @@ int main() {
 	//lights[0]->SetAngles(vec3(0.0f, -90.0f, 0.0f));
 
 
-	for (int i = 0; i < 256; i++) {
+	for (int i = 0; i < 64; i++) {
 		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
 	}
 
@@ -177,10 +177,7 @@ int main() {
 		if (models[0])
 			models[0]->SetMatrix(mat4(1, 0, 0, -128));
 		models[1]->SetMatrix(mat4());
-		models[3]->SetMatrix(mat4(10, 0, 0, 0,
-								  0, 10, 0, 0,
-								  0, 0, 10, 0,
-								  0, 0, 0, 1));
+		models[3]->SetMatrix(mat4());
 
 		models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
 																					0, 10, 0, 0,

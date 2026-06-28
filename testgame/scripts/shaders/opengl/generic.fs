@@ -19,9 +19,17 @@ in VertexData {
 
 vec3 GenerateTemporaryTexture() {
     uint isOther = 0u;
-    if (UV.x >= 0.5f)
+    float X = UV.x;
+    float Y = UV.y;
+
+    while (X > 1.0f) X -= 1.0f;
+    while (Y > 1.0f) Y -= 1.0f;
+    while (X < 0.0f) X += 1.0f;
+    while (Y < 0.0f) Y += 1.0f;
+
+    if (X >= 0.5f)
         isOther = 1u;
-    if (UV.y >= 0.5f)
+    if (Y >= 0.5f)
         isOther += 2u;
     vec3 ret = vec3(1.0f);
     return isOther != 0u && isOther != 3u ? ret : ret * 0.9f;
