@@ -44,7 +44,7 @@ vec2 poissonDisk[16] = vec2[](
     vec2(0.14383161, -0.14100790)
 );
 
-float SampleSpotLightForShadows(int light, vec3 point, float NormalDotLightDir) {
+float STDGLight_SampleSpotLightForShadows(int light, vec3 point, float NormalDotLightDir) {
     if (point.z < 0.0f || point.z > 1.0f ) return 0.0f;
     float TexturePosX = float(LightBuffer.Lights[light].TextureSpacePosition & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
     float TexturePosY = float((LightBuffer.Lights[light].TextureSpacePosition >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
@@ -57,10 +57,25 @@ float SampleSpotLightForShadows(int light, vec3 point, float NormalDotLightDir) 
 
     float Shadow = 0.0f;
     for (int i = 0; i < STDGLLIGHT_AMOUNT_OF_ITERATIONS; i++) {
-        float bias = max(0.005 * (1.0f - NormalDotLightDir), 0.002);
+        float bias = max(0.0015 * (1.0f - NormalDotLightDir), 0.0005);
         Shadow += texture(LightAtlas, TruePoint - vec3(0.0f, 0.0f, bias) + vec3((poissonDisk[i] * vec2(TextureSizeX, TextureSizeY)) * 0.004f * (1.0f - LinearizeDepth(TruePoint.z, LightBuffer.Lights[light].Near, LightBuffer.Lights[light].Far) * 0.7f), 0.0f)) * NormalDotLightDir;
     }
     Shadow /= STDGLLIGHT_AMOUNT_OF_ITERATIONS;
 
     return Shadow;
+}
+
+vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float Roughness, vec3 Position, int light) {
+    vec4 LightPos = LightBuffer.Lights[light].ViewProjection * vec4(Position, 1.0f);
+    vec3 projCoords = LightPos.xyz / LightPos.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float NormalDotLightDir = max(dot(Normal, normalize(LightBuffer.Lights[light].LightPos - Position)), 0.0f);
+    
+    float Shadow = STDGLight_SampleSpotLightForShadows(light, projCoords, NormalDotLightDir);
+
+    Shadow += 0.3f;
+    Shadow = min(1.0f, Shadow);
+
+    return Albedo * vec3(Shadow, Shadow, Shadow);
 }
