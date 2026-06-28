@@ -1,8 +1,11 @@
+#include "helpers.incl"
+
 #define LIGHT_TYPE_NONE 0
 #define LIGHT_TYPE_SPOT 1
 
 #define STDGLLIGHT_MAX_COUNT 4096
 #define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
+#define STDGLLIGHT_AMOUNT_OF_ITERATIONS 16
 
 struct STDGLLightData {
     mat4 ViewProjection;
@@ -22,10 +25,27 @@ layout (std140, binding = 2) buffer _LightBuffer {
 
 layout (binding = 15) uniform sampler2DShadow LightAtlas;
 
-float SampleLight(int light, vec3 point) {
-    while (point.x > 1.0f) point.x -= 1.0f;
-    while (point.y > 1.0f) point.y -= 1.0f;
+vec2 poissonDisk[16] = vec2[](
+    vec2(-0.94201624, -0.39906216),
+    vec2(0.94558609, -0.76890725),
+    vec2(-0.094184101, -0.92938870),
+    vec2(0.34495938, 0.29387760),
+    vec2(-0.91588581, 0.45771432),
+    vec2(-0.81544232, -0.87922466),
+    vec2(-0.38277543, 0.27676845),
+    vec2(0.97484398, 0.75648379),
+    vec2(0.44323325, -0.97511554),
+    vec2(0.53742981, -0.47373420),
+    vec2(-0.26496911, -0.41893023),
+    vec2(0.79197514, 0.19090188),
+    vec2(-0.24188840, 0.99706507),
+    vec2(-0.81409550, 0.91437590),
+    vec2(0.19984126, 0.78641367),
+    vec2(0.14383161, -0.14100790)
+);
 
+float SampleSpotLightForShadows(int light, vec3 point, float NormalDotLightDir) {
+    if (point.z < 0.0f || point.z > 1.0f ) return 0.0f;
     float TexturePosX = float(LightBuffer.Lights[light].TextureSpacePosition & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
     float TexturePosY = float((LightBuffer.Lights[light].TextureSpacePosition >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
 
@@ -34,5 +54,13 @@ float SampleLight(int light, vec3 point) {
 
     vec3 TruePoint = vec3(TexturePosX + (TextureSizeX * point.x), TexturePosY + (TextureSizeY * point.y), point.z);
 
-    return texture(LightAtlas, TruePoint);
+
+    float Shadow = 0.0f;
+    for (int i = 0; i < STDGLLIGHT_AMOUNT_OF_ITERATIONS; i++) {
+        float bias = max(0.005 * (1.0f - NormalDotLightDir), 0.002);
+        Shadow += texture(LightAtlas, TruePoint - vec3(0.0f, 0.0f, bias) + vec3((poissonDisk[i] * vec2(TextureSizeX, TextureSizeY)) * 0.004f * (1.0f - LinearizeDepth(TruePoint.z, LightBuffer.Lights[light].Near, LightBuffer.Lights[light].Far) * 0.7f), 0.0f)) * NormalDotLightDir;
+    }
+    Shadow /= STDGLLIGHT_AMOUNT_OF_ITERATIONS;
+
+    return Shadow;
 }

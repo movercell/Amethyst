@@ -49,6 +49,25 @@ void STDGLLight::UpdateData() {
     glNamedBufferSubData(Owner->LightDataBuffer, sizeof(STDGLLightData) * ID, sizeof(STDGLLightData), &Data);
 }
 
+
+STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworldref, uint32_t id, STDGLLightType type, vec2 resolution, float fov, vec3 color, float near, float far) {
+    Owner = owner;
+    RWorldRef = rworldref;
+    ID = id;
+    Type = type;
+    Resolution = resolution;
+    // Don't forget to pad the block to prevent texture bleeding artifacts! 
+    TextureSpace = Owner->LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
+    FOV = fov;
+    Color = color;
+    Near = near;
+    Far = far;
+
+    CreateBuffers();
+
+    wasChanged = true;
+}
+
 STDGLLight::~STDGLLight() {
     glfwMakeContextCurrent(Owner->Context);
 
@@ -71,8 +90,34 @@ Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> R
         FreedIndices.pop();
     }
 
-    // Don't forget to pad the block to prevent texture bleeding artifacts! 
-    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING), fov, color, near, far);
+    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, resolution, fov, color, near, far);
     LightResources[ID] = Resource;
     return Engine::Reference(Resource);
+}
+
+STDGLLightSystem::STDGLLightSystem() {
+    Context = glfwGetCurrentContext();
+    LightResources.fill(nullptr);
+
+    glCreateBuffers(1, &LightDataBuffer);
+
+    auto* DefaultData = new STDGLLightData[STDGLLIGHT_MAX_COUNT];
+    glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
+    delete DefaultData;
+
+    // Depth buffer
+    glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
+    glTextureStorage2D (LightDepthBuffer, 1, GL_DEPTH_COMPONENT16, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+    float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glClearTexImage(LightDepthBuffer, 0, GL_RGBA, GL_FLOAT, clearColor);
+}
+
+STDGLLightSystem::~STDGLLightSystem() {
+    glDeleteBuffers(1, &LightDataBuffer);
+    glDeleteTextures(1, &LightDepthBuffer);
 }
