@@ -35,8 +35,9 @@ namespace Geometry {
         Block ENGINEEXPORT Alloc(uint16_t sizex, uint16_t sizey);
         void ENGINEEXPORT Free(Block block);
 
-        Block AllocPadded(uint16_t sizex, uint16_t sizey, uint16_t padding) {
+        Block AllocPadded(uint16_t sizex, uint16_t sizey, uint16_t padding, Block* ReturnPadded = nullptr) {
             auto ret = Alloc(sizex + padding * 2, sizey + padding * 2);
+            if (ReturnPadded) *ReturnPadded = ret;
             return Block(ret.PosX + padding, ret.PosY + padding, sizex, sizey);
         }
         void FreePadded(Block block, uint16_t padding) {
