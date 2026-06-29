@@ -1,4 +1,5 @@
 #include "STDGLLight.h"
+#include <numbers>
 
 void STDGLLight::Bind() {
     if (wasChanged) {
@@ -41,9 +42,12 @@ void STDGLLight::UpdateData() {
     Data.ViewProjection = Info.ViewProjection;
     Data.Type = Type;
     Data.Color = Color;
-    Data.Far = Far;
     Data.FOV = FOV;
+    Data.Spot_InnerCutoff = cos(75.0f * (std::numbers::pi / 180.0));
+    Data.Spot_OuterCutoff = cos(90.0f * (std::numbers::pi / 180.0));
+    Data.Spot_Direction = Front;
     Data.Near = Near;
+    Data.Far = Far;
     Data.TextureSpace = TextureSpace;
     Data.LightPos = Position;
     glNamedBufferSubData(Owner->LightDataBuffer, sizeof(STDGLLightData) * ID, sizeof(STDGLLightData), &Data);

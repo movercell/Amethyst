@@ -45,6 +45,6 @@ void main()
     float linearDepth = 1.0f;
     vec3 Albedo = GenerateTemporaryTexture() * vec3(0.3f * linearDepth, 0.3f * linearDepth, 0.7f * linearDepth);
 
-    FragColor = vec4(STDGLight_ProcessSpotlight(Albedo, normalize(Normal), 0.05f, 0.7f, vec3(Position.xyz), 0), 1.0f);
+    FragColor = vec4(STDGLight_ProcessSpotlight(Albedo, normalize(Normal), 0.05f, 0.7f, vec3(Position.xyz), 0) + (Albedo * vec3(0.3f)), 1.0f);
     FragNormal = Octahedral_Map(normalize(Normal));
 }

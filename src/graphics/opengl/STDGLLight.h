@@ -24,8 +24,11 @@ struct STDGLLightData {
     float FOV;
     float Near;
     float Far;
+    float Spot_InnerCutoff; // Cosines of the angles.
+    float Spot_OuterCutoff; // Cosines of the angles.
     vec3 Color;
     vec3 LightPos;
+    vec3 Spot_Direction;
 };
 
 struct RWorld;
