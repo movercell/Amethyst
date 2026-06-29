@@ -34,12 +34,6 @@ namespace Engine {
                 wasChanged = true;
             }
 
-            void SetFOV(float fov) {
-                FOV = fov;
-
-                wasChanged = true;
-            }
-
             inline vec2 GetResolution() { return Resolution; };
         protected:
             vec3 Position;

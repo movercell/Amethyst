@@ -13,9 +13,9 @@ Engine::Reference<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::st
 
     return result;
 }
-Engine::Reference<Light> STDGLRWorld::MakeSpotLight(vec2 resolution, float fov, vec3 color, float near, float far) {
+Engine::Reference<Light> STDGLRWorld::MakeSpotLight(vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far) {
     glfwMakeContextCurrent(context);
-    return lightsystem.MakeLight(selfResource, STDGLLightType::Spot, resolution, fov, color, near, far);
+    return lightsystem.MakeLight(selfResource, STDGLLightType::Spot, resolution, inner_cutoff_angle, outer_cutoff_angle, color, near, far);
 }
 
 Camera* STDGLRWorld::GetCamera(const std::string& name) {

@@ -9,7 +9,8 @@
 #define STDGLLIGHT_AMOUNT_OF_ITERATIONS 16
 
 struct STDGLLightData {
-    mat4 ViewProjection;
+    mat4 View;
+    mat4 Projection;
     uint TextureSpacePosition;
     uint TextureSpaceSize;
     uint Type;
@@ -100,7 +101,9 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float
     vec3 CameraDir = normalize(FromFragToCamera);
 
     // First, do the shadow calculation.
-    vec4 LightPos = Light.ViewProjection * vec4(Position, 1.0f);
+    vec4 LightPosView = Light.View * vec4(Position, 1.0f);
+    LightPosView.z += 0.4f;
+    vec4 LightPos = Light.Projection * LightPosView;
     vec3 projCoords = LightPos.xyz / LightPos.w;
     projCoords = vec3((projCoords * 0.5 + 0.5).xy, projCoords.z);
 

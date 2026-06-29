@@ -4,8 +4,7 @@
 void STDGLLight::Bind() {
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
-        Info.ViewProjection = projection * Info.View;
+        Info.ViewProjection = Info.Projection * Info.View;
 
         Info.InverseView = glm::inverse(Info.View.toglm());
         Info.InverseViewProjection = glm::inverse(Info.ViewProjection.toglm());
@@ -39,12 +38,13 @@ void STDGLLight::CreateBuffers() {
 
 void STDGLLight::UpdateData() {
     STDGLLightData Data;
-    Data.ViewProjection = Info.ViewProjection;
+    Data.View = Info.View;
+    Data.Projection = Info.Projection;
     Data.Type = Type;
     Data.Color = Color;
     Data.FOV = FOV;
-    Data.Spot_InnerCutoff = cos(75.0f * (std::numbers::pi / 180.0));
-    Data.Spot_OuterCutoff = cos(90.0f * (std::numbers::pi / 180.0));
+    Data.Spot_InnerCutoff = InnerCutoffCosine;
+    Data.Spot_OuterCutoff = OuterCutoffCosine;
     Data.Spot_Direction = Front;
     Data.Near = Near;
     Data.Far = Far;
@@ -54,7 +54,7 @@ void STDGLLight::UpdateData() {
 }
 
 
-STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworldref, uint32_t id, STDGLLightType type, vec2 resolution, float fov, vec3 color, float near, float far) {
+STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworldref, uint32_t id, STDGLLightType type, vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far) {
     Owner = owner;
     RWorldRef = rworldref;
     ID = id;
@@ -62,14 +62,17 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
     Resolution = resolution;
     // Don't forget to pad the block to prevent texture bleeding artifacts! 
     TextureSpace = Owner->LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
-    FOV = fov;
+    FOV = outer_cutoff_angle * 2.0f;
+    InnerCutoffCosine = cos(inner_cutoff_angle * (std::numbers::pi / 180.0));
+    OuterCutoffCosine = cos(outer_cutoff_angle * (std::numbers::pi / 180.0));
+
     Color = color;
     Near = near;
     Far = far;
 
     CreateBuffers();
 
-    wasChanged = true;
+    Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
 }
 
 STDGLLight::~STDGLLight() {
@@ -85,7 +88,7 @@ STDGLLight::~STDGLLight() {
 
 
 
-Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> RWorldRef, STDGLLightType Type, vec2 resolution, float fov, vec3 color, float near, float far) {
+Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> RWorldRef, STDGLLightType Type, vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far) {
     uint32_t ID;
     if (FreedIndices.empty()) {
         ID = NextIndexToMake++;
@@ -94,7 +97,7 @@ Engine::Reference<Light> STDGLLightSystem::MakeLight(Engine::Reference<RWorld> R
         FreedIndices.pop();
     }
 
-    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, resolution, fov, color, near, far);
+    auto* Resource = new Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>(this, this, RWorldRef, ID, Type, resolution, inner_cutoff_angle, outer_cutoff_angle, color, near, far);
     LightResources[ID] = Resource;
     return Engine::Reference(Resource);
 }

@@ -1,5 +1,6 @@
 layout (std140, binding = 0) uniform _Camera {
     mat4 View;
+    mat4 Projection;
     mat4 ViewProjection;
     mat4 InverseView;
     mat4 InverseViewProjection;

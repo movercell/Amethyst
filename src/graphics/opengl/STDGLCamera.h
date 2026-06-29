@@ -29,6 +29,7 @@ struct STDGLCamera : public Camera {
 
     struct Camerainfo_t {
         mat4 View;
+        mat4 Projection;
         mat4 ViewProjection;
         mat4 InverseView;
         mat4 InverseViewProjection;
@@ -39,16 +40,7 @@ struct STDGLCamera : public Camera {
 
     Engine::Reference<RWorld> RWorldRef;
     // Constructor with vectors.
-    STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR) {
-        Context = glfwGetCurrentContext();
-        RWorldRef = rworldref;
-        Resolution = resolution;
-        Name = name;
-        FOV = fov;
-        Near = near;
-        Far = far;
-        CreateBuffers();
-    }
+    STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR);
 
     // Binds the camera into UBO slot 0.
     void Bind();

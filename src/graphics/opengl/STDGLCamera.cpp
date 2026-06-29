@@ -5,8 +5,7 @@
 void STDGLCamera::Bind() {
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
-        mat4 projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
-        Info.ViewProjection = projection * Info.View;
+        Info.ViewProjection = Info.Projection * Info.View;
 
         Info.InverseView = glm::inverse(Info.View.toglm());
         Info.InverseViewProjection = glm::inverse(Info.ViewProjection.toglm());
@@ -57,6 +56,19 @@ uint32_t STDGLCamera::GetTexture() {
 
 uint32_t STDGLCamera::GetDepthTexture() {
     return Depthbuffer;
+}
+
+STDGLCamera::STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov, float near, float far) {
+    Context = glfwGetCurrentContext();
+    RWorldRef = rworldref;
+    Resolution = resolution;
+    Name = name;
+    FOV = fov;
+    Near = near;
+    Far = far;
+    CreateBuffers();
+
+    Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
 }
 
 STDGLCamera::~STDGLCamera() {
