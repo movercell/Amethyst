@@ -6,7 +6,7 @@
 #include "engine/Resource.h"
 #include "engine/geometry/Alloc2D.h"
 
-inline constexpr int STDGLLIGHT_MAX_COUNT = 4096;
+inline constexpr int STDGLLIGHT_MAX_COUNT = 1024;
 inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS = 8192;
 inline constexpr int STDGLLIGHT_ALLOC2D_PADDING = 4;
 

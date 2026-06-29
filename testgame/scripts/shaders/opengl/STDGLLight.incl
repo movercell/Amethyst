@@ -4,7 +4,7 @@
 #define LIGHT_TYPE_NONE 0
 #define LIGHT_TYPE_SPOT 1
 
-#define STDGLLIGHT_MAX_COUNT 4096
+#define STDGLLIGHT_MAX_COUNT 1024
 #define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
 #define STDGLLIGHT_AMOUNT_OF_ITERATIONS 16
 
@@ -92,8 +92,7 @@ float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point, floa
     return Shadow;
 }
 
-vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float Roughness, vec3 Position, int light) {
-    STDGLLightData Light = LightBuffer.Lights[light];
+vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
     vec3 FromFragToLight = Light.LightPos - Position;
     float FromFragToLightDistance = length(FromFragToLight);
     if (FromFragToLightDistance > Light.Far) return vec3(0.0f);
