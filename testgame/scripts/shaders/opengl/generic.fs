@@ -4,8 +4,8 @@
 #extension GL_GOOGLE_include_directive : require
 #endif
 
-#include "STDGLLight.incl"
 #include "STDGLCamera.incl"
+#include "STDGLLight.incl"
 #include "OctahedralMapping.incl"
 
 layout (location = 0) out vec4 FragColor;
@@ -37,14 +37,17 @@ vec3 GenerateTemporaryTexture() {
 
 void main()
 {
-    //const float near = 1.0f;
-    //const float far = 32768.0f;
-    //float linearDepth = (2.0 * near * far) / (far + near - gl_FragCoord.z * (far - near));
-    //linearDepth /= 100.0f;
+    vec3 Texture = GenerateTemporaryTexture();
+    vec3 Albedo = Texture * vec3(0.3f, 0.3f, 0.7f);
 
-    float linearDepth = 1.0f;
-    vec3 Albedo = GenerateTemporaryTexture() * vec3(0.3f * linearDepth, 0.3f * linearDepth, 0.7f * linearDepth);
+    vec3 IncomingLight = STDGLight_ProcessSpotlight(Albedo, normalize(Normal), Texture.z, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), 0);
+    vec3 AmbientLight = vec3(0.03) * Albedo;
 
-    FragColor = vec4(STDGLight_ProcessSpotlight(Albedo, normalize(Normal), 0.05f, 0.7f, vec3(Position.xyz), 0) + (Albedo * vec3(0.3f)), 1.0f);
+    vec3 Color = AmbientLight + IncomingLight;
+	
+    Color = Color / (Color + vec3(1.0));
+    Color = pow(Color, vec3(1.0/2.2));  
+
+    FragColor = vec4(Color, 1.0f);
     FragNormal = Octahedral_Map(normalize(Normal));
 }
