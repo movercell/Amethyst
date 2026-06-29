@@ -17,6 +17,10 @@ struct STDGLLightData {
     float FOV;
     float Near;
     float Far;
+    float Falloff_Constant;
+    float Falloff_Linear;
+    float Falloff_Quadratic;
+    float Intensity;
     float Spot_InnerCutoff;
     float Spot_OuterCutoff;
     vec3 Color;
@@ -50,11 +54,8 @@ vec2 poissonDisk[16] = vec2[](
 );
 
 vec3 CalculateLightRadiance(STDGLLightData Light, vec3 WorldPosition, vec3 LightDir, float FromFragToLightDistance) {
-    // TODO: Add intensity values to lights.
-    float intensity = 99999.0f;
-
     // Distance attenuation.
-    float BaseAttenuation = 1.0f / (FromFragToLightDistance * FromFragToLightDistance);
+    float BaseAttenuation = 1.0f / (Light.Falloff_Constant + FromFragToLightDistance * Light.Falloff_Linear + (FromFragToLightDistance * FromFragToLightDistance) * Light.Falloff_Quadratic);
     float Windowing = pow(clamp(1.0f - pow(FromFragToLightDistance / Light.Far, 4.0f), 0.0f, 1.0f), 2.0f);
     float DistanceAttenuation = BaseAttenuation * Windowing;
 
@@ -64,10 +65,10 @@ vec3 CalculateLightRadiance(STDGLLightData Light, vec3 WorldPosition, vec3 Light
         float Epsilon = Light.Spot_InnerCutoff - Light.Spot_OuterCutoff;
         float IntensityAttenuation = clamp((Theta - Light.Spot_OuterCutoff) / Epsilon, 0.0f, 1.0f);
 
-        return Light.Color * intensity * DistanceAttenuation * IntensityAttenuation;
+        return Light.Color * Light.Intensity * DistanceAttenuation * IntensityAttenuation;
     }
 
-    return Light.Color * intensity * DistanceAttenuation;
+    return Light.Color * Light.Intensity * DistanceAttenuation;
 }
 
 float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point, float NormalDotLightDir) {

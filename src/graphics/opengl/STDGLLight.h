@@ -25,6 +25,10 @@ struct STDGLLightData {
     float FOV;
     float Near;
     float Far;
+    float Falloff_Constant;
+    float Falloff_Linear;
+    float Falloff_Quadratic;
+    float Intensity;
     float Spot_InnerCutoff; // Cosines of the angles.
     float Spot_OuterCutoff; // Cosines of the angles.
     vec3 Color;
@@ -39,10 +43,12 @@ struct STDGLLight : public Light {
     GLuint Infobuffer;
     float InnerCutoffCosine;
     float OuterCutoffCosine;
+    vec3 Falloff = vec3(0.0f, 0.0f, 1.0f); // Purely quadratic.
     STDGLLightSystem* Owner;
     STDGLCamera::Camerainfo_t Info;
     STDGLLightType Type;
     uint32_t ID;
+    float Intensity = 1000.0f;
     Engine::Reference<RWorld> RWorldRef;
     Geometry::Alloc2D::Block TextureSpace;
 
@@ -57,6 +63,8 @@ struct STDGLLight : public Light {
     void SetColor(vec3 color);
     void SetInnerAngle(float Inner);
     void SetOuterAngle(float Outer);
+    void SetFalloff(float Constant, float Linear, float Quadraric);
+    void SetIntensity(float Intensity);
 protected:
     void CreateBuffers();
     void UpdateData();

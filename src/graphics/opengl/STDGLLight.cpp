@@ -57,6 +57,16 @@ void STDGLLight::SetOuterAngle(float Outer) {
     wasChanged = true;
     wasChangedProjection = true;
 }
+void STDGLLight::SetFalloff(float Constant, float Linear, float Quadraric) {
+    Falloff = vec3(Constant, Linear, Quadraric);
+
+    wasChanged = true;
+}
+void STDGLLight::SetIntensity(float intensity) {
+    Intensity = intensity;
+
+    wasChanged = true;
+}
 
 void STDGLLight::CreateBuffers() {
     glCreateFramebuffers(1, &Framebuffer);
@@ -84,6 +94,10 @@ void STDGLLight::UpdateData() {
     Data.Spot_Direction = Front;
     Data.Near = Near;
     Data.Far = Far;
+    Data.Falloff_Constant = Falloff.x;
+    Data.Falloff_Linear = Falloff.y;
+    Data.Falloff_Quadratic = Falloff.z;
+    Data.Intensity = Intensity;
     Data.TextureSpace = TextureSpace;
     Data.LightPos = Position;
     glNamedBufferSubData(Owner->LightDataBuffer, sizeof(STDGLLightData) * ID, sizeof(STDGLLightData), &Data);
