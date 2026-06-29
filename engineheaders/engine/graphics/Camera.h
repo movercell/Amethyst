@@ -15,26 +15,6 @@ namespace Engine {
     //@internal
     namespace Internal {
         struct BaseCameraOrLight {
-            void SetRotation(quat Rotation) {
-                mat4 RotationMatrix = quat(Rotation).MakeRotationMatrix();
-
-                Front = RotationMatrix[0].ToVec3();
-                Left = RotationMatrix[1].ToVec3();
-                Up = RotationMatrix[2].ToVec3();
-
-                wasChanged = true;
-            }
-            void SetAngles(vec3 Angle) {
-                SetRotation(quat(Angle));
-            }
-
-            void SetPosition(vec3 Pos) {
-                Position = Pos;
-
-                wasChanged = true;
-            }
-
-            inline vec2 GetResolution() { return Resolution; };
         protected:
             vec3 Position;
 
@@ -46,8 +26,6 @@ namespace Engine {
             float Near = CAMERA_DEFAULT_NEAR;
             float Far = CAMERA_DEFAULT_FAR;
             vec2 Resolution;
-
-            bool wasChanged = true;
         };
     }
 }
@@ -67,6 +45,16 @@ struct Camera : public Engine::Internal::BaseCameraOrLight {
 
     virtual uint32_t GetTexture() = 0;
     virtual uint32_t GetDepthTexture() = 0;
+
+    virtual void SetRotation(quat Rotation) = 0;
+    inline void SetAngles(vec3 Angle) {
+        SetRotation(quat(Angle));
+    }
+
+    virtual void SetPosition(vec3 Position) = 0;
+    virtual void SetFov(float fov) = 0;
+
+    inline vec2 GetResolution() { return Resolution; };
 
     virtual ~Camera() {};
 

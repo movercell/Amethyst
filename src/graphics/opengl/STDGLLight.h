@@ -51,9 +51,18 @@ struct STDGLLight : public Light {
     ~STDGLLight();
 
     void Bind();
+
+    void SetPosition(vec3 Position);
+    void SetRotation(quat Rotation);
+    void SetColor(vec3 color);
+    void SetInnerAngle(float Inner);
+    void SetOuterAngle(float Outer);
 protected:
     void CreateBuffers();
     void UpdateData();
+    
+    bool wasChanged = true;
+    bool wasChangedProjection = true;
 };
 
 

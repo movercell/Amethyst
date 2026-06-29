@@ -3,6 +3,10 @@
 #include "glm/geometric.hpp"
 
 void STDGLCamera::Bind() {
+    if (wasChangedProjection) {
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
+        wasChangedProjection = false;
+    }
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
         Info.ViewProjection = Info.Projection * Info.View;
@@ -58,6 +62,26 @@ uint32_t STDGLCamera::GetDepthTexture() {
     return Depthbuffer;
 }
 
+void STDGLCamera::SetPosition(vec3 position) {
+    Position = position;
+
+    wasChanged = true;
+}
+void STDGLCamera::SetRotation(quat rotation)  {
+    mat4 RotationMatrix = quat(rotation).MakeRotationMatrix();
+
+    Front = RotationMatrix[0].ToVec3();
+    Left = RotationMatrix[1].ToVec3();
+    Up = RotationMatrix[2].ToVec3();
+
+    wasChanged = true;
+}
+void STDGLCamera::SetFov(float fov) {
+    FOV = fov;
+
+    wasChangedProjection = true;
+}
+
 STDGLCamera::STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov, float near, float far) {
     Context = glfwGetCurrentContext();
     RWorldRef = rworldref;
@@ -67,8 +91,6 @@ STDGLCamera::STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, c
     Near = near;
     Far = far;
     CreateBuffers();
-
-    Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
 }
 
 STDGLCamera::~STDGLCamera() {

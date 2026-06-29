@@ -2,6 +2,10 @@
 #include <numbers>
 
 void STDGLLight::Bind() {
+    if (wasChangedProjection) {
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
+        wasChangedProjection = false;
+    }
     if (wasChanged) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
         Info.ViewProjection = Info.Projection * Info.View;
@@ -20,6 +24,38 @@ void STDGLLight::Bind() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
+}
+
+void STDGLLight::SetPosition(vec3 position) {
+    Position = position;
+
+    wasChanged = true;
+}
+void STDGLLight::SetRotation(quat rotation)  {
+    mat4 RotationMatrix = quat(rotation).MakeRotationMatrix();
+
+    Front = RotationMatrix[0].ToVec3();
+    Left = RotationMatrix[1].ToVec3();
+    Up = RotationMatrix[2].ToVec3();
+
+    wasChanged = true;
+}
+void STDGLLight::SetColor(vec3 color) {
+    Color = color;
+
+    wasChanged = true;
+}
+void STDGLLight::SetInnerAngle(float Inner) {
+    InnerCutoffCosine = cos(Inner * (std::numbers::pi / 180.0));
+
+    wasChanged = true;
+}
+void STDGLLight::SetOuterAngle(float Outer) {
+    InnerCutoffCosine = cos(Outer * (std::numbers::pi / 180.0));
+    FOV = Outer * 2.0f;
+
+    wasChanged = true;
+    wasChangedProjection = true;
 }
 
 void STDGLLight::CreateBuffers() {
@@ -71,8 +107,6 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
     Far = far;
 
     CreateBuffers();
-
-    Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
 }
 
 STDGLLight::~STDGLLight() {

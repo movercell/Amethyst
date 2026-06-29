@@ -47,10 +47,16 @@ struct STDGLCamera : public Camera {
 
     uint32_t GetTexture();
     uint32_t GetDepthTexture();
+    void SetPosition(vec3 Position);
+    void SetRotation(quat Rotation);
+    void SetFov(float fov);
 
     ~STDGLCamera();
 
 private:
     // Creates the buffers.
     void CreateBuffers();
+    
+    bool wasChanged = true;
+    bool wasChangedProjection = true;
 };
