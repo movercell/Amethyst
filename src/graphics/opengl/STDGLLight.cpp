@@ -4,9 +4,8 @@
 void STDGLLight::Bind() {
     if (wasChangedProjection) {
         Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
-        wasChangedProjection = false;
     }
-    if (wasChanged) {
+    if (wasChanged || wasChangedProjection) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
         Info.ViewProjection = Info.Projection * Info.View;
 
@@ -20,6 +19,7 @@ void STDGLLight::Bind() {
         UpdateData();
 
         wasChanged = false;
+        wasChangedProjection = false;
     }
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);

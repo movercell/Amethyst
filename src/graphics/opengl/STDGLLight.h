@@ -14,7 +14,8 @@ struct STDGLLightSystem;
 
 enum class STDGLLightType : GLuint {
     None = 0,
-    Spot = 1
+    Spot = 1,
+    Point = 2
 };
 
 struct STDGLLightData {

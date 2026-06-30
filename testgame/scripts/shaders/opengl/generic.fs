@@ -44,7 +44,7 @@ void main()
     STDGLLightData Light = LightBuffer.Lights[0];
 
     if (Light.Type == LIGHT_TYPE_SPOT)
-        IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
+        IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), vec3(0.0f, 0.0f, 1.0f), Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
     
     vec3 AmbientLight = vec3(0.03) * Albedo;
 

@@ -3,6 +3,7 @@
 
 #define LIGHT_TYPE_NONE 0
 #define LIGHT_TYPE_SPOT 1
+#define LIGHT_TYPE_POINT 2
 
 #define STDGLLIGHT_MAX_COUNT 1024
 #define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
@@ -68,7 +69,11 @@ vec3 CalculateLightRadiance(STDGLLightData Light, vec3 WorldPosition, vec3 Light
         return Light.Color * Light.Intensity * DistanceAttenuation * IntensityAttenuation;
     }
 
-    return Light.Color * Light.Intensity * DistanceAttenuation;
+    if (Light.Type == LIGHT_TYPE_POINT) {
+        return Light.Color * Light.Intensity * DistanceAttenuation;
+    }
+
+    return vec3(0.0f / 0.0f); // Fallback, return NaN.
 }
 
 float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point, float NormalDotLightDir) {
@@ -83,25 +88,26 @@ float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point, floa
 
 
     float Shadow = 0.0f;
-    float bias = max(0.001 * (1.0f - NormalDotLightDir), 0.0003) * (1.0f - LinearizeDepth(TruePoint.z, Light.Near, Light.Far));
+    float bias = max(0.0007 * (1.0f - NormalDotLightDir), 0.0003) * (1.0f - LinearizeDepth(TruePoint.z, Light.Near, Light.Far));
     for (int i = 0; i < STDGLLIGHT_AMOUNT_OF_ITERATIONS; i++) {
-        Shadow += texture(LightAtlas, TruePoint + vec3(0.0f, 0.0f, bias) + vec3((poissonDisk[i] * vec2(TextureSizeX, TextureSizeY)) * 0.004f * (1.0f - LinearizeDepth(TruePoint.z, Light.Near, Light.Far) * 0.7f), 0.0f)) * NormalDotLightDir;
+        Shadow += texture(LightAtlas, TruePoint + vec3(0.0f, 0.0f, bias) + vec3((poissonDisk[i] * vec2(TextureSizeX, TextureSizeY)) * 0.004f * max(1.0f - LinearizeDepth(TruePoint.z, Light.Near, Light.Far) * 0.7f, 0.2f), 0.0f)) * NormalDotLightDir;
     }
     Shadow /= STDGLLIGHT_AMOUNT_OF_ITERATIONS;
 
     return Shadow;
 }
 
-vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
+vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNormal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
     vec3 FromFragToLight = Light.LightPos - Position;
     float FromFragToLightDistance = length(FromFragToLight);
     if (FromFragToLightDistance > Light.Far) return vec3(0.0f);
 
+    vec3 Normal = VertexNormal; // TODO: Transform the vertex normal by texture normal
     vec3 FromFragToCamera = Camera.Pos - Position;
     vec3 CameraDir = normalize(FromFragToCamera);
 
     // First, do the shadow calculation.
-    vec4 LightPosView = Light.View * vec4(Position, 1.0f);
+    vec4 LightPosView = Light.View * vec4(Position + (VertexNormal * 1.4f), 1.0f);
     LightPosView.z += 0.4f;
     vec4 LightPos = Light.Projection * LightPosView;
     vec3 projCoords = LightPos.xyz / LightPos.w;
@@ -111,7 +117,7 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 Normal, float Metalness, float
     float NormalDotLightDir = max(dot(Normal, LightDir), 0.0f);
     
     float Shadow = STDGLight_SampleSpotLightForShadows(Light, projCoords, NormalDotLightDir);
-    if (Shadow == 0.0f) return vec3(0.0f); // Allow fow skipping if the entire subgroup is in shadow.
+    if (Shadow == 0.0f) return vec3(0.0f); // Allow for skipping if the entire subgroup is in shadow.
 
 
     // PBR Lighting.
