@@ -4,8 +4,9 @@
 #define LIGHT_TYPE_NONE 0
 #define LIGHT_TYPE_SPOT 1
 #define LIGHT_TYPE_POINT 2
+#define LIGHT_TYPE_END_MARKER 128
 
-#define STDGLLIGHT_MAX_COUNT 1024
+#define STDGLLIGHT_MAX_COUNT 4
 #define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
 #define STDGLLIGHT_AMOUNT_OF_ITERATIONS 16
 
@@ -54,7 +55,8 @@ vec2 poissonDisk[16] = vec2[](
     vec2(0.14383161, -0.14100790)
 );
 
-vec3 CalculateLightRadiance(STDGLLightData Light, vec3 WorldPosition, vec3 LightDir, float FromFragToLightDistance) {
+// Type is a separate argument to allow for easier time for the compiler.
+vec3 CalculateLightRadiance(STDGLLightData Light, const int Type, vec3 WorldPosition, vec3 LightDir, float FromFragToLightDistance) {
     // Distance attenuation.
     float BaseAttenuation = 1.0f / (Light.Falloff_Constant + FromFragToLightDistance * Light.Falloff_Linear + (FromFragToLightDistance * FromFragToLightDistance) * Light.Falloff_Quadratic);
     float Windowing = pow(clamp(1.0f - pow(FromFragToLightDistance / Light.Far, 4.0f), 0.0f, 1.0f), 2.0f);
@@ -108,7 +110,7 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNorm
 
     // First, do the shadow calculation.
     vec4 LightPosView = Light.View * vec4(Position + (VertexNormal * 1.4f), 1.0f);
-    LightPosView.z += 0.4f;
+    LightPosView.z += 0.6f;
     vec4 LightPos = Light.Projection * LightPosView;
     vec3 projCoords = LightPos.xyz / LightPos.w;
     projCoords = vec3((projCoords * 0.5 + 0.5).xy, projCoords.z);
@@ -125,7 +127,7 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNorm
     F0 = mix(F0, Albedo, Metalness);
 
     vec3 H = normalize(CameraDir + LightDir);
-    vec3 radiance = CalculateLightRadiance(Light, Position, LightDir, FromFragToLightDistance);
+    vec3 radiance = CalculateLightRadiance(Light, LIGHT_TYPE_SPOT, Position, LightDir, FromFragToLightDistance);
 
     // Cook-torrance BRDF.
     float NDF = DistributionGGX(Normal, H, Roughness);        

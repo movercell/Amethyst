@@ -6,7 +6,7 @@
 #include "engine/Resource.h"
 #include "engine/geometry/Alloc2D.h"
 
-inline constexpr int STDGLLIGHT_MAX_COUNT = 1024;
+inline constexpr int STDGLLIGHT_MAX_COUNT = 4;
 inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS = 8192;
 inline constexpr int STDGLLIGHT_ALLOC2D_PADDING = 4;
 
@@ -15,14 +15,15 @@ struct STDGLLightSystem;
 enum class STDGLLightType : GLuint {
     None = 0,
     Spot = 1,
-    Point = 2
+    Point = 2,
+    EndMarker = 128
 };
 
 struct STDGLLightData {
     mat4 View;
     mat4 Projection;
     Geometry::Alloc2D::Block TextureSpace;
-    STDGLLightType Type = STDGLLightType::None;
+    STDGLLightType Type = STDGLLightType::EndMarker;
     float FOV;
     float Near;
     float Far;
@@ -108,6 +109,10 @@ struct STDGLLightSystem {
             std::queue<uint32_t> empty;
             FreedIndices.swap(empty);
             NextIndexToMake = 0;
+
+            auto* DefaultData = new STDGLLightData[STDGLLIGHT_MAX_COUNT];
+            glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
+            delete DefaultData;
         }
 
         delete res;

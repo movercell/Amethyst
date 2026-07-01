@@ -157,6 +157,12 @@ int main() {
 	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
 	lights[0]->SetFalloff(0.0f, 0.7f, 0.3f);
 	lights[0]->SetIntensity(79999.0f);
+
+	lights[1] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(0.0f, 1.0f, 0.0f), 1, 1024.0);
+	lights[1]->SetPosition(vec3(-88.0f, 20.0f, 37.0f));
+	lights[1]->SetAngles(vec3(20.0f, -30.0f, 0.0f));
+	lights[1]->SetFalloff(0.0f, 0.3f, 0.7f);
+	lights[1]->SetIntensity(9999.0f);
 	//lights[0]->SetPosition(vec3(0.0f, 30.0f, 0.0f));
 	//lights[0]->SetAngles(vec3(0.0f, -90.0f, 0.0f));
 

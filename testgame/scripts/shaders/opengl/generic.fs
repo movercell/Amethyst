@@ -41,11 +41,13 @@ void main()
     vec3 Albedo = Texture * vec3(0.3f, 0.3f, 0.7f);
 
     vec3 IncomingLight;
-    STDGLLightData Light = LightBuffer.Lights[0];
 
-    if (Light.Type == LIGHT_TYPE_SPOT)
-        IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), vec3(0.0f, 0.0f, 1.0f), Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
-    
+    for (int light = 0; light < STDGLLIGHT_MAX_COUNT; light++) {
+        STDGLLightData Light = LightBuffer.Lights[light];
+
+        if (Light.Type == LIGHT_TYPE_SPOT)
+            IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), vec3(0.0f, 0.0f, 1.0f), Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
+    }
     vec3 AmbientLight = vec3(0.03) * Albedo;
 
     vec3 Color = AmbientLight + IncomingLight;
