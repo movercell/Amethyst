@@ -102,7 +102,7 @@ void STDGLRenderer::Draw() {
             
             GL_PUSH_DEBUG("Light");
             light->resource.Bind();
-            glViewport(0, 0, light->resource.GetResolution().x, light->resource.GetResolution().y);
+            glViewport(light->resource.TextureSpace.PosX, light->resource.TextureSpace.PosY, light->resource.TextureSpace.SizeX, light->resource.TextureSpace.SizeY);
             glClear(GL_DEPTH_BUFFER_BIT);
             
             PreprocessIArrays(InstanceArrayRefs);
