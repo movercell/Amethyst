@@ -145,26 +145,24 @@ int main() {
 	enginewindow->SetUIFunction(mainuifunction);
 	std::array<Engine::Reference<Camera>, 2> cameras;
 	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
-	cameras[1] = rworld->MakeCamera(vec2(800 * 4, 600 * 4), "cam2");
+	cameras[1] = rworld->MakeCamera(vec2(800 * 2, 600 * 2), "cam2");
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.adf");
 	models[3] = rworld->MakeModelInstance("floor_plane.adf");
 
 	std::array<Engine::Reference<Light>, 2> lights;
-	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 1024.0);
+	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 512.0);
 	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
 	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
 	lights[0]->SetFalloff(0.0f, 0.7f, 0.3f);
 	lights[0]->SetIntensity(79999.0f);
 
-	lights[1] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(0.0f, 1.0f, 0.0f), 1, 1024.0);
+	lights[1] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(0.0f, 1.0f, 0.0f), 1, 256.0);
 	lights[1]->SetPosition(vec3(-88.0f, 20.0f, 37.0f));
 	lights[1]->SetAngles(vec3(20.0f, -30.0f, 0.0f));
 	lights[1]->SetFalloff(0.0f, 0.3f, 0.7f);
 	lights[1]->SetIntensity(9999.0f);
-	//lights[0]->SetPosition(vec3(0.0f, 30.0f, 0.0f));
-	//lights[0]->SetAngles(vec3(0.0f, -90.0f, 0.0f));
 
 
 	for (int i = 0; i < 64; i++) {
