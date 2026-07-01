@@ -151,7 +151,7 @@ int main() {
 	models[2] = rworld->MakeModelInstance("cube.adf");
 	models[3] = rworld->MakeModelInstance("floor_plane.adf");
 
-	std::array<Engine::Reference<Light>, 1> lights;
+	std::array<Engine::Reference<Light>, 2> lights;
 	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 1024.0);
 	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
 	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
