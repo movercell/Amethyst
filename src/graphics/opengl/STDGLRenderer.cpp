@@ -110,7 +110,7 @@ void STDGLRenderer::Draw() {
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
 
-            // Basic frustum culling for lights.
+            // Frustum culling for lights.
             {
                 bool isActive = true;
                 auto Sphere = Shapes::Sphere(light->resource.GetPosition(), light->resource.GetFar());
