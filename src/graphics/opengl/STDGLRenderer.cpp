@@ -93,6 +93,15 @@ void STDGLRenderer::Draw() {
         InstanceArrayRefs.reserve(rworld->InstanceArrays.size());
         for (auto& [_, iarray] : rworld->InstanceArrays)
             InstanceArrayRefs.emplace_back(iarray);
+
+        
+        std::vector<Shapes::Frustum> AllCameraFrustums;
+        AllCameraFrustums.reserve(rworld->CameraVec.size());
+        // First, update all the cameras to get accurate frustums.
+        for (auto camera : rworld->CameraVec) {
+            camera->resource.Update();
+            AllCameraFrustums.push_back(camera->resource.Info.Frustum);
+        }
         
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(5.0f, 2.0f);
@@ -100,8 +109,24 @@ void STDGLRenderer::Draw() {
         glEnable(GL_SCISSOR_TEST);
         for (auto light : rworld->lightsystem.LightResources) {
             if (!light) continue;
+
+            // Basic frustum culling for lights.
+            {
+                bool isActive = true;
+                auto Sphere = Shapes::Sphere(light->resource.GetPosition(), light->resource.GetFar());
+
+                for (const auto& Frustum : AllCameraFrustums) {
+                    if (!Frustum.CullSphere(Sphere)) {
+                        isActive = false;
+                        break;
+                    }
+                }
+
+                if (!isActive) continue;
+            }
             
             GL_PUSH_DEBUG("Light");
+            light->resource.Update();
             light->resource.Bind();
             glViewport(light->resource.TextureSpace.PosX, light->resource.TextureSpace.PosY, light->resource.TextureSpace.SizeX, light->resource.TextureSpace.SizeY);
             glScissor(light->resource.TextureSpace.PosX, light->resource.TextureSpace.PosY, light->resource.TextureSpace.SizeX, light->resource.TextureSpace.SizeY);

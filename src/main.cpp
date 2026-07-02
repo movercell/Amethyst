@@ -152,10 +152,10 @@ int main() {
 	models[3] = rworld->MakeModelInstance("floor_plane.adf");
 
 	std::array<Engine::Reference<Light>, 2> lights;
-	lights[0] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 512.0);
+	lights[0] = rworld->MakeSpotLight(vec2(2048, 2048), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 512.0);
 	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
 	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
-	lights[0]->SetFalloff(0.0f, 0.7f, 0.3f);
+	lights[0]->SetFalloff(0.0f, 0.7f, 0.1f);
 	lights[0]->SetIntensity(79999.0f);
 
 	lights[1] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(0.0f, 1.0f, 0.0f), 1, 256.0);
@@ -165,8 +165,9 @@ int main() {
 	lights[1]->SetIntensity(9999.0f);
 
 
-	for (int i = 0; i < 64; i++) {
-		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
+	extramodels.reserve(128);
+	for (int i = 0; i < 128; i++) {
+		extramodels.push_back(rworld->MakeModelInstance(std::to_string(i)));
 	}
 
 	std::cout << "Hello, world!" << std::endl;
@@ -192,8 +193,13 @@ int main() {
 		position += 32.0f * deltaTime;
 		if (position > 360.0f) position -= 360.0f;
 
+		float x = 128.0f;
 		for (auto& model : extramodels) {
-			model->SetMatrix(mat4());
+			model->SetMatrix(mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			 					  0.0f, 1.0f, 0.0f, -x,
+			 					  0.0f, 0.0f, 1.0f, 0.0f,
+			 					  0.0f, 0.0f, 0.0f, 1.0f));
+			x += 128.0f;
 		}
 
 		tmpworld.Update();

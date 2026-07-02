@@ -2,7 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "glm/geometric.hpp"
 
-void STDGLCamera::Bind() {
+void STDGLCamera::Update() {
     if (wasChangedProjection) {
         Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
         wasChangedProjection = false;
@@ -20,6 +20,10 @@ void STDGLCamera::Bind() {
 
         wasChanged = false;
     }
+}
+
+void STDGLCamera::Bind() {
+    
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(0, 0, Resolution.x, Resolution.y);

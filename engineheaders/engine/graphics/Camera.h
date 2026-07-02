@@ -15,6 +15,15 @@ namespace Engine {
     //@internal
     namespace Internal {
         struct BaseCameraOrLight {
+            vec3 GetPosition() {
+                return Position;
+            }
+            float GetNear() {
+                return Near;
+            }
+            float GetFar() {
+                return Far;
+            }
         protected:
             vec3 Position;
 

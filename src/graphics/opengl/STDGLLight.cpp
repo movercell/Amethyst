@@ -1,7 +1,7 @@
 #include "STDGLLight.h"
 #include <numbers>
 
-void STDGLLight::Bind() {
+void STDGLLight::Update() {
     if (wasChangedProjection) {
         Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
     }
@@ -21,6 +21,9 @@ void STDGLLight::Bind() {
         wasChanged = false;
         wasChangedProjection = false;
     }
+}
+
+void STDGLLight::Bind() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);

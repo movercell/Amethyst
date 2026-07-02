@@ -58,6 +58,7 @@ struct STDGLLight : public Light {
     STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworldref, uint32_t id, STDGLLightType type, vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far);
     ~STDGLLight();
 
+    void Update();
     void Bind();
 
     void SetPosition(vec3 Position);
