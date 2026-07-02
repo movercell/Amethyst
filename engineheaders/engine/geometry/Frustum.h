@@ -23,6 +23,15 @@ class alignas(alignof(vec4)) Shapes::Frustum {
         plane.z /= magnitude;
         plane.w /= magnitude;
     };
+    bool InvPlaneTest(const Shapes::Sphere& Sphere, vec4 Plane) const {
+        float Distance = vec3(Plane.x, Plane.y, Plane.z).dot(Sphere.Position) + Plane.w;
+        
+        if (Distance < -Sphere.Radius) {
+            return true;
+        }
+        return false;
+    }
+
 
 public:
     Frustum() {};
@@ -68,5 +77,22 @@ public:
         Front.w = ViewProjection[3, 3] + ViewProjection[3, 2];
 
         NormalizePlane(Front);
+    }
+
+    //! Returns true if the sphere is in the frustum.
+    bool CullSphere(const Shapes::Sphere Sphere) const {
+        if (InvPlaneTest(Sphere, Right))
+            return false;
+        if (InvPlaneTest(Sphere, Left))
+            return false;
+        if (InvPlaneTest(Sphere, Top))
+            return false;
+        if (InvPlaneTest(Sphere, Bottom))
+            return false;
+        if (InvPlaneTest(Sphere, Back))
+            return false;
+        if (InvPlaneTest(Sphere, Front))
+            return false;
+        return true;
     }
 };

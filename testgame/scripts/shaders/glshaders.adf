@@ -3,10 +3,13 @@ Shaders {
         Generic {
             Source "generic.vs"
         }
+        Screenspace {
+            Source "screenspace.vs"
+        }
     }
     Fragment {
-        UnlitGeneric {
-            Source "unlitgeneric.fs"
+        Generic {
+            Source "generic.fs"
             DepthSource "generic.ds"
         }
     }

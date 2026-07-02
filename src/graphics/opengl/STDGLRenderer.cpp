@@ -48,6 +48,12 @@ void STDGLRenderer::Init() {
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
+
+
+    glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+    glClearDepth(0.0f);
+    glClearColor(0, 0, 0, 1);
+    glDepthFunc(GL_GREATER);
 }
 
 STDGLRenderer::~STDGLRenderer() {
@@ -73,9 +79,6 @@ void STDGLRenderer::Draw() {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glClearDepth(1.0f);
-    glClearColor(0, 0, 0, 1);
 
     for (auto rworldres : RWorldVec) {
 
@@ -83,20 +86,79 @@ void STDGLRenderer::Draw() {
         if (rworld->isSkippingRendering())
             continue;
 
+        rworld->lightsystem.Bind();
+
         // Get references to all instance arrays.
         std::vector<Engine::Reference<STDGLModelInstanceArray>> InstanceArrayRefs;
         InstanceArrayRefs.reserve(rworld->InstanceArrays.size());
         for (auto& [_, iarray] : rworld->InstanceArrays)
             InstanceArrayRefs.emplace_back(iarray);
 
+        
+        std::vector<Shapes::Frustum> AllCameraFrustums;
+        AllCameraFrustums.reserve(rworld->CameraVec.size());
+        // First, update all the cameras to get accurate frustums.
+        for (auto camera : rworld->CameraVec) {
+            camera->resource.Update();
+            AllCameraFrustums.push_back(camera->resource.Info.Frustum);
+        }
+        
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(5.0f, 2.0f);
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_SCISSOR_TEST);
+        for (auto light : rworld->lightsystem.LightResources) {
+            if (!light) continue;
+
+            // Frustum culling for lights.
+            {
+                bool isActive = true;
+                auto Sphere = Shapes::Sphere(light->resource.GetPosition(), light->resource.GetFar());
+
+                for (const auto& Frustum : AllCameraFrustums) {
+                    if (!Frustum.CullSphere(Sphere)) {
+                        isActive = false;
+                        break;
+                    }
+                }
+
+                if (!isActive) continue;
+            }
+            
+            GL_PUSH_DEBUG("Light");
+            light->resource.Update();
+            light->resource.Bind();
+            glViewport(light->resource.TextureSpace.PosX, light->resource.TextureSpace.PosY, light->resource.TextureSpace.SizeX, light->resource.TextureSpace.SizeY);
+            glScissor(light->resource.TextureSpace.PosX, light->resource.TextureSpace.PosY, light->resource.TextureSpace.SizeX, light->resource.TextureSpace.SizeY);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            
+            PreprocessIArrays(InstanceArrayRefs);
+            DrawIArrays<true>(InstanceArrayRefs);
+
+            GL_POP_DEBUG;
+        }
+
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_SCISSOR_TEST);
         for (auto camera : rworld->CameraVec) {
 
             GL_PUSH_DEBUG(camera->resource.Name.c_str());
             camera->resource.Bind();
-            glViewport(0, 0, camera->resource.GetResolution().x, camera->resource.GetResolution().y);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+            // Instance culling.
+            PreprocessIArrays(InstanceArrayRefs);
             
+            // Z-Prepass.
+            DrawIArrays<true>(InstanceArrayRefs);
+
+            // TODO: Cluster processing
+
+            // Normal rendering.
+            glDepthFunc(GL_EQUAL);
             DrawIArrays<false>(InstanceArrayRefs);
+            glDepthFunc(GL_GREATER);
 
             GL_POP_DEBUG;
             
@@ -116,8 +178,7 @@ void STDGLRenderer::Draw() {
     
 }
 
-template<bool isDepth>
-void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
+void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
     // Clear the instance counts.
     for (auto& iarray : InstanceArrayRefs) {
         auto* model = iarray->Model.get();
@@ -146,10 +207,17 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
     }
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+}
 
+template<bool isDepth>
+void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
     // Draw.
     glUseProgram(0);
-    auto tmpshader = ShaderSystem.GetShaderPipeline("Generic", "UnlitGeneric").first;
+    GLuint tmpshader;
+    if constexpr (isDepth)
+        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").second;
+    else
+        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").first;
     glBindProgramPipeline(tmpshader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
@@ -158,10 +226,7 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
         Model->BindInfo();
         Model->BindIndirectCommands();
 
-        if constexpr (isDepth)
-            Model->DrawDepth();
-        else
-            Model->Draw();
+        Model->Draw<isDepth>();
     }
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -170,7 +235,9 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
 
 
 Engine::Reference<RWorld> STDGLRenderer::MakeRWorld() {
-    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, rendererData, &ModelSystem);
+    glfwMakeContextCurrent(rendererData);
+    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, &ModelSystem);
+    result->resource.selfResource = result;
     RWorldVec.push_back(result);
 
     return Engine::Reference(result);

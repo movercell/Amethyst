@@ -1,6 +1,6 @@
 #pragma once
 
-#define STDGLMODEL_INSTANCE_MAX_COUNT 4096
+#define STDGLMODEL_INSTANCE_MAX_COUNT 2048
 #define STDGLMODEL_LOD_MAX_COUNT 4
 #define STDGLMODEL_MESH_MAX_COUNT 8
 #define STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE 128
@@ -18,6 +18,7 @@
 #include <map>
 
 struct STDGLModel {
+    template<bool isDepth>
     void Draw() {
         glBindVertexArray(VAO);
         for (int LOD = 0; LOD < LODCount; LOD++) {
@@ -28,7 +29,6 @@ struct STDGLModel {
             }
         }
     }
-    void DrawDepth();
     inline void BindInfo() {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ModelInfo);
     }

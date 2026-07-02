@@ -7,6 +7,9 @@ project(AMETHYST VERSION 1.0
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Amethyst build configuration.
+set(AMETHYST_BUILD_PROFILE OFF)
+
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX")
 elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
@@ -14,12 +17,14 @@ elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
 endif()
 
 
-# Profiling stuff
-# add_compile_options(-pg -g)
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+# Profiling
+if (AMETHYST_BUILD_PROFILE)
+add_compile_options(-pg -g)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+endif()
 
 
-# include the libraries
+# Include the libraries.
 set(GLFW_LIBRARY_TYPE STATIC CACHE STRING "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -42,7 +47,9 @@ set_target_properties(assimp PROPERTIES IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/bui
 else()
 set_target_properties(assimp PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/testgame/libassimp.so.6")
 endif()
-	
+
+
+# The main engine source code.
 add_executable(amethyst
 	src/main.cpp
 	
@@ -54,8 +61,10 @@ add_executable(amethyst
 	src/graphics/opengl/STDGLModel.cpp
 	src/graphics/opengl/STDGLWindow.cpp
 	src/graphics/opengl/STDGLShaderSystem.cpp
+	src/graphics/opengl/STDGLLight.cpp
 	src/graphics/opengl/GLMisc.cpp
 	src/geometry/Model.cpp
+	src/geometry/Alloc2D.cpp
 	src/Init.cpp
 	src/filesystem/Filesystem.cpp
 	src/filesystem/ADFParser.cpp
@@ -63,10 +72,13 @@ add_executable(amethyst
 	src/entities/BasicEntities.cpp
 )
 
+
+# Link the libraries.
 target_link_libraries(amethyst glad)
 target_link_libraries(amethyst glfw)
 target_link_libraries(amethyst imgui)
 target_link_libraries(amethyst assimp)
+
 
 target_include_directories(amethyst PRIVATE include)
 target_include_directories(amethyst PRIVATE engineheaders)

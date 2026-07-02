@@ -17,34 +17,34 @@ bool InvPlaneTest(vec3 center, float radius, vec4 plane) {
 void main() {
     bool isActive = true;
 
-    if (isnan(InstanceMatrices[gl_GlobalInvocationID.x][0][0])) isActive = false;
+    if (isnan(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][0][0])) isActive = false;
 
 
-    vec3 position = InstanceMatrices[gl_GlobalInvocationID.x][3].xyz;
+    vec3 position = InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][3].xyz;
     float maxscale;
 
     {
-        float xscale = length(InstanceMatrices[gl_GlobalInvocationID.x][0].xyz);
-        float yscale = length(InstanceMatrices[gl_GlobalInvocationID.x][1].xyz);
-        float zscale = length(InstanceMatrices[gl_GlobalInvocationID.x][2].xyz);
+        float xscale = length(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][0].xyz);
+        float yscale = length(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][1].xyz);
+        float zscale = length(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][2].xyz);
 
         maxscale = max(max(xscale, yscale), zscale);
     }
 
-    float radius = ModelRadius * maxscale;
+    float radius = ModelInfo.Radius * maxscale;
 
     for (int i = 0; i < 6; i++)
-        if (InvPlaneTest(position, radius, CameraFrustum[i]))
+        if (InvPlaneTest(position, radius, Camera.Frustum[i]))
             isActive = false;
 
 
     // Determine the LOD level
-    float DistanceFromCamera = distance(CameraPos, vec3(InstanceMatrices[gl_GlobalInvocationID.x][3]));
+    float DistanceFromCamera = distance(Camera.Pos, vec3(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][3]));
     int LOD = STDGLMODEL_LOD_MAX_COUNT - 1;
-    while ((LOD != 0) && (DistanceFromCamera < (LODDistances[LOD] * maxscale))) LOD--;
+    while ((LOD != 0) && (DistanceFromCamera < (ModelInfo.LODDistances[LOD] * maxscale))) LOD--;
 
     if (isActive) {
-        uint ID = atomicAdd(IndirectBuffers[LOD][0].instanceCount, 1u);
-        InstanceIndices[LOD][ID] = gl_GlobalInvocationID.x;
+        uint ID = atomicAdd(ModelInfo.IndirectBuffers[LOD][0].instanceCount, 1u);
+        ModelInfo.InstanceIndices[LOD][ID] = gl_GlobalInvocationID.x;
     }
 }

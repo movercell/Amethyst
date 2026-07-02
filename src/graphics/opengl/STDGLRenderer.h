@@ -28,7 +28,7 @@ protected:
 
     GLuint ModelInstancePreprocessShader;
     GLuint ModelInstanceReplicatorShader;
-
+    
     uint64_t FrameCounter = 0;
 
     void Init();
@@ -43,6 +43,7 @@ protected:
         RWorldVec.erase(std::find(RWorldVec.begin(), RWorldVec.end(), res));
         delete res;
     }
+    void PreprocessIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs);
     template<bool isDepth>
     void DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs);
 public:
