@@ -5,23 +5,13 @@
 namespace Engine {
     template<typename T>
     struct Resource {
-        std::atomic_bool hasbegun = false; // Used for checking whether this is the first reference that's created
-        std::atomic_int16_t referencecount = 0;
+        mutable std::atomic_int16_t referencecount = 0;
 
-        virtual bool IncrementReference() {
-            bool expected = false;
-            bool desired = true;
-            if (hasbegun.compare_exchange_strong(expected, desired)) {
-                referencecount++;
-                return true;
-            }
-            if (referencecount <= 0)
-                return false;
-            referencecount++;
-            return true;
+        virtual void IncrementReference() {
+            referencecount.fetch_add(1, std::memory_order_relaxed);
         }
         virtual void DecrementReference() {
-            if (--referencecount == 0) {
+            if (referencecount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
                 delete this;
             }
         }
@@ -35,7 +25,7 @@ namespace Engine {
 
     template<typename T>
     struct Reference {
-        Reference(Engine::Resource<T>* resource) : Resource(resource) { if (!Resource || !Resource->IncrementReference()) Resource = nullptr; }
+        Reference(Engine::Resource<T>* resource) : Resource(resource) { if (Resource) Resource->IncrementReference(); }
         Reference() { Resource = nullptr; }
         Reference(const Reference& other) { Resource = other.Resource; if (Resource) Resource->IncrementReference(); }
         Reference(Reference&& other) noexcept { Resource = other.Resource; other.Resource = nullptr; }
@@ -71,7 +61,7 @@ namespace Engine {
         ManagedResource(Container* in, Args&&... args) : resource(std::forward<Args>(args)...), container(in) {}
 
         void DecrementReference() {
-            if (--Resource<T>::referencecount == 0) {
+            if (Resource<T>::referencecount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
                 container->_unmanage_resource(this);
             }
         }
@@ -100,7 +90,7 @@ namespace Engine {
         ManagedInterfacedResource(Container* in, Args&&... args) : resource(std::forward<Args>(args)...), container(in) {}
 
         void DecrementReference() {
-            if (--Resource<Interface>::referencecount == 0) {
+            if (Resource<Interface>::referencecount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
                 container->_unmanage_resource(this);
             }
         }

@@ -1,10 +1,12 @@
 #include <map>
 #include <functional>
+#include <format>
 
 #include "engine/entities/Entity.h"
 #include "engine/entities/World.h"
 
-#define WORLD_DEFAULT_SLOT_AMOUNT 4096
+inline constexpr int SAVEFILE_VERSION = 0;
+inline constexpr int WORLD_DEFAULT_SLOT_AMOUNT = 4096;
 
 static std::map<std::string, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
 
@@ -16,15 +18,21 @@ ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
         auto& Handler = (*Storage)[i];
         if (!Handler) continue;
 
-        retmap.emplace(std::to_string(i), Handler->ToADF());
+        // The padding is needed for the std::map constructor to properly order the entities on load.
+        retmap.emplace(std::format("{:06}", i), Handler->ToADF());
     }
 
     return ret;
 }
 void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent) {
     const auto& entmap = Saved.GetMap();
-    Storage->resize(Saved.GetMap().size());
 
+    // This line is needed due to the .rbegin() later, otherwise it segfaults when there's no entities in the storage.
+    if (entmap.size() == 0) return;
+
+    Storage->reserve(std::stoi(entmap.rbegin()->first) + 1);
+
+    int IndexValidation = -1;
     for (const auto& SavedEntity : entmap) {
         Engine::Reference<iEntHandler> Handler;
         
@@ -35,6 +43,12 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
         }
 
         int slot = std::stoi(SavedEntity.first);
+
+        if (slot <= IndexValidation) {
+            Engine::Error("Corrupted Savefile: Entities out of order or attempting to share the same slot.");
+        }
+        IndexValidation = slot;
+
         (*Storage)[slot] = Handler;
         Handler->slot = slot;
         Handler->FromADF(SavedEntity.second);
@@ -48,12 +62,25 @@ ADFEntry World::Save() {
     auto& savemap = ret["Savefile"].GetMap();
 
     savemap.emplace("MapName", ADFEntry::String(MapName));
+    savemap.emplace("MapVersion", ADFEntry::String("thisvalueisnotyetused"));
+    savemap.emplace("SavefileVersion", ADFEntry::String(std::to_string(SAVEFILE_VERSION)));
     savemap.emplace("Entities", EntityStorageToADF(this));
 
     return ret;
 }
 void World::Restore(const ADFEntry& Saved) {
     const auto& Savefile = Saved["Savefile"];
+    
+    int Saveversion = std::stoi(Savefile["SavefileVersion"].GetString());
+    if (Saveversion > SAVEFILE_VERSION) {
+        Engine::Warning("Cannot load Savefile: Too old of an engine version.(You should update the game. By the way, for what reason are you trying to load a Savefile in an older version?)");
+        return;
+    }
+    if (Saveversion < SAVEFILE_VERSION) {
+        Engine::Error("Savefile updating is not yet supported!");
+    }
+    
+
     if (Savefile.HasChild("Mapname")) {
         MapName = Savefile["Mapname"].GetString();
         // TODO: add map file loading here
@@ -121,12 +148,28 @@ int EntityStorage::GetFreeIndex() {
     int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
 
     if (iterator == end()) {
-        resize(size() + ResizeAdditionalSlotAmount);
+        reserve(size() + size() / 2);
     }
 
     return ret;
 }
 
+void EntityStorage::reserve(uint count) {
+    if (count > Size) {
+        if(count > PreallocatedSlotAmount) {
+            Engine::Reference<iEntHandler>* OldStorage = begin();
+            DynamicStorage = new Engine::Reference<iEntHandler>[count];
+                
+            for (int i = 0; i < Size; i++) {
+                DynamicStorage[i] = OldStorage[i];
+            }
+            if (Size > PreallocatedSlotAmount) {
+                delete[] OldStorage;
+            }
+        }
+        Size = count;
+    }
+}
 void EntityStorage::Update() {
     for (auto& Handler : (*this)) {
         if (Handler) {

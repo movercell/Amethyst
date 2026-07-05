@@ -167,7 +167,7 @@ int main() {
 
 	extramodels.reserve(128);
 	for (int i = 0; i < 128; i++) {
-		extramodels.push_back(rworld->MakeModelInstance(std::to_string(i)));
+		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
 	}
 
 	std::cout << "Hello, world!" << std::endl;

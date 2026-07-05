@@ -5,6 +5,7 @@
 #include <variant>
 #include <optional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -54,24 +55,22 @@ class ADFEntry {
 
 
     class Tokenizer {
-        std::ifstream filestream;
+        std::istream* stream;
         const std::string& filepath;
         static inline constexpr auto eof = std::char_traits<char>::eof();
     public:
-        inline Tokenizer(const std::string& FilePath) : filepath(FilePath) {
-            filestream = Filesystem::GetFileAsStream(FilePath, std::ios::in | std::ios_base::binary);
-        }
+        inline Tokenizer(std::istream* Stream, const std::string& FilePath) : filepath(FilePath), stream(std::move(Stream)) {}
         Token ReadToken();
     };
 
     [[noreturn]] void ADFError(const std::string& error) const;
 
-    ENGINEEXPORT void ToFile(std::filebuf* buffer, int IndentationLevel) const;
-    void ToFileObjectFormatHelper(std::filebuf* buffer, int IndentationLevel) const;
-    void ToFileStringFormatHelper(std::filebuf* buffer, const std::string& str) const;
+    ENGINEEXPORT void ToStream(std::streambuf* buffer, int IndentationLevel) const;
+    void ToStreamObjectFormatHelper(std::streambuf* buffer, int IndentationLevel) const;
+    void ToStreamStringFormatHelper(std::streambuf* buffer, const std::string& str) const;
 
-    ENGINEEXPORT void ToFileCompact(std::filebuf* buffer) const;
-    void ToFileCompactObjectFormatHelper(std::filebuf* buffer) const;
+    ENGINEEXPORT void ToStreamCompact(std::streambuf* buffer) const;
+    void ToStreamCompactObjectFormatHelper(std::streambuf* buffer) const;
 
     ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename);
     ADFEntry(std::string content, Engine::Reference<std::string> filename) { data = std::move(content); filename = filename; }
@@ -79,21 +78,37 @@ class ADFEntry {
 public:
     //! Creates an ADF tree from a .adf file.
     static ENGINEEXPORT ADFEntry FromFile(const std::string& FilePath);
+    //! Creates an ADF tree from a stream.
+    static ENGINEEXPORT ADFEntry FromStream(std::istream& Stream);
     inline void ToFile(const std::string& FilePath, bool isCompact = false) const {
         if (!IsMap()) {
             Engine::Error("Attempted to turn a non-Map-type ADF entry into a string, only a Map-type entry can be the root node of a tree!");
         }
         auto out = Filesystem::GetFileOutputStream(FilePath, std::ios::binary);
 
-        if (!std::ofstream::sentry(out)) {
-            Engine::Error("Failed to create an output stream for a .ADF export!");
+        auto sentry = std::ofstream::sentry(out);
+        if (!sentry) {
+            Engine::Error("Failed to create an output stream for an .ADF export!");
         }
 
         auto buffer = out.rdbuf();
         if (isCompact) {
-            ToFileCompact(buffer);
+            ToStreamCompact(buffer);
         } else {
-            ToFile(buffer, 0);
+            ToStream(buffer, 0);
+        }
+    }
+    inline void ToStream(std::ostream Stream, bool isCompact = false) const {
+        auto sentry = std::ostream::sentry(Stream);
+        if (!sentry) {
+            Engine::Error("Failed to lock the output stream for an .ADF export!");
+        }
+
+        auto buffer = Stream.rdbuf();
+        if (isCompact) {
+            ToStreamCompact(buffer);
+        } else {
+            ToStream(buffer, 0);
         }
     }
 

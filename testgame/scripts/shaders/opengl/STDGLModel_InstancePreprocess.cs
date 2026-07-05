@@ -1,5 +1,11 @@
 #version 460 core
 
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#ifdef GLSLANGVALIDATOR
+#extension GL_GOOGLE_include_directive : require
+#endif
+
 #include "STDGLModel.incl"
 #include "STDGLCamera.incl"
 
@@ -38,13 +44,28 @@ void main() {
             isActive = false;
 
 
-    // Determine the LOD level
+    // Determine the LOD level.
     float DistanceFromCamera = distance(Camera.Pos, vec3(InstanceBuffer.InstanceMatrices[gl_GlobalInvocationID.x][3]));
     int LOD = STDGLMODEL_LOD_MAX_COUNT - 1;
     while ((LOD != 0) && (DistanceFromCamera < (ModelInfo.LODDistances[LOD] * maxscale))) LOD--;
 
+    // Compact the active threads so that less atomic operations happen.
+    uvec4 AllLODBallots[4];
+    for (int i = 0; i < STDGLMODEL_LOD_MAX_COUNT; i++) {
+        AllLODBallots[i] = subgroupBallot(isActive && (LOD == i));
+    }
+    uint BaseLODInstanceIndices[STDGLMODEL_LOD_MAX_COUNT];
+    if (subgroupElect()) {
+        for (int i = 0; i < STDGLMODEL_LOD_MAX_COUNT; i++) {
+            BaseLODInstanceIndices[i] = atomicAdd(ModelInfo.IndirectBuffers[i][0].instanceCount, subgroupBallotBitCount(AllLODBallots[i]));
+        }
+    }
+    for (int i = 0; i < STDGLMODEL_LOD_MAX_COUNT; i++) {
+        BaseLODInstanceIndices[i] = subgroupBroadcastFirst(BaseLODInstanceIndices[i]);
+    }
+
+    // Now, write the instance data.
     if (isActive) {
-        uint ID = atomicAdd(ModelInfo.IndirectBuffers[LOD][0].instanceCount, 1u);
-        ModelInfo.InstanceIndices[LOD][ID] = gl_GlobalInvocationID.x;
+        ModelInfo.InstanceIndices[LOD][BaseLODInstanceIndices[LOD] + subgroupBallotExclusiveBitCount(AllLODBallots[LOD])] = gl_GlobalInvocationID.x;
     }
 }

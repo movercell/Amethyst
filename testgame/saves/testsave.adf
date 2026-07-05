@@ -1,7 +1,8 @@
 "Savefile" {
     "MapName" ""
+    "SavefileVersion" "1"
     "Entities" {
-        "0" {
+        "000000" {
             "classname" "prop_dynamic"
             "properties" {
                 "targetname" not\ quoted
@@ -11,7 +12,7 @@
                 "scale" { x 1 y 3 z 5 }
             }
             "children" {
-                "0" {
+                "000000" {
                     "classname" "prop_dynamic"
                     "properties" {
                         "targetname" "hia"

@@ -2,13 +2,13 @@
 
 
 void DynamicProp::Initialize() {
-    modelinstance = world->GetRWorld()->MakeModelInstance(model);
-
     BaseEntity::Initialize();
+
+    modelinstance = world->GetRWorld()->MakeModelInstance(model);
 }
 
 void DynamicProp::Update() {
-    modelinstance->SetMatrix(MakeTransformationMatrix());
-
     BaseEntity::Update();
+    
+    modelinstance->SetMatrix(TransformationMatrix);
 }

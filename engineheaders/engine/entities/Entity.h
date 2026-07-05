@@ -30,6 +30,8 @@ struct iEntHandler {
     virtual void AddTag(const std::string& tag) = 0;
     virtual bool HasTag(const std::string& tag) = 0;
 
+    virtual mat4 GetTransformationMatrix() = 0;
+
     virtual ~iEntHandler() {};
 
     //! Removes the entity from it's slot, resulting in destruction when not owned by anything else.
@@ -50,7 +52,7 @@ template<typename T>
 class BaseEntityHandler : public iEntHandler {
 protected:
 
-    using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*>;
+    using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*, ADFEntry T::*>;
 
     const char* classname;
     const std::optional<iEntHandler*> parent;
@@ -73,6 +75,7 @@ protected:
             ADFEntry operator()(vec4 T::* entproperty)        {  return ADFEntry::Vector4(Entity.*entproperty); }
             ADFEntry operator()(quat T::* entproperty)        {  return ADFEntry::Quaternion(Entity.*entproperty); }
             ADFEntry operator()(std::string T::* entproperty) {  return ADFEntry::String(Entity.*entproperty); }
+            ADFEntry operator()(ADFEntry T::* entproperty)    {  return Entity.*entproperty; }
         };
 
         return std::visit<ADFEntry>(Processor(Entity), Property);
@@ -119,6 +122,7 @@ public:
             void operator()(vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); };
             void operator()(quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); };
             void operator()(std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
+            void operator()(ADFEntry T::* entproperty)    { Entity.*entproperty  = Property; }
         };
         try {
             std::visit<void>(Processor(Entity, Property), Properties.at(Name));
@@ -170,7 +174,13 @@ public:
 
 
 
-    void InitEntity() { Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this); Entity.world = world; Entity.Initialize(); }
+    void InitEntity() {
+        Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this);
+        Entity.world = world;
+        Entity.Initialize();
+        
+        AddTag("InitializedOnce");
+    }
     void UpdateEntity() { Entity.Update(); }
 
     const char* GetClassname() const { return classname; }
@@ -178,6 +188,8 @@ public:
 
     inline void AddTag(const std::string& tag) { tags.push_back(tag); }
     inline bool HasTag(const std::string& tag) { return std::find(tags.begin(), tags.end(), tag) != tags.end(); }
+
+    mat4 GetTransformationMatrix() { return Entity.TransformationMatrix; }
 
     BaseEntityHandler(const char* Classname, World* World, std::optional<iEntHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
     ~BaseEntityHandler() = default;
@@ -194,25 +206,27 @@ struct BaseEntity {
 
     quat rotation;
 
-    virtual void Initialize() {
-        if (!HasTag("WasAlreadyInitializedOnce")) {
-            rotation = quat(angles);
+    mat4 TransformationMatrix;
 
-            AddTag("WasAlreadyInitializedOnce");
+    virtual void Initialize() {
+        if (!HasTag("InitializedOnce")) {
+            rotation = quat(angles);
         }
     }
-    virtual void Update() {}
-    virtual void OnSave() {}
-
-    mat4 MakeTransformationMatrix() {
-        mat4 result = mat4(scale.x, 0.0f, 0.0f, 0.0f,
+    virtual void Update() {
+        TransformationMatrix = mat4(scale.x, 0.0f, 0.0f, 0.0f,
                            0.0f, scale.y, 0.0f, 0.0f,
                            0.0f, 0.0f, scale.z, 0.0f,
                            0.0f, 0.0f, 0.0f, 1.0f);
-        result *= rotation.MakeRotationMatrix();
-        result[3] = position;
-        return result;
+        TransformationMatrix *= rotation.MakeRotationMatrix();
+        TransformationMatrix[3] = position;
+
+        auto parent = handler->GetParent();
+        if (parent) {
+            TransformationMatrix *= parent.value()->GetTransformationMatrix();
+        }
     }
+    virtual void OnSave() {}
 
     // Handler wrapper functions
     inline const char* GetClassname() const { return handler->GetClassname(); }

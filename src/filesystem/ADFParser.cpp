@@ -8,7 +8,7 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
 
     // Skip any whitespace.
     do {
-        currchar = filestream.get();
+        currchar = stream->get();
     } while (std::isspace(currchar));
 
     // Any of the other cases
@@ -16,12 +16,12 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
     case '\"':
         TokenContent.reserve(256);
 
-        currchar = filestream.get(); // Has to be like this as to not include the starting quotation mark.
+        currchar = stream->get(); // Has to be like this as to not include the starting quotation mark.
         while (!(currchar == '\"' || currchar == -1)) {
-            if (currchar == '\\') currchar = filestream.get(); // For escaping special characters.
+            if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
 
             TokenContent.push_back(currchar);
-            currchar = filestream.get();
+            currchar = stream->get();
         }
 
         TokenContent.shrink_to_fit();
@@ -44,10 +44,10 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
         TokenContent.reserve(256);
 
         do {
-            if (currchar == '\\') currchar = filestream.get(); // For escaping special characters.
+            if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
 
             TokenContent.push_back(currchar);
-            currchar = filestream.get();
+            currchar = stream->get();
         } while (std::isgraph(currchar) && currchar != '{' && currchar != '}' && currchar != '[' && currchar != ']' && currchar != '\"');
 
         TokenContent.shrink_to_fit();
@@ -155,12 +155,17 @@ void ADFEntry::ADFError(const std::string& error) const {
 }
 
 ENGINEEXPORT ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
-    Tokenizer Tokenizer(FilePath);
+    auto Stream = Filesystem::GetFileAsStream(FilePath, std::ios::in | std::ios_base::binary);
+    Tokenizer Tokenizer(&Stream, FilePath);
     auto filename = new Engine::UnmanagedResource<std::string>(FilePath);
     return ADFEntry(ADFType::map, Tokenizer, filename);
 }
+ENGINEEXPORT ADFEntry ADFEntry::FromStream(std::istream& Stream) {
+    Tokenizer Tokenizer(&Stream, "[dynamic stream]");
+    return ADFEntry(ADFType::map, Tokenizer, nullptr);
+}
 
-void ADFEntry::ToFileStringFormatHelper(std::filebuf* buffer, const std::string& str) const {
+void ADFEntry::ToStreamStringFormatHelper(std::streambuf* buffer, const std::string& str) const {
     buffer->sputc('\"');
     for (char character : str) {
         if (character == '\"' || character == '\\') {
@@ -171,14 +176,14 @@ void ADFEntry::ToFileStringFormatHelper(std::filebuf* buffer, const std::string&
     buffer->sputc('\"');
 }
 
-void ADFEntry::ToFileObjectFormatHelper(std::filebuf* buffer, int IndentationLevel) const {
+void ADFEntry::ToStreamObjectFormatHelper(std::streambuf* buffer, int IndentationLevel) const {
     if (IsString()) {
-        ToFileStringFormatHelper(buffer, std::get<std::string>(data));
+        ToStreamStringFormatHelper(buffer, std::get<std::string>(data));
     } else if (IsMap()) {
         buffer->sputc('{');
         if (HasChildren()) {
             buffer->sputc('\n');
-            ToFile(buffer, IndentationLevel + 1);
+            ToStream(buffer, IndentationLevel + 1);
 
             for (int i = 0; i < IndentationLevel; i++) {
                 buffer->sputc('\t');
@@ -190,7 +195,7 @@ void ADFEntry::ToFileObjectFormatHelper(std::filebuf* buffer, int IndentationLev
         buffer->sputc('[');
         if (HasElements()) {
             buffer->sputc('\n');
-            ToFile(buffer, IndentationLevel + 1);
+            ToStream(buffer, IndentationLevel + 1);
 
             for (int i = 0; i < IndentationLevel; i++) {
                 buffer->sputc('\t');
@@ -201,7 +206,7 @@ void ADFEntry::ToFileObjectFormatHelper(std::filebuf* buffer, int IndentationLev
     }
 }
 
-ENGINEEXPORT void ADFEntry::ToFile(std::filebuf* buffer, int IndentationLevel) const {
+ENGINEEXPORT void ADFEntry::ToStream(std::streambuf* buffer, int IndentationLevel) const {
     if (IsArray()) {
         const auto& array = GetArray();
 
@@ -210,7 +215,7 @@ ENGINEEXPORT void ADFEntry::ToFile(std::filebuf* buffer, int IndentationLevel) c
                 buffer->sputc('\t');
             }
 
-            element.ToFileObjectFormatHelper(buffer, IndentationLevel);
+            element.ToStreamObjectFormatHelper(buffer, IndentationLevel);
             buffer->sputc('\n');
         }
     } else {
@@ -221,10 +226,10 @@ ENGINEEXPORT void ADFEntry::ToFile(std::filebuf* buffer, int IndentationLevel) c
                 buffer->sputc('\t');
             }
 
-            ToFileStringFormatHelper(buffer, kvpair.first);
+            ToStreamStringFormatHelper(buffer, kvpair.first);
             buffer->sputc(' ');
             
-            kvpair.second.ToFileObjectFormatHelper(buffer, IndentationLevel);
+            kvpair.second.ToStreamObjectFormatHelper(buffer, IndentationLevel);
             buffer->sputc('\n');
         }
     }
@@ -234,40 +239,40 @@ ENGINEEXPORT void ADFEntry::ToFile(std::filebuf* buffer, int IndentationLevel) c
 
 
 // Compacted exporting, with no formatting
-void ADFEntry::ToFileCompactObjectFormatHelper(std::filebuf* buffer) const {
+void ADFEntry::ToStreamCompactObjectFormatHelper(std::streambuf* buffer) const {
     if (IsString()) {
-        ToFileStringFormatHelper(buffer, std::get<std::string>(data));
+        ToStreamStringFormatHelper(buffer, std::get<std::string>(data));
     } else if (IsMap()) {
         buffer->sputc('{');
         if (HasChildren()) {
-            ToFileCompact(buffer);
+            ToStreamCompact(buffer);
         }
 
         buffer->sputc('}');
     } else {
         buffer->sputc('[');
         if (HasElements()) {
-            ToFileCompact(buffer);
+            ToStreamCompact(buffer);
         }
 
         buffer->sputc(']');
     }
 }
 
-ENGINEEXPORT void ADFEntry::ToFileCompact(std::filebuf* buffer) const {
+ENGINEEXPORT void ADFEntry::ToStreamCompact(std::streambuf* buffer) const {
     if (IsArray()) {
         const auto& array = GetArray();
 
         for (const auto& element : array) {
-            element.ToFileCompactObjectFormatHelper(buffer);
+            element.ToStreamCompactObjectFormatHelper(buffer);
         }
     } else {
         const auto& map = GetMap();
 
         for (const auto& kvpair : map) {
-            ToFileStringFormatHelper(buffer, kvpair.first);
+            ToStreamStringFormatHelper(buffer, kvpair.first);
             
-            kvpair.second.ToFileCompactObjectFormatHelper(buffer);
+            kvpair.second.ToStreamCompactObjectFormatHelper(buffer);
         }
     }
 }
