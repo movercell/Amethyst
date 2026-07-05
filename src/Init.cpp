@@ -2,6 +2,7 @@
 #include "graphics/opengl/STDGLRenderer.h"
 #include "engine/entities/Entity.h"
 #include "entities/BasicEntities.h"
+#include "entities/MiscEntities.h"
 
 static void exitfunc() {
 	glfwTerminate();
@@ -15,4 +16,6 @@ void Engine::Init() {
 
     RegisterEntityType<BaseEntityHandler, BaseEntity>("info_target");
     RegisterEntityType<BasicVisiblePropHandler, DynamicProp>("prop_dynamic");
+    RegisterEntityType<LightSpotHandler, LightSpot>("light_spot");
+    RegisterEntityType<PointRotatingHandler, PointRotating>("point_rotating");
 }

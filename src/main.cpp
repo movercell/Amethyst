@@ -25,7 +25,7 @@
 #include "engine/entities/Entity.h"
 
 // Time between current frame and last frame
-float deltaTime = 0.0f;	
+float ENGINEEXPORT deltaTime = 0.0f;	
 float lastFrame = 0.0f;
 
 bool EngineShouldNotTerminate = true;

@@ -58,6 +58,9 @@ struct alignas(sizeof(float) * 4) vec3 {
     vec3& operator*=(const float& other) { x *= other; y *= other; z *= other; return *this; }
     vec3& operator/=(const float& other) { x /= other; y /= other; z /= other; return *this; }
 
+    bool operator==(const vec3& other)  const { return (x == other.x) && (y == other.y) && (z == other.z); }
+    bool operator==(const vec3&& other) const { return (x == other.x) && (y == other.y) && (z == other.z); }
+
     float& operator[](int index) { return rawdata.at(index); }
     float operator[](int index) const { return rawdata.at(index); }
 
@@ -101,6 +104,9 @@ struct alignas(sizeof(float) * 2) vec2 {
     vec2& operator-=(const float& other) { x -= other; y -= other; return *this; }
     vec2& operator*=(const float& other) { x *= other; y *= other; return *this; }
     vec2& operator/=(const float& other) { x /= other; y /= other; return *this; }
+
+    bool operator==(const vec2&  other) const { return (x == other.x) && (y == other.y); }
+    bool operator==(const vec2&& other) const { return (x == other.x) && (y == other.y); }
 
     float& operator[](int index) { return rawdata.at(index); }
     float operator[](int index) const { return rawdata.at(index); }
@@ -148,6 +154,9 @@ struct alignas(sizeof(float) * 4) vec4 {
     vec4& operator-=(const float& other) { x -= other; y -= other; z -= other; w -= other; return *this; }
     vec4& operator*=(const float& other) { x *= other; y *= other; z *= other; w *= other; return *this; }
     vec4& operator/=(const float& other) { x /= other; y /= other; z /= other; w /= other; return *this; }
+
+    bool operator==(const vec4& other)  const { return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w); }
+    bool operator==(const vec4&& other) const { return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w); }
 
     float& operator[](int index) { return rawdata.at(index); }
     float operator[](int index) const { return rawdata.at(index); }
@@ -284,7 +293,7 @@ struct alignas(sizeof(float) * 4) quat {
         Norm();
     }
 
-    void Norm() {
+    quat& Norm() {
         float squaremagnitude = w*w + x*x + y*y + z*z;
         float scalefactor;
 
@@ -298,6 +307,8 @@ struct alignas(sizeof(float) * 4) quat {
         x *= scalefactor;
         y *= scalefactor;
         z *= scalefactor;
+
+        return *this;
     }
 
     //https://www.songho.ca/opengl/gl_quaternion.html
@@ -336,6 +347,13 @@ struct alignas(sizeof(float) * 4) quat {
         
         return *this;
     }
+
+    bool operator==(const quat& other) const {
+        return (w == other.w) && (x == other.x) && (y == other.y) && (z == other.z);
+    }
+    bool operator==(const quat&& other) const {
+        return (w == other.w) && (x == other.x) && (y == other.y) && (z == other.z);
+    }
 };
 
 
@@ -361,3 +379,6 @@ namespace Shapes {
         std::array<Vertex, 3> Vertices;
     };
 }
+
+
+extern ENGINEEXPORT float deltaTime;

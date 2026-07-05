@@ -1,6 +1,6 @@
 "Savefile" {
     "MapName" ""
-    "SavefileVersion" "1"
+    "SavefileVersion" "0"
     "Entities" {
         "000000" {
             "classname" "prop_dynamic"
@@ -25,6 +25,90 @@
                     "tags" []
                 }
             }
+            "tags" []
+        }
+        "000001" {
+            "classname" "prop_dynamic"
+            "properties" {
+                "position" { x 512 y 256 z 32 }
+                "model" "machine_support.adf"
+            }
+            "children" {
+                "000000" {
+                    "classname" "point_rotating"
+                    "properties" {
+                        "rotationamount" { x 0 y 180 z 0 }
+                    }
+                    "children" {
+                        "000000" {
+                            "classname" "prop_dynamic"
+                            "properties" {
+                                "position" { x 0 y 0 z 0 }
+                                "model" "machine_base.adf"
+                            }
+                            "children" {}
+                            "tags" []
+                        }
+                        "000001" {
+                            "classname" "point_rotating"
+                            "properties" {
+                                "position" { x "-22" y "-142" z 0 }
+                                "rotationamount" { x 0 y 360 z 0 }
+                            }
+                            "children" {
+                                "000000" {
+                                    "classname" "prop_dynamic"
+                                    "properties" {
+                                        "position" { x 0 y 0 z 0 }
+                                        "model" "machine_blade.adf"
+                                    }
+                                    "children" {}
+                                    "tags" []
+                                }
+                            }
+                            "tags" []
+                        }
+                        "000002" {
+                            "classname" "point_rotating"
+                            "properties" {
+                                "position" { x "22" y "142" z 0 }
+                                "rotationamount" { x 0 y 360 z 0 }
+                            }
+                            "children" {
+                                "000000" {
+                                    "classname" "prop_dynamic"
+                                    "properties" {
+                                        "position" { x 0 y 0 z 0 }
+                                        "model" "machine_blade.adf"
+                                    }
+                                    "children" {}
+                                    "tags" []
+                                }
+                            }
+                            "tags" []
+                        }
+                    }
+                    "tags" []
+                }
+            }
+            "tags" []
+        }
+        "000003" {
+            "classname" "light_spot"
+            "properties" {
+                "position" { x 407 y 107 z 167 }
+                "angles" { x 58 y 52 z 0 }
+                "resolution" { x 1024 y 1024 }
+                "far" 512
+                "constantfalloff" 0
+                "linearfalloff" "0.5"
+                "quadraticfalloff" "0.2"
+                "intensity" 69999
+                "color" { x "0.6" y 0 z 0 }
+                "innerfalloffangle" 50
+                "outerfalloffangle" 55
+            }
+            "children" {}
             "tags" []
         }
     }

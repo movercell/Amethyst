@@ -70,6 +70,7 @@ add_executable(amethyst
 	src/filesystem/ADFParser.cpp
 	src/entities/World.cpp
 	src/entities/BasicEntities.cpp
+	src/entities/MiscEntities.cpp
 )
 
 

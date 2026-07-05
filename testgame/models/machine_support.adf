@@ -1,0 +1,7 @@
+Model {
+    LODs [
+        {
+            Model "machine_support.glb"
+        }
+    ]
+}

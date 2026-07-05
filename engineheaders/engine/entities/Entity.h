@@ -60,6 +60,8 @@ protected:
 
     static inline std::map<std::string, EntPropertyLocation> Properties;
 
+    static inline T DefaultValues;
+
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
     inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
@@ -124,7 +126,7 @@ public:
             void operator()(std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
             void operator()(ADFEntry T::* entproperty)    { Entity.*entproperty  = Property; }
         };
-        try {
+        try { // This `try` statement is here in case of trying to set a propoerty that (does not)/(no longer) exist(s).
             std::visit<void>(Processor(Entity, Property), Properties.at(Name));
         } catch(...) {}
     }
@@ -146,8 +148,11 @@ public:
         retmap.emplace("tags", TagsToADF());
 
         auto& propertymap = retmap.emplace("properties", ADFEntry::Map()).first->second.GetMap();
-        for (auto property : Properties) {
-            propertymap.emplace(property.first, PropertyToADF(Properties.at(property.first)));
+        for (auto& property : Properties) {
+            if (std::visit<bool>([this](auto& entproperty) -> bool {
+                return Entity.*entproperty == DefaultValues.*entproperty;
+                }, property.second)) continue;
+            propertymap.emplace(property.first, PropertyToADF(property.second));
         }
 
         retmap.emplace("classname", ADFEntry::String(classname));

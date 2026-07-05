@@ -171,15 +171,12 @@ public:
     inline ADFEntry& operator[](int i) {
         return GetArray()[i];
     }
-
     inline ADFEntry& operator[](const std::string& name) {
         return GetMap().at(name);
     }
-
     inline const ADFEntry& operator[](int i) const {
         return GetArray()[i];
     }
-
     inline const ADFEntry& operator[](const std::string& name) const {
         return GetMap().at(name);
     }
@@ -187,13 +184,18 @@ public:
     inline bool HasChild(const std::string& name) const {
         return GetMap().contains(name);
     }
-
     inline bool HasChildren() const {
         return !GetMap().empty();
     }
-
     inline bool HasElements() const {
         return !GetArray().empty();
+    }
+
+    inline bool operator==(const ADFEntry& other) const {
+        return data == other.data;
+    }
+    inline bool operator==(const ADFEntry&& other) const {
+        return data == other.data;
     }
 
 
