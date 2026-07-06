@@ -60,8 +60,6 @@ protected:
 
     static inline std::map<std::string, EntPropertyLocation> Properties;
 
-    static inline T DefaultValues;
-
     static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
 
     inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
@@ -149,9 +147,6 @@ public:
 
         auto& propertymap = retmap.emplace("properties", ADFEntry::Map()).first->second.GetMap();
         for (auto& property : Properties) {
-            if (std::visit<bool>([this](auto& entproperty) -> bool {
-                return Entity.*entproperty == DefaultValues.*entproperty;
-                }, property.second)) continue;
             propertymap.emplace(property.first, PropertyToADF(property.second));
         }
 

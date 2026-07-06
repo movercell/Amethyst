@@ -245,6 +245,7 @@ public:
         return ret;
     } 
 
+    //! Interprets a map-type entry as a 2-component vector.
     inline vec2 GetVec2() const {
         const auto& map = GetMap();
 
@@ -254,6 +255,7 @@ public:
 
         ADFError("Tried to get a vec2 from a different type of an ADF entry!");
     }
+    //! Interprets a map-type entry as a 3-component vector.
     inline vec3 GetVec3() const {
         const auto& map = GetMap();
 
@@ -263,6 +265,7 @@ public:
 
         ADFError("Tried to get a vec3 from a different type of an ADF entry!");
     }
+    //! Interprets a map-type entry as a 4-component vector.
     inline vec4 GetVec4() const {
         const auto& map = GetMap();
 
@@ -272,11 +275,15 @@ public:
 
         ADFError("Tried to get a vec4 from a different type of an ADF entry!");
     }
+    //! Interprets a map-type entry as a quaternion(Interpreted as euler angles and converted to a quaternion if a W component is not present.).
     inline quat GetQuat() const {
         const auto& map = GetMap();
 
-        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("w")) {
-            return quat(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
+        if (map.contains("x") && map.contains("y") && map.contains("z")) {
+            if (map.contains("w")) {
+                return quat(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
+            }
+            return quat(GetVec3()); // Read as euler angles if there's no w.
         }
 
         ADFError("Tried to get a quaternion from a different type of an ADF entry!");

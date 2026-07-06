@@ -73,7 +73,29 @@
 							"children" {}
 							"classname" "prop_dynamic"
 							"properties" {
+								"angles" {
+									"x" "0"
+									"y" "0"
+									"z" "0"
+								}
 								"model" "machine_base.adf"
+								"position" {
+									"x" "0"
+									"y" "0"
+									"z" "0"
+								}
+								"rotation" {
+									"w" "1"
+									"x" "0"
+									"y" "0"
+									"z" "0"
+								}
+								"scale" {
+									"x" "1"
+									"y" "1"
+									"z" "1"
+								}
+								"targetname" ""
 							}
 							"tags" [
 								"InitializedOnce"
@@ -85,7 +107,29 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
+										"angles" {
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
 										"model" "machine_blade.adf"
+										"position" {
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
+										"rotation" {
+											"w" "1"
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
+										"scale" {
+											"x" "1"
+											"y" "1"
+											"z" "1"
+										}
+										"targetname" ""
 									}
 									"tags" [
 										"InitializedOnce"
@@ -94,9 +138,20 @@
 							}
 							"classname" "point_rotating"
 							"properties" {
+								"angles" {
+									"x" "0"
+									"y" "0"
+									"z" "0"
+								}
 								"position" {
 									"x" "-22"
 									"y" "-142"
+									"z" "0"
+								}
+								"rotation" {
+									"w" "1"
+									"x" "0"
+									"y" "0"
 									"z" "0"
 								}
 								"rotationamount" {
@@ -104,6 +159,12 @@
 									"y" "360"
 									"z" "0"
 								}
+								"scale" {
+									"x" "1"
+									"y" "1"
+									"z" "1"
+								}
+								"targetname" ""
 							}
 							"tags" [
 								"InitializedOnce"
@@ -115,7 +176,29 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
+										"angles" {
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
 										"model" "machine_blade.adf"
+										"position" {
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
+										"rotation" {
+											"w" "1"
+											"x" "0"
+											"y" "0"
+											"z" "0"
+										}
+										"scale" {
+											"x" "1"
+											"y" "1"
+											"z" "1"
+										}
+										"targetname" ""
 									}
 									"tags" [
 										"InitializedOnce"
@@ -124,9 +207,20 @@
 							}
 							"classname" "point_rotating"
 							"properties" {
+								"angles" {
+									"x" "0"
+									"y" "0"
+									"z" "0"
+								}
 								"position" {
 									"x" "22"
 									"y" "142"
+									"z" "0"
+								}
+								"rotation" {
+									"w" "1"
+									"x" "0"
+									"y" "0"
 									"z" "0"
 								}
 								"rotationamount" {
@@ -134,6 +228,12 @@
 									"y" "360"
 									"z" "0"
 								}
+								"scale" {
+									"x" "1"
+									"y" "1"
+									"z" "1"
+								}
+								"targetname" ""
 							}
 							"tags" [
 								"InitializedOnce"
@@ -142,11 +242,33 @@
 					}
 					"classname" "point_rotating"
 					"properties" {
+						"angles" {
+							"x" "0"
+							"y" "0"
+							"z" "0"
+						}
+						"position" {
+							"x" "0"
+							"y" "0"
+							"z" "0"
+						}
+						"rotation" {
+							"w" "1"
+							"x" "0"
+							"y" "0"
+							"z" "0"
+						}
 						"rotationamount" {
 							"x" "0"
 							"y" "180"
 							"z" "0"
 						}
+						"scale" {
+							"x" "1"
+							"y" "1"
+							"z" "1"
+						}
+						"targetname" ""
 					}
 					"tags" [
 						"InitializedOnce"
@@ -155,12 +277,29 @@
 			}
 			"classname" "prop_dynamic"
 			"properties" {
+				"angles" {
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
 				"model" "machine_support.adf"
 				"position" {
 					"x" "512"
 					"y" "256"
 					"z" "32"
 				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"targetname" ""
 			}
 			"tags" [
 				"InitializedOnce"
@@ -180,10 +319,13 @@
 					"y" "0"
 					"z" "0"
 				}
+				"constantfalloff" "0"
 				"far" "512"
 				"innerfalloffangle" "50"
 				"intensity" "69999"
+				"isconstantlyupdating" "0"
 				"linearfalloff" "0.5"
+				"near" "1"
 				"outerfalloffangle" "55"
 				"position" {
 					"x" "407"
@@ -201,6 +343,12 @@
 					"y" "0.435744"
 					"z" "0.38340807"
 				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"targetname" ""
 			}
 			"tags" [
 				"InitializedOnce"
