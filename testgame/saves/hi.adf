@@ -6,11 +6,6 @@
 					"children" {}
 					"classname" "prop_dynamic"
 					"properties" {
-						"angles" {
-							"x" "45"
-							"y" "180"
-							"z" "45"
-						}
 						"model" "backpack.adf"
 						"position" {
 							"x" "-128"
@@ -37,11 +32,6 @@
 			}
 			"classname" "prop_dynamic"
 			"properties" {
-				"angles" {
-					"x" "45"
-					"y" "180"
-					"z" "45"
-				}
 				"model" "multimesh.adf"
 				"position" {
 					"x" "128"
@@ -73,11 +63,6 @@
 							"children" {}
 							"classname" "prop_dynamic"
 							"properties" {
-								"angles" {
-									"x" "0"
-									"y" "0"
-									"z" "0"
-								}
 								"model" "machine_base.adf"
 								"position" {
 									"x" "0"
@@ -107,11 +92,6 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
-										"angles" {
-											"x" "0"
-											"y" "0"
-											"z" "0"
-										}
 										"model" "machine_blade.adf"
 										"position" {
 											"x" "0"
@@ -138,11 +118,6 @@
 							}
 							"classname" "point_rotating"
 							"properties" {
-								"angles" {
-									"x" "0"
-									"y" "0"
-									"z" "0"
-								}
 								"position" {
 									"x" "-22"
 									"y" "-142"
@@ -176,11 +151,6 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
-										"angles" {
-											"x" "0"
-											"y" "0"
-											"z" "0"
-										}
 										"model" "machine_blade.adf"
 										"position" {
 											"x" "0"
@@ -207,11 +177,6 @@
 							}
 							"classname" "point_rotating"
 							"properties" {
-								"angles" {
-									"x" "0"
-									"y" "0"
-									"z" "0"
-								}
 								"position" {
 									"x" "22"
 									"y" "142"
@@ -242,11 +207,6 @@
 					}
 					"classname" "point_rotating"
 					"properties" {
-						"angles" {
-							"x" "0"
-							"y" "0"
-							"z" "0"
-						}
 						"position" {
 							"x" "0"
 							"y" "0"
@@ -277,11 +237,6 @@
 			}
 			"classname" "prop_dynamic"
 			"properties" {
-				"angles" {
-					"x" "0"
-					"y" "0"
-					"z" "0"
-				}
 				"model" "machine_support.adf"
 				"position" {
 					"x" "512"
@@ -309,11 +264,6 @@
 			"children" {}
 			"classname" "light_spot"
 			"properties" {
-				"angles" {
-					"x" "58"
-					"y" "52"
-					"z" "0"
-				}
 				"color" {
 					"x" "0.6"
 					"y" "0"

@@ -97,14 +97,10 @@ public:
     
 
     static void PropertyInit() {
-        // Public-facing properties.
-        AddProperty("targetname",            &T::targetname);
-        AddProperty("position",              &T::position);
-        AddProperty("angles",                &T::angles);
-        AddProperty("scale",                 &T::scale);
-
-        // Internal properties.
-        AddProperty("rotation",              &T::rotation);
+        AddProperty("targetname", &T::targetname);
+        AddProperty("position",   &T::position);
+        AddProperty("scale",      &T::scale);
+        AddProperty("rotation",   &T::rotation);
     }
 
 
@@ -201,18 +197,13 @@ struct BaseEntity {
 
     std::string targetname;
     vec3 position;
-    vec3 angles;
     vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
     quat rotation;
 
     mat4 TransformationMatrix;
 
-    virtual void Initialize() {
-        if (!HasTag("InitializedOnce")) {
-            rotation = quat(angles);
-        }
-    }
+    virtual void Initialize() {}
     virtual void Update() {
         TransformationMatrix = mat4(scale.x, 0.0f, 0.0f, 0.0f,
                            0.0f, scale.y, 0.0f, 0.0f,

@@ -8,7 +8,7 @@
                 "targetname" not\ quoted
                 "position" { x 128 y 0 z 128 }
                 "model" "multimesh.adf"
-                "angles" { x 45 y 180 z 45 }
+                "rotation" { x 45 y 180 z 45 }
                 "scale" { x 1 y 3 z 5 }
             }
             "children" {
@@ -18,7 +18,7 @@
                         "targetname" "hia"
                         "position" { x -128 y 0 z 128 }
                         "model" "backpack.adf"
-                        "angles" { x 45 y 180 z 45 }
+                        "rotation" { x 45 y 180 z 45 }
                         "scale" { x 1 y 3 z 5 }
                     }
                     "children" {}
@@ -97,7 +97,7 @@
             "classname" "light_spot"
             "properties" {
                 "position" { x 407 y 107 z 167 }
-                "angles" { x 58 y 52 z 0 }
+                "rotation" { x 58 y 52 z 0 }
                 "resolution" { x 1024 y 1024 }
                 "far" 512
                 "constantfalloff" 0
