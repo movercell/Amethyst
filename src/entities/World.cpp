@@ -154,7 +154,7 @@ int EntityStorage::GetFreeIndex() {
     return ret;
 }
 
-void EntityStorage::reserve(uint count) {
+void EntityStorage::reserve(uint32_t count) {
     if (count > Size) {
         if(count > PreallocatedSlotAmount) {
             Engine::Reference<iEntHandler>* OldStorage = begin();

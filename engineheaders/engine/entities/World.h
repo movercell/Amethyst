@@ -18,7 +18,7 @@ class EntityStorage {
     static inline constexpr int PreallocatedSlotAmount = 4;
     Engine::Reference<iEntHandler> PreallocatedSlots[PreallocatedSlotAmount];
     Engine::Reference<iEntHandler>* DynamicStorage;
-    uint Size = 0;
+    uint32_t Size = 0;
 public:
     void AddEntityBack(Engine::Reference<iEntHandler> Entity);
 
@@ -27,8 +27,8 @@ public:
     void Update();
     void Clear();
 
-    uint size() { return Size; }
-    void reserve(uint count);
+    uint32_t size() { return Size; }
+    void reserve(uint32_t count);
 
     iterator begin() {
         if (Size > PreallocatedSlotAmount)
@@ -43,14 +43,14 @@ public:
     auto rbegin() { return std::make_reverse_iterator(end()); }
     auto rend() { return std::make_reverse_iterator(begin()); }
 
-    Engine::Reference<iEntHandler>& operator[](uint index) {
+    Engine::Reference<iEntHandler>& operator[](uint32_t index) {
         if (!(index < Size)) Engine::Error("Attempted to index an EntityStorage out of bounds!");
 
         if (Size > PreallocatedSlotAmount)
             return DynamicStorage[index];
         return PreallocatedSlots[index];
     }
-    const Engine::Reference<iEntHandler>& operator[](uint index) const {
+    const Engine::Reference<iEntHandler>& operator[](uint32_t index) const {
         if (!(index < Size)) Engine::Error("Attempted to index an EntityStorage out of bounds!");
         
         if (Size > PreallocatedSlotAmount)
