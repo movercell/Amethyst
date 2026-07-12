@@ -49,6 +49,8 @@ void STDGLRenderer::Init() {
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
 
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
 
     glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
     glClearDepth(0.0f);

@@ -5,8 +5,7 @@
 #include <GLFW/glfw3.h>
 #include "imgui.h"
 
-class STDGLWindow : public Window {
-protected:
+struct STDGLWindow : public Window {
     Engine::Reference<Renderer> rendererRef;
     GLFWwindow* rendererData = nullptr;
     ImGuiContext* UIData = nullptr;
@@ -17,8 +16,6 @@ protected:
     void ProcessCursorEating();
     void Update();
 
-    friend class GLMisc;
-public:
     ~STDGLWindow();
     STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name);
 

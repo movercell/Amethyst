@@ -11,17 +11,17 @@
     #define GL_POP_DEBUG
 #endif
 
-class GLMisc {
-public:
-    static void EnsureGLLoaded();
+namespace GLMisc {
+    void EnsureGLLoaded();
+    void GLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
-    static void windowFocusCallback(GLFWwindow* window, int focused);
-    static void windowCursorEnterCallback(GLFWwindow* window, int entered);
-    static void windowCursorPosCallback(GLFWwindow* window, double x, double y);
-    static void windowMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    static void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    static void windowKeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
-    static void windowCharCallback(GLFWwindow* window, unsigned int c);
+    void windowFocusCallback(GLFWwindow* window, int focused);
+    void windowCursorEnterCallback(GLFWwindow* window, int entered);
+    void windowCursorPosCallback(GLFWwindow* window, double x, double y);
+    void windowMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    void windowKeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
+    void windowCharCallback(GLFWwindow* window, unsigned int c);
 
-    static void windowSetCallbacks(GLFWwindow*);
+    void windowSetCallbacks(GLFWwindow*);
 };

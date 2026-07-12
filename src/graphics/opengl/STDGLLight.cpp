@@ -172,7 +172,7 @@ STDGLLightSystem::STDGLLightSystem() {
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
 
     float clearColor = 0.0f;
-    glClearTexImage(LightDepthBuffer, 0, GL_RGBA, GL_DEPTH_COMPONENT, &clearColor);
+    glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &clearColor);
 }
 
 STDGLLightSystem::~STDGLLightSystem() {
