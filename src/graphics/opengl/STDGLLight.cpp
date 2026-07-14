@@ -114,7 +114,7 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
     Type = type;
     Resolution = resolution;
     // Don't forget to pad the block to prevent texture bleeding artifacts! 
-    TextureSpace = Owner->LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
+    TextureSpace = Owner->LightAreaAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
     FOV = outer_cutoff_angle * 2.0f;
     InnerCutoffCosine = cos(inner_cutoff_angle * (std::numbers::pi / 180.0));
     OuterCutoffCosine = cos(outer_cutoff_angle * (std::numbers::pi / 180.0));
@@ -133,7 +133,7 @@ STDGLLight::~STDGLLight() {
     glDeleteBuffers(1, &Infobuffer);
 
     // The block has padding that needs to be accounted for when freeing.
-    Owner->LightDepthBufferAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
+    Owner->LightAreaAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
 }
 
 
@@ -163,9 +163,59 @@ STDGLLightSystem::STDGLLightSystem() {
     glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
     delete DefaultData;
 
+    // In case of sparse textures being available.
+    if (GLAD_GL_ARB_sparse_texture) {
+        // Get the maximum aligments.
+        GLint SparseAlignmentX;
+        {
+            GLint SparseAlignmentXA;
+            glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &SparseAlignmentXA);
+            GLint SparseAlignmentXB;
+            glGetInternalformativ(GL_TEXTURE_2D, MomentFormat, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &SparseAlignmentXB);
+            SparseAlignmentX = std::max(SparseAlignmentXA, SparseAlignmentXB);
+        }
+        GLint SparseAlignmentY;
+        {
+            GLint SparseAlignmentYA;
+            glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &SparseAlignmentYA);
+            GLint SparseAlignmentYB;
+            glGetInternalformativ(GL_TEXTURE_2D, MomentFormat, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &SparseAlignmentYB);
+            SparseAlignmentY = std::max(SparseAlignmentYA, SparseAlignmentYB);
+        }
+
+        LightAreaAllocator = Geometry::Alloc2D(STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS, SparseAlignmentX, SparseAlignmentY);
+
+        LightAreaAllocator.SetCallbacks(
+            [this](Geometry::Alloc2D::Block block) -> void {
+                glfwMakeContextCurrent(Context);
+                if (isLightDepthBufferSparse) {
+                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_TRUE);
+                    glClearTexSubImage(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                }
+            },
+            [this](Geometry::Alloc2D::Block block) -> void {
+                glfwMakeContextCurrent(Context);
+                if (isLightDepthBufferSparse) {
+                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_FALSE);
+                }
+            });
+
+        GLint VirtualPageSizesForDepth;
+        glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);
+        
+        if (VirtualPageSizesForDepth != -1) {
+            isLightDepthBufferSparse = true;
+        }
+
+        isLightMomentBufferSparse = true;
+
+        Engine::Warning("Sparse!");
+    }
+
     // Depth buffer
     glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
-    glTextureStorage2D (LightDepthBuffer, 1, GL_DEPTH_COMPONENT32F, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
+    if (isLightDepthBufferSparse) glTextureParameteri(LightDepthBuffer, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
+    glTextureStorage2D (LightDepthBuffer, 1, DepthFormat, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);

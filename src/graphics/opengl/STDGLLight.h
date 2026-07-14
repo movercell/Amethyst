@@ -86,8 +86,13 @@ struct STDGLLightSystem {
     GLFWwindow* Context = 0;
     GLuint LightDataBuffer = 0;
     GLuint LightDepthBuffer = 0;
+    bool isLightDepthBufferSparse = false;
+    bool isLightMomentBufferSparse = false;
 
-    Geometry::Alloc2D LightDepthBufferAllocator = { STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS };
+    Geometry::Alloc2D LightAreaAllocator = { STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS };
+
+    static inline constexpr int DepthFormat = GL_DEPTH_COMPONENT32F;
+    static inline constexpr int MomentFormat = GL_RG32F;
 
     Engine::Reference<Light> MakeLight(Engine::Reference<RWorld> RWorldRef, STDGLLightType Type, vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far);
 
