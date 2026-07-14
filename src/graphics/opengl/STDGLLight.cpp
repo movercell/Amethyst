@@ -189,14 +189,14 @@ STDGLLightSystem::STDGLLightSystem() {
             [this](Geometry::Alloc2D::Block block) -> void {
                 glfwMakeContextCurrent(Context);
                 if (isLightDepthBufferSparse) {
-                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_TRUE);
-                    glClearTexSubImage(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_TRUE);
+                    glClearTexSubImage(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
                 }
             },
             [this](Geometry::Alloc2D::Block block) -> void {
                 glfwMakeContextCurrent(Context);
                 if (isLightDepthBufferSparse) {
-                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 0, GL_FALSE);
+                    glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_FALSE);
                 }
             });
 

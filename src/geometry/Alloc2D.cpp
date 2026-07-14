@@ -6,17 +6,19 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
 
     int BestFitIndex = -1;
     int BestFitScore = std::numeric_limits<int>::max(); // The lower, the better.
-    Block ret;
+    Block result;
     int size = sizex * sizey;
 
     // Scoring logic.
     for (int block = 0; block < FreeBlocks.size(); block++) {
         if ((FreeBlocks[block].SizeX == sizex) && (FreeBlocks[block].SizeY == sizey)) {
             // Perfect fit, nice!
-            ret = FreeBlocks[block];
+            result = FreeBlocks[block];
             std::swap(FreeBlocks[block], FreeBlocks.back());
             FreeBlocks.pop_back();
-            return ret;
+
+            if (AllocCallback) AllocCallback(result);
+            return result;
         }
 
         if ((FreeBlocks[block].SizeX == sizex) || (FreeBlocks[block].SizeY == sizey)) {
@@ -55,7 +57,9 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
             FreeBlocks[BestFitIndex].PosX += sizex;
         }
 
-        return Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
+        result = Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
+        if (AllocCallback) AllocCallback(result);
+        return result;
     }
 
     // Split.
@@ -65,10 +69,8 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
 
     FreeBlocks.emplace_back(BestFitCopy.PosX, BestFitCopy.PosY + sizey, BestFitCopy.SizeX, BestFitCopy.SizeY - sizey); 
 
-    Block result = Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
-
+    result = Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
     if (AllocCallback) AllocCallback(result);
-
     return result;
 }
 
