@@ -165,6 +165,8 @@ STDGLLightSystem::STDGLLightSystem() {
 
     // In case of sparse textures being available.
     if (GLAD_GL_ARB_sparse_texture) {
+        Engine::Print("STDGLLight: GL_ARB_sparse_texture detected, using");
+
         // Get the maximum aligments.
         GLint SparseAlignmentX;
         {
@@ -204,12 +206,12 @@ STDGLLightSystem::STDGLLightSystem() {
         glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);
         
         if (VirtualPageSizesForDepth != -1) {
+            Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using");
+
             isLightDepthBufferSparse = true;
         }
 
         isLightMomentBufferSparse = true;
-
-        Engine::Warning("Sparse!");
     }
 
     // Depth buffer

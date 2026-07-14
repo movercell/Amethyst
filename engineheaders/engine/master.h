@@ -25,6 +25,7 @@
 
 namespace Engine {
     void ENGINEEXPORT Warning(const std::string& text);
+    void ENGINEEXPORT Print(const std::string& text);
     [[noreturn]] void ENGINEEXPORT Error(const std::string& text);
 }
 
