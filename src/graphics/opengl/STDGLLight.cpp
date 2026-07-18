@@ -3,7 +3,7 @@
 
 void STDGLLight::Update() {
     if (wasChangedProjection) {
-        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
     }
     if (wasChanged || wasChangedProjection) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
@@ -27,6 +27,7 @@ void STDGLLight::Bind() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
+    glScissor(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
 }
 
 void STDGLLight::SetPosition(vec3 position) {
@@ -87,8 +88,7 @@ void STDGLLight::CreateBuffers() {
 
 void STDGLLight::UpdateData() {
     STDGLLightData Data;
-    Data.View = Info.View;
-    Data.Projection = Info.Projection;
+    Data.ViewProjection = Info.ViewProjection;
     Data.Type = Type;
     Data.Color = Color;
     Data.FOV = FOV;
@@ -163,9 +163,28 @@ STDGLLightSystem::STDGLLightSystem() {
     glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
     delete DefaultData;
 
+    // TODO: Make this buffer be allocated more nicely.
+    glCreateBuffers(1, &LightDepthTemporaryBufferForBlur);
+    glNamedBufferStorage(LightDepthTemporaryBufferForBlur, 2048 * 2048 * sizeof(float), nullptr, 0); // temp, yes this may cause problems rn but i'll need to implement a proper allocator to do this nicely
+
     // In case of sparse textures being available.
     if (GLAD_GL_ARB_sparse_texture) {
         Engine::Print("STDGLLight: GL_ARB_sparse_texture detected, using.");
+
+        GLint VirtualPageSizesForDepth;
+        glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);
+        
+        if (VirtualPageSizesForDepth > 0) {
+            Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using.");
+
+            isLightDepthBufferSparse = true;
+            //LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSTIONS_SPARSE; < need to transmit this to the shader
+        } else {
+            Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth buffers not detected, possible semi-high VRAM usage.");
+        }
+        isLightMomentBufferSparse = true;
+
+
 
         // Get the maximum aligments.
         GLint SparseAlignmentX;
@@ -185,7 +204,7 @@ STDGLLightSystem::STDGLLightSystem() {
             SparseAlignmentY = std::max(SparseAlignmentYA, SparseAlignmentYB);
         }
 
-        LightAreaAllocator = Geometry::Alloc2D(STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS, SparseAlignmentX, SparseAlignmentY);
+        LightAreaAllocator = Geometry::Alloc2D(LightAreaAllocatorDimensions, LightAreaAllocatorDimensions, SparseAlignmentX, SparseAlignmentY);
 
         LightAreaAllocator.SetCallbacks(
             [this](Geometry::Alloc2D::Block block) -> void {
@@ -201,30 +220,16 @@ STDGLLightSystem::STDGLLightSystem() {
                     glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_FALSE);
                 }
             });
-
-        GLint VirtualPageSizesForDepth;
-        glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);
-        
-        if (VirtualPageSizesForDepth != -1) {
-            Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using.");
-
-            isLightDepthBufferSparse = true;
-        }
-
-        isLightMomentBufferSparse = true;
+    } else {
+        Engine::Print("STDGLLight: GL_ARB_sparse_texture support not detected, possible high VRAM usage.");
     }
 
     // Depth buffer
     glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
     if (isLightDepthBufferSparse) glTextureParameteri(LightDepthBuffer, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
-    glTextureStorage2D (LightDepthBuffer, 1, DepthFormat, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
-    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
+    glTextureStorage2D(LightDepthBuffer, 1, DepthFormat, LightAreaAllocatorDimensions, LightAreaAllocatorDimensions);
 
-    float clearColor = 0.0f;
-    glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &clearColor);
+    glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 }
 
 STDGLLightSystem::~STDGLLightSystem() {

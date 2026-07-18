@@ -7,7 +7,8 @@
 #include "engine/geometry/Alloc2D.h"
 
 inline constexpr int STDGLLIGHT_MAX_COUNT = 4;
-inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS = 8192;
+inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS_DEFAULT = 8192;
+inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS_SPARSE = 16384;
 inline constexpr int STDGLLIGHT_ALLOC2D_PADDING = 4;
 
 struct STDGLLightSystem;
@@ -20,8 +21,7 @@ enum class STDGLLightType : GLuint {
 };
 
 struct STDGLLightData {
-    mat4 View;
-    mat4 Projection;
+    mat4 ViewProjection;
     Geometry::Alloc2D::Block TextureSpace;
     STDGLLightType Type = STDGLLightType::EndMarker;
     float FOV;
@@ -86,13 +86,15 @@ struct STDGLLightSystem {
     GLFWwindow* Context = 0;
     GLuint LightDataBuffer = 0;
     GLuint LightDepthBuffer = 0;
+    GLuint LightDepthTemporaryBufferForBlur = 0;
     bool isLightDepthBufferSparse = false;
     bool isLightMomentBufferSparse = false;
 
-    Geometry::Alloc2D LightAreaAllocator = { STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS };
+    uint16_t LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSTIONS_DEFAULT;
+    Geometry::Alloc2D LightAreaAllocator = { LightAreaAllocatorDimensions, LightAreaAllocatorDimensions };
 
     static inline constexpr int DepthFormat = GL_DEPTH_COMPONENT32F;
-    static inline constexpr int MomentFormat = GL_RG32F;
+    static inline constexpr int MomentFormat = GL_R32F;
 
     Engine::Reference<Light> MakeLight(Engine::Reference<RWorld> RWorldRef, STDGLLightType Type, vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far);
 

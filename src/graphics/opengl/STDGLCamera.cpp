@@ -4,7 +4,7 @@
 
 void STDGLCamera::Update() {
     if (wasChangedProjection) {
-        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
         wasChangedProjection = false;
     }
     if (wasChanged) {
@@ -23,7 +23,6 @@ void STDGLCamera::Update() {
 }
 
 void STDGLCamera::Bind() {
-    
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(0, 0, Resolution.x, Resolution.y);
