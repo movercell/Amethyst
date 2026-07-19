@@ -5,3 +5,7 @@ float LinearizeDepth(float depth, float near, float far) {
     float linearDepth = (2.0 * near * far) / (far + near - ndc * (far - near));
     return linearDepth / far;
 }
+
+float linstep(float low, float high, float v) {
+	return clamp((v-low)/(high-low), 0.0, 1.0);
+}

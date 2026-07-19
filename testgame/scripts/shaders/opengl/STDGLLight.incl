@@ -74,7 +74,7 @@ float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point) {
 	float variance = max(moments.y - moments.x * moments.x, 0.00000002f);
 	
 	float d = TruePoint.z - moments.x;
-	float pMax = variance / (variance + d*d);
+	float pMax = linstep(0.2f, 1.0f, variance / (variance + d*d));
 	
 	return min(max(p, pMax), 1.0);
 }

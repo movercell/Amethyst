@@ -228,6 +228,8 @@ STDGLLightSystem::STDGLLightSystem() {
     glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
     if (isLightDepthBufferSparse) glTextureParameteri(LightDepthBuffer, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
     glTextureStorage2D(LightDepthBuffer, 1, DepthFormat, LightAreaAllocatorDimensions, LightAreaAllocatorDimensions);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 }
