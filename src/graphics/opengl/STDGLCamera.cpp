@@ -4,7 +4,7 @@
 
 void STDGLCamera::Update() {
     if (wasChangedProjection) {
-        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
         wasChangedProjection = false;
     }
     if (wasChanged) {

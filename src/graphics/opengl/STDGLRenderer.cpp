@@ -53,8 +53,9 @@ void STDGLRenderer::Init() {
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
 
     glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-    glClearDepth(1.0f);
+    glClearDepth(0.0f);
     glClearColor(0, 0, 0, 1);
+    glDepthFunc(GL_GREATER);
 }
 
 STDGLRenderer::~STDGLRenderer() {
@@ -154,7 +155,7 @@ void STDGLRenderer::Draw() {
             // Normal rendering.
             glDepthFunc(GL_EQUAL);
             DrawIArrays<false>(InstanceArrayRefs);
-            glDepthFunc(GL_LESS);
+            glDepthFunc(GL_GREATER);
 
             GL_POP_DEBUG;
             

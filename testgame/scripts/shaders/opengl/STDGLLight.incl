@@ -70,7 +70,7 @@ float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point) {
     float value = texture(LightAtlas, vec2(TruePoint.xy)).r;
     vec2 moments = vec2(value, value * value); // temp
 	
-	float p = step(TruePoint.z, moments.x);
+	float p = step(moments.x, TruePoint.z);
 	float variance = max(moments.y - moments.x * moments.x, 0.00000002f);
 	
 	float d = TruePoint.z - moments.x;

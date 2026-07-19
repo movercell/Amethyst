@@ -3,7 +3,7 @@
 
 void STDGLLight::Update() {
     if (wasChangedProjection) {
-        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Near, Far);
+        Info.Projection = glm::perspective(glm::radians(FOV), Resolution.x / Resolution.y, Far, Near); // Because reverse-Z.
     }
     if (wasChanged || wasChangedProjection) {
         Info.View = glm::lookAt(Position.toglm(), (Position + Front).toglm(), Up.toglm());
