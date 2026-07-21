@@ -59,24 +59,29 @@ vec3 CalculateLightRadiance(STDGLLightData Light, const int Type, vec3 WorldPosi
 
 float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point) {
     if (point.z < 0.0f || point.z > 1.0f ) return 0.0f;
-    float TexturePosX = float(Light.TextureSpacePosition & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
-    float TexturePosY = float((Light.TextureSpacePosition >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
 
-    float TextureSizeX = float(Light.TextureSpaceSize & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
-    float TextureSizeY = float((Light.TextureSpaceSize >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+    uvec2 TextureSize = uvec2(Light.TextureSpaceSize & 0xFFFFu, (Light.TextureSpaceSize >> 16u) & 0xFFFFu);
+    ivec2 TexturePos = ivec2(uvec2((Light.TextureSpacePosition & 0xFFFFu) + uint(TextureSize.x * point.x), ((Light.TextureSpacePosition >> 16u) & 0xFFFFu) + uint(TextureSize.y * point.y)));
 
-    vec3 TruePoint = vec3(TexturePosX + (TextureSizeX * point.x), TexturePosY + (TextureSizeY * point.y), point.z);
+    float shadow = 0.0f;
 
-    float value = texture(LightAtlas, vec2(TruePoint.xy)).r;
-    vec2 moments = vec2(value, value * value); // temp
-	
-	float p = step(moments.x, TruePoint.z);
-	float variance = max(moments.y - moments.x * moments.x, 0.00000002f);
-	
-	float d = TruePoint.z - moments.x;
-	float pMax = linstep(0.2f, 1.0f, variance / (variance + d*d));
-	
-	return min(max(p, pMax), 1.0);
+    // Point.
+    if (point.z >= texelFetch(LightAtlas, TexturePos, 0).r) shadow += 1.0f;
+    // Cardinal.
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(1, 0), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(-1, 0), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(0, 1), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(0, -1), 0).r) shadow += 1.0f;
+    // Corners.
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(1, 1), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(-1, 1), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(1, -1), 0).r) shadow += 1.0f;
+    if (point.z >= texelFetch(LightAtlas, TexturePos + ivec2(-1, -1), 0).r) shadow += 1.0f;
+
+    // Require at least two samples to pass.
+    shadow = max(shadow - 1.0f, 0.0f) / 7.0f;
+
+    return shadow;
 }
 
 vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNormal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
@@ -91,7 +96,7 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNorm
     vec3 CameraDir = normalize(FromFragToCamera);
 
     // First, do the shadow calculation.
-    vec4 LightPos = Light.ViewProjection * vec4(Position + LightDir * 0.5, 1.0f);
+    vec4 LightPos = Light.ViewProjection * vec4(Position + LightDir, 1.0f);
     vec3 projCoords = LightPos.xyz / LightPos.w;
     projCoords = vec3((projCoords * 0.5 + 0.5).xy, projCoords.z);
 
