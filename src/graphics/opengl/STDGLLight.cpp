@@ -230,6 +230,8 @@ STDGLLightSystem::STDGLLightSystem() {
     glTextureStorage2D(LightDepthBuffer, 1, DepthFormat, LightAreaAllocatorDimensions, LightAreaAllocatorDimensions);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
 
     glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 }
