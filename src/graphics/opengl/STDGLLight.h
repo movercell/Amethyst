@@ -86,9 +86,7 @@ struct STDGLLightSystem {
     GLFWwindow* Context = 0;
     GLuint LightDataBuffer = 0;
     GLuint LightDepthBuffer = 0;
-    GLuint LightDepthTemporaryBufferForBlur = 0;
     bool isLightDepthBufferSparse = false;
-    bool isLightMomentBufferSparse = false;
 
     uint16_t LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSTIONS_DEFAULT;
     Geometry::Alloc2D LightAreaAllocator = { LightAreaAllocatorDimensions, LightAreaAllocatorDimensions };
