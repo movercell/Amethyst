@@ -65,25 +65,26 @@ float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point) {
 
     float shadow = 0.0f;
 
-    // Point.
-    if (point.z > texelFetch(LightAtlas, TexturePos, 0).r) shadow += 1.0f;
-    // Cardinal.
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, 0), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, 0), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, 1), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, -1), 0).r) shadow += 1.0f;
-    // Corners.
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, 1), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, 1), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, -1), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, -1), 0).r) shadow += 1.0f;
-    // Cardinal(Far).
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(2, 0), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-2, 0), 0).r) shadow += 1.0f;
     if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, 2), 0).r) shadow += 1.0f;
-    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, -2), 0).r) shadow += 1.0f;
 
-    // Require at least two samples to pass.
+    // Top row.
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, 1), 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, 1), 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, 1), 0).r) shadow += 1.0f;
+    // Middle row.
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-2, 0), 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, 0), 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos, 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, 0), 0).r) shadow += 1.0f;
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(2, 0), 0).r) shadow += 1.0f;
+    // Bottom row.
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(-1, -1), 0).r) shadow += 1.0f; 
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, -1), 0).r) shadow += 1.0f; 
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(1, -1), 0).r) shadow += 1.0f;
+
+    if (point.z > texelFetch(LightAtlas, TexturePos + ivec2(0, -2), 0).r) shadow += 1.0f; 
+
+    // Require at least three samples to pass.
     shadow = max(shadow - 2.0f, 0.0f) / 11.0f;
 
     return shadow;
