@@ -27,6 +27,7 @@ void STDGLLight::Bind() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
+    glScissor(TextureSpace.PosX, TextureSpace.PosY, TextureSpace.SizeX, TextureSpace.SizeY);
 }
 
 void STDGLLight::SetPosition(vec3 position) {
@@ -87,8 +88,7 @@ void STDGLLight::CreateBuffers() {
 
 void STDGLLight::UpdateData() {
     STDGLLightData Data;
-    Data.View = Info.View;
-    Data.Projection = Info.Projection;
+    Data.ViewProjection = Info.ViewProjection;
     Data.Type = Type;
     Data.Color = Color;
     Data.FOV = FOV;
@@ -114,7 +114,7 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
     Type = type;
     Resolution = resolution;
     // Don't forget to pad the block to prevent texture bleeding artifacts! 
-    TextureSpace = Owner->LightDepthBufferAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
+    TextureSpace = Owner->LightAreaAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
     FOV = outer_cutoff_angle * 2.0f;
     InnerCutoffCosine = cos(inner_cutoff_angle * (std::numbers::pi / 180.0));
     OuterCutoffCosine = cos(outer_cutoff_angle * (std::numbers::pi / 180.0));
@@ -133,7 +133,7 @@ STDGLLight::~STDGLLight() {
     glDeleteBuffers(1, &Infobuffer);
 
     // The block has padding that needs to be accounted for when freeing.
-    Owner->LightDepthBufferAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
+    Owner->LightAreaAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
 }
 
 
@@ -161,18 +161,50 @@ STDGLLightSystem::STDGLLightSystem() {
 
     auto* DefaultData = new STDGLLightData[STDGLLIGHT_MAX_COUNT];
     glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
-    delete DefaultData;
+    delete[] DefaultData;
+
+    // In case of sparse textures being available.
+    if (GLAD_GL_ARB_sparse_texture) {
+    GLint VirtualPageSizesForDepth;
+    glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);    
+    if (VirtualPageSizesForDepth > 0) {
+        Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using.");
+
+        isLightDepthBufferSparse = true;
+        LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSIONS_SPARSE;
+
+        // Get the maximum aligments.
+        GLint SparseAlignmentX;
+        glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &SparseAlignmentX);
+        GLint SparseAlignmentY;
+        glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &SparseAlignmentY);
+
+        LightAreaAllocator = Geometry::Alloc2D(LightAreaAllocatorDimensions, LightAreaAllocatorDimensions, SparseAlignmentX, SparseAlignmentY);
+
+        LightAreaAllocator.SetCallbacks(
+            [this](Geometry::Alloc2D::Block block) -> void {
+                glfwMakeContextCurrent(Context);
+                glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_TRUE);
+                glClearTexSubImage(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            },
+            [this](Geometry::Alloc2D::Block block) -> void {
+                glfwMakeContextCurrent(Context);
+                glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_FALSE);
+            });
+    } else {
+        Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth buffers not detected, possible high VRAM usage.");
+    }}
 
     // Depth buffer
     glCreateTextures(GL_TEXTURE_2D, 1, &LightDepthBuffer);
-    glTextureStorage2D (LightDepthBuffer, 1, GL_DEPTH_COMPONENT32F, STDGLLIGHT_ALLOC2D_DIMENSTIONS, STDGLLIGHT_ALLOC2D_DIMENSTIONS);
+    if (isLightDepthBufferSparse) glTextureParameteri(LightDepthBuffer, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
+    glTextureStorage2D(LightDepthBuffer, 1, DepthFormat, LightAreaAllocatorDimensions, LightAreaAllocatorDimensions);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTextureParameteri(LightDepthBuffer, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
 
-    float clearColor = 0.0f;
-    glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &clearColor);
+    glClearTexImage(LightDepthBuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 }
 
 STDGLLightSystem::~STDGLLightSystem() {

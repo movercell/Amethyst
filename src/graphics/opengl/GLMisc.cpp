@@ -62,7 +62,7 @@ void GLMisc::GLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenu
     std::stringstream MessageStream;
 	MessageStream << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << '\n';
     
-    Engine::Error(MessageStream.str());
+    Engine::Warning(MessageStream.str());
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <functional>
 #include "engine/master.h"
 
 namespace Geometry {
@@ -18,10 +19,15 @@ namespace Geometry {
     private:
         uint16_t SizeX;
         uint16_t SizeY;
+        uint16_t AlignmentX;
+        uint16_t AlignmentY;
 
         std::vector<Block> FreeBlocks;
+
+        std::function<void(Block)> AllocCallback;
+        std::function<void(Block)> FreeCallback;
     public:
-        Alloc2D(uint16_t sizex, uint16_t sizey,int ReserveSpaceForBlocks = 256) : SizeX(sizex), SizeY(sizey) {
+        Alloc2D(uint16_t sizex, uint16_t sizey, uint16_t alignmentx = 1, uint16_t alignmenty = 1, int ReserveSpaceForBlocks = 256) : SizeX(sizex), SizeY(sizey), AlignmentX(alignmentx), AlignmentY(alignmenty) {
             FreeBlocks.reserve(ReserveSpaceForBlocks);
 
             FreeBlocks.emplace_back(0, 0, SizeX, SizeY);
@@ -47,6 +53,12 @@ namespace Geometry {
             block.SizeY += padding * 2;
             
             Free(block);
+        }
+
+        //! Sets callback functions.(Sends in the actual full block in it's pure size and position.) 
+        void SetCallbacks(decltype(AllocCallback) alloccallback, decltype(FreeCallback) freecallback) {
+            AllocCallback = alloccallback;
+            FreeCallback = freecallback;
         }
     };
 

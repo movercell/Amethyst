@@ -23,7 +23,6 @@ void STDGLCamera::Update() {
 }
 
 void STDGLCamera::Bind() {
-    
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, Infobuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
     glViewport(0, 0, Resolution.x, Resolution.y);

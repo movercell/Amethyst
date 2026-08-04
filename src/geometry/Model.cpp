@@ -6,7 +6,7 @@
 #include <assimp/postprocess.h>
 #include <iostream>
 
-Geometry::Model::Model(std::string path) {
+const aiScene* MakeAssimpScene(std::string path) {
     auto modelfile = Filesystem::GetFileAsStream("models/" + path, std::ios::in | std::ios_base::binary);
     if (!modelfile) {
         modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
@@ -39,6 +39,12 @@ Geometry::Model::Model(std::string path) {
             Engine::Error(std::string("Error loading the error model: ") + aiGetErrorString());
         }
     }
+
+    return scene;
+}
+
+Geometry::Model::Model(std::string path) {
+    const aiScene* scene = MakeAssimpScene(path);
     
     Meshes.reserve(scene->mNumMeshes);
     for (int meshindex = 0; meshindex < scene->mNumMeshes; meshindex++) {
