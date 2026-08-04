@@ -8,7 +8,7 @@
 
 inline constexpr int STDGLLIGHT_MAX_COUNT = 4;
 inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS_DEFAULT = 8192;
-inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSTIONS_SPARSE = 16384;
+inline constexpr int STDGLLIGHT_ALLOC2D_DIMENSIONS_SPARSE = 16384;
 inline constexpr int STDGLLIGHT_ALLOC2D_PADDING = 4;
 
 struct STDGLLightSystem;

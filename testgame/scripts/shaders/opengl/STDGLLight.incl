@@ -7,7 +7,6 @@
 #define LIGHT_TYPE_END_MARKER 128
 
 #define STDGLLIGHT_MAX_COUNT 4
-#define STDGLLIGHT_ALLOC2D_DIMENSTIONS 8192.0f
 
 struct STDGLLightData {
     mat4 ViewProjection;
@@ -59,9 +58,10 @@ vec3 CalculateLightRadiance(STDGLLightData Light, const int Type, vec3 WorldPosi
 
 float STDGLight_SampleSpotLightForShadows(STDGLLightData Light, vec3 point) {
     if (point.z < 0.0f || point.z > 1.0f ) return 0.0f;
-    vec2 TexturePos = vec2(float(Light.TextureSpacePosition & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS, float((Light.TextureSpacePosition >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS);
-    vec2 TextureSize = vec2(float(Light.TextureSpaceSize & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS, float((Light.TextureSpaceSize >> 16u) & 0xFFFFu) / STDGLLIGHT_ALLOC2D_DIMENSTIONS);
-    float TexelSize = 1.0f / STDGLLIGHT_ALLOC2D_DIMENSTIONS;
+    float TextureDimensions = textureSize(LightAtlas, 0).x;
+    vec2 TexturePos = vec2(float(Light.TextureSpacePosition & 0xFFFFu) / TextureDimensions, float((Light.TextureSpacePosition >> 16u) & 0xFFFFu) / TextureDimensions);
+    vec2 TextureSize = vec2(float(Light.TextureSpaceSize & 0xFFFFu) / TextureDimensions, float((Light.TextureSpaceSize >> 16u) & 0xFFFFu) / TextureDimensions);
+    float TexelSize = 1.0f / TextureDimensions;
     float DTexelSize = TexelSize + TexelSize;
 
     vec3 TruePoint = vec3(TexturePos.x + (TextureSize.x * point.x), TexturePos.y + (TextureSize.y * point.y), point.z);

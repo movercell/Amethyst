@@ -171,7 +171,7 @@ STDGLLightSystem::STDGLLightSystem() {
         Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using.");
 
         isLightDepthBufferSparse = true;
-        //LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSTIONS_SPARSE; < need to transmit this to the shader
+        LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSIONS_SPARSE;
 
         // Get the maximum aligments.
         GLint SparseAlignmentX;
