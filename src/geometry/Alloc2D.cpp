@@ -1,9 +1,9 @@
 #include "engine/geometry/Alloc2D.h"
 
-Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey) {
-    if (AlignmentX > 1) sizex = ((sizex + AlignmentX - 1) / AlignmentX) * AlignmentX; // Alignment.
-    if (AlignmentY > 1) sizey = ((sizey + AlignmentY - 1) / AlignmentY) * AlignmentY;
+#define REMOVE_BLOCK(BLOCK_ID)  std::swap(FreeBlocks[BLOCK_ID], FreeBlocks.back()); \
+                                FreeBlocks.pop_back();
 
+Geometry::Alloc2D::Block Geometry::Alloc2D::RawAlloc(uint16_t sizex, uint16_t sizey) {
     int BestFitIndex = -1;
     int BestFitScore = std::numeric_limits<int>::max(); // The lower, the better.
     Block result;
@@ -45,16 +45,15 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
     }
 
     // Now, split the block!
-    Block BestFitCopy = FreeBlocks[BestFitIndex]; // Copied because the block data gets changed during the process.
+    Block BestFitCopy = FreeBlocks[BestFitIndex]; // Copied because the block gets removed during the process.
+    REMOVE_BLOCK(BestFitIndex)
 
     // Matched an axis.
     if (BestFitScore < 0) {
         if (BestFitCopy.SizeX == sizex) {
-            FreeBlocks[BestFitIndex].SizeY -= sizey;
-            FreeBlocks[BestFitIndex].PosY += sizey;
+            RawFree({BestFitCopy.PosX, (uint16_t)(BestFitCopy.PosY + sizey), BestFitCopy.SizeX, (uint16_t)(BestFitCopy.SizeY - sizey)});
         } else {
-            FreeBlocks[BestFitIndex].SizeX -= sizex;
-            FreeBlocks[BestFitIndex].PosX += sizex;
+            RawFree({(uint16_t)(BestFitCopy.PosX + sizex), BestFitCopy.PosY, (uint16_t)(BestFitCopy.SizeX - sizex), BestFitCopy.SizeY});
         }
 
         result = Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
@@ -63,25 +62,35 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
     }
 
     // Split.
-    FreeBlocks[BestFitIndex].PosX += sizex;
-    FreeBlocks[BestFitIndex].SizeX -= sizex;
-    FreeBlocks[BestFitIndex].SizeY = sizey;
-
-    FreeBlocks.emplace_back(BestFitCopy.PosX, BestFitCopy.PosY + sizey, BestFitCopy.SizeX, BestFitCopy.SizeY - sizey); 
+    RawFree({(uint16_t)(BestFitCopy.PosX + sizex), BestFitCopy.PosY, (uint16_t)(BestFitCopy.SizeX - sizex), sizey}); 
+    RawFree({BestFitCopy.PosX, (uint16_t)(BestFitCopy.PosY + sizey), BestFitCopy.SizeX, (uint16_t)(BestFitCopy.SizeY - sizey)}); 
 
     result = Block(BestFitCopy.PosX, BestFitCopy.PosY, sizex, sizey);
     if (AllocCallback) AllocCallback(result);
     return result;
 }
+Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey) {
+    uint16_t passedsizex = sizex;
+    uint16_t passedsizey = sizey;
+    sizex += PadX * 2;
+    sizey += PadY * 2;
 
-#define REMOVE_CURRENT_BLOCK_AND_GO_BACK_TO_START   std::swap(FreeBlocks[i], FreeBlocks.back()); \
-                                                    FreeBlocks.pop_back(); \
+    if (AlignmentX > 1) sizex = ((sizex + AlignmentX - 1) / AlignmentX) * AlignmentX; // Alignment.
+    if (AlignmentY > 1) sizey = ((sizey + AlignmentY - 1) / AlignmentY) * AlignmentY;
+
+    Block Allocated = RawAlloc(sizex, sizey);
+    Allocated.PosX + PadX;
+    Allocated.PosY + PadY;
+    Allocated.SizeX = passedsizex;
+    Allocated.SizeY = passedsizey;
+
+    return Allocated;
+}
+
+#define REMOVE_CURRENT_BLOCK_AND_GO_BACK_TO_START   REMOVE_BLOCK(i) \
                                                     i = -1; \
                                                     continue;
-void Geometry::Alloc2D::Free(Geometry::Alloc2D::Block block) { // Handles coalescence for any blocks that are next to the one being freed.
-    if (AlignmentX > 1) block.SizeX = ((block.SizeX + AlignmentX - 1) / AlignmentX) * AlignmentX; // Alignment.
-    if (AlignmentY > 1) block.SizeY = ((block.SizeY + AlignmentY - 1) / AlignmentY) * AlignmentY;
-
+void Geometry::Alloc2D::RawFree(Geometry::Alloc2D::Block block) { // Handles coalescence for any blocks that are next to the one being freed.
     for (int i = 0; i < FreeBlocks.size(); i++) {
         if (FreeBlocks[i].SizeX == block.SizeX) {
             if ((FreeBlocks[i].PosY + FreeBlocks[i].SizeY) == block.PosY) {
@@ -114,4 +123,14 @@ void Geometry::Alloc2D::Free(Geometry::Alloc2D::Block block) { // Handles coales
     FreeBlocks.push_back(block);
     
     if (FreeCallback) FreeCallback(block);
+}
+void Geometry::Alloc2D::Free(Geometry::Alloc2D::Block block) {
+    block.SizeX += PadX * 2;
+    block.SizeY += PadY * 2;
+    block.PosX -= PadX;
+    block.PosY -= PadY;
+    if (AlignmentX > 1) block.SizeX = ((block.SizeX + AlignmentX - 1) / AlignmentX) * AlignmentX; // Alignment.
+    if (AlignmentY > 1) block.SizeY = ((block.SizeY + AlignmentY - 1) / AlignmentY) * AlignmentY;
+
+    RawFree(block);
 }

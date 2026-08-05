@@ -21,13 +21,30 @@ namespace Geometry {
         uint16_t SizeY;
         uint16_t AlignmentX;
         uint16_t AlignmentY;
+        uint16_t PadX;
+        uint16_t PadY;
 
         std::vector<Block> FreeBlocks;
 
         std::function<void(Block)> AllocCallback;
         std::function<void(Block)> FreeCallback;
+
+        Block RawAlloc(uint16_t sizex, uint16_t sizey);
+        void RawFree(Block block);
     public:
-        Alloc2D(uint16_t sizex, uint16_t sizey, uint16_t alignmentx = 1, uint16_t alignmenty = 1, int ReserveSpaceForBlocks = 256) : SizeX(sizex), SizeY(sizey), AlignmentX(alignmentx), AlignmentY(alignmenty) {
+        Alloc2D(uint16_t sizex,
+                uint16_t sizey,
+                uint16_t padx = 0,
+                uint16_t pady = 0,
+                uint16_t alignmentx = 1,
+                uint16_t alignmenty = 1,
+                int ReserveSpaceForBlocks = 256) : 
+                        SizeX(sizex),
+                        SizeY(sizey),
+                        AlignmentX(alignmentx),
+                        AlignmentY(alignmenty),
+                        PadX(padx),
+                        PadY(pady) {
             FreeBlocks.reserve(ReserveSpaceForBlocks);
 
             FreeBlocks.emplace_back(0, 0, SizeX, SizeY);
@@ -40,20 +57,6 @@ namespace Geometry {
 
         Block ENGINEEXPORT Alloc(uint16_t sizex, uint16_t sizey);
         void ENGINEEXPORT Free(Block block);
-
-        Block AllocPadded(uint16_t sizex, uint16_t sizey, uint16_t padding, Block* ReturnPadded = nullptr) {
-            auto ret = Alloc(sizex + padding * 2, sizey + padding * 2);
-            if (ReturnPadded) *ReturnPadded = ret;
-            return Block(ret.PosX + padding, ret.PosY + padding, sizex, sizey);
-        }
-        void FreePadded(Block block, uint16_t padding) {
-            block.PosX -= padding;
-            block.PosY -= padding;
-            block.SizeX += padding * 2;
-            block.SizeY += padding * 2;
-            
-            Free(block);
-        }
 
         //! Sets callback functions.(Sends in the actual full block in it's pure size and position.) 
         void SetCallbacks(decltype(AllocCallback) alloccallback, decltype(FreeCallback) freecallback) {

@@ -114,7 +114,7 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
     Type = type;
     Resolution = resolution;
     // Don't forget to pad the block to prevent texture bleeding artifacts! 
-    TextureSpace = Owner->LightAreaAllocator.AllocPadded(resolution.x, resolution.y, STDGLLIGHT_ALLOC2D_PADDING);
+    TextureSpace = Owner->LightAreaAllocator.Alloc(resolution.x, resolution.y);
     FOV = outer_cutoff_angle * 2.0f;
     InnerCutoffCosine = cos(inner_cutoff_angle * (std::numbers::pi / 180.0));
     OuterCutoffCosine = cos(outer_cutoff_angle * (std::numbers::pi / 180.0));
@@ -133,7 +133,7 @@ STDGLLight::~STDGLLight() {
     glDeleteBuffers(1, &Infobuffer);
 
     // The block has padding that needs to be accounted for when freeing.
-    Owner->LightAreaAllocator.FreePadded(TextureSpace, STDGLLIGHT_ALLOC2D_PADDING);
+    Owner->LightAreaAllocator.Free(TextureSpace);
 }
 
 
@@ -168,7 +168,7 @@ STDGLLightSystem::STDGLLightSystem() {
     GLint VirtualPageSizesForDepth;
     glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_NUM_VIRTUAL_PAGE_SIZES_ARB, 1, &VirtualPageSizesForDepth);    
     if (VirtualPageSizesForDepth > 0) {
-        Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth components detected, using.");
+        Engine::Print("STDGLLightSystem: GL_ARB_sparse_texture support for depth components detected, using.");
 
         isLightDepthBufferSparse = true;
         LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSIONS_SPARSE;
@@ -179,7 +179,7 @@ STDGLLightSystem::STDGLLightSystem() {
         GLint SparseAlignmentY;
         glGetInternalformativ(GL_TEXTURE_2D, DepthFormat, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &SparseAlignmentY);
 
-        LightAreaAllocator = Geometry::Alloc2D(LightAreaAllocatorDimensions, LightAreaAllocatorDimensions, SparseAlignmentX, SparseAlignmentY);
+        LightAreaAllocator = Geometry::Alloc2D(LightAreaAllocatorDimensions, LightAreaAllocatorDimensions, STDGLLIGHT_ALLOC2D_PADDING, STDGLLIGHT_ALLOC2D_PADDING, SparseAlignmentX, SparseAlignmentY);
 
         LightAreaAllocator.SetCallbacks(
             [this](Geometry::Alloc2D::Block block) -> void {
@@ -192,7 +192,7 @@ STDGLLightSystem::STDGLLightSystem() {
                 glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_FALSE);
             });
     } else {
-        Engine::Print("STDGLLight: GL_ARB_sparse_texture support for depth buffers not detected, possible high VRAM usage.");
+        Engine::Print("STDGLLightSystem: GL_ARB_sparse_texture support for depth buffers not detected, possible high VRAM usage.");
     }}
 
     // Depth buffer

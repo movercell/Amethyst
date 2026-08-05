@@ -89,7 +89,7 @@ struct STDGLLightSystem {
     bool isLightDepthBufferSparse = false;
 
     uint16_t LightAreaAllocatorDimensions = STDGLLIGHT_ALLOC2D_DIMENSTIONS_DEFAULT;
-    Geometry::Alloc2D LightAreaAllocator = { LightAreaAllocatorDimensions, LightAreaAllocatorDimensions };
+    Geometry::Alloc2D LightAreaAllocator = { LightAreaAllocatorDimensions, LightAreaAllocatorDimensions, STDGLLIGHT_ALLOC2D_PADDING, STDGLLIGHT_ALLOC2D_PADDING };
 
     static inline constexpr int DepthFormat = GL_DEPTH_COMPONENT32F;
     static inline constexpr int MomentFormat = GL_R32F;
