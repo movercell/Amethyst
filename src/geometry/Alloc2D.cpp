@@ -79,8 +79,8 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
     if (AlignmentY > 1) sizey = ((sizey + AlignmentY - 1) / AlignmentY) * AlignmentY;
 
     Block Allocated = RawAlloc(sizex, sizey);
-    Allocated.PosX + PadX;
-    Allocated.PosY + PadY;
+    Allocated.PosX += PadX;
+    Allocated.PosY += PadY;
     Allocated.SizeX = passedsizex;
     Allocated.SizeY = passedsizey;
 
