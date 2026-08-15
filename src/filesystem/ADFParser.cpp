@@ -14,7 +14,7 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
     // Any of the other cases
     switch (currchar) {
     case '\"':
-        TokenContent.reserve(256);
+        TokenContent.reserve(256); // TODO: Okay that was not a very bright idea, probably should make a preallocated buffer
 
         currchar = stream->get(); // Has to be like this as to not include the starting quotation mark.
         while (!(currchar == '\"' || currchar == -1)) {
