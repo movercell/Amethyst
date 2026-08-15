@@ -102,7 +102,7 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
                 case TokenType::EndFile:
                     ADFError("Incomplete ADF key/value pair!");
                 case TokenType::EndArray:
-                    ADFError("Incomplete ADF key/value pair!(And also it was closed with a square bracket!)");
+                    ADFError("Incomplete ADF key/value pair!(And also it was closed with a square bracket)");
             }
         }
 
@@ -126,9 +126,8 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
                     arraydata.emplace_back(ADFEntry(ADFType::array, Tokenizer, filename));
                 break;
                 case TokenType::EndArray:
-                    return;
                 case TokenType::EndFile:
-                    ADFError("Incomplete ADF array!");
+                    return;
                 case TokenType::EndMap:
                     ADFError("Mismatched ADF closing brackets!(Tried to end an array with a curly brace)");
             }
