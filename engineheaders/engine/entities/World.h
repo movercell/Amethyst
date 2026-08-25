@@ -10,17 +10,17 @@
 #include "engine/graphics/Renderer.h"
 #include "engine/Resource.h"
 
-struct iEntHandler;
+struct EntityHandler;
 
 class EntityStorage {
-    using iterator = Engine::Reference<iEntHandler>*;
+    using iterator = Engine::Reference<EntityHandler>*;
 
     static inline constexpr int PreallocatedSlotAmount = 4;
-    Engine::Reference<iEntHandler> PreallocatedSlots[PreallocatedSlotAmount];
-    Engine::Reference<iEntHandler>* DynamicStorage;
+    Engine::Reference<EntityHandler> PreallocatedSlots[PreallocatedSlotAmount];
+    Engine::Reference<EntityHandler>* DynamicStorage;
     uint32_t Size = 0;
 public:
-    void AddEntityBack(Engine::Reference<iEntHandler> Entity);
+    void AddEntityBack(Engine::Reference<EntityHandler> Entity);
 
     int GetFreeIndex();
 
@@ -43,14 +43,14 @@ public:
     auto rbegin() { return std::make_reverse_iterator(end()); }
     auto rend() { return std::make_reverse_iterator(begin()); }
 
-    Engine::Reference<iEntHandler>& operator[](uint32_t index) {
+    Engine::Reference<EntityHandler>& operator[](uint32_t index) {
         if (!(index < Size)) Engine::Error("Attempted to index an EntityStorage out of bounds!");
 
         if (Size > PreallocatedSlotAmount)
             return DynamicStorage[index];
         return PreallocatedSlots[index];
     }
-    const Engine::Reference<iEntHandler>& operator[](uint32_t index) const {
+    const Engine::Reference<EntityHandler>& operator[](uint32_t index) const {
         if (!(index < Size)) Engine::Error("Attempted to index an EntityStorage out of bounds!");
         
         if (Size > PreallocatedSlotAmount)
@@ -69,7 +69,7 @@ public:
     ADFEntry Save();
 
     //! Returns an uninitalized entity, or nullptr if classname is not valid.
-    Engine::Reference<iEntHandler> MakeEntity(std::string classname, std::optional<iEntHandler*> parent = std::nullopt);
+    Engine::Reference<EntityHandler> MakeEntity(std::string classname, std::optional<EntityHandler*> parent = std::nullopt);
 
     void Clear();
 
@@ -78,6 +78,6 @@ public:
 
     Engine::Reference<RWorld> GetRWorld() { return RenderWorld; }
 
-    void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent = std::nullopt);
+    void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<EntityHandler*> parent = std::nullopt);
     ADFEntry EntityStorageToADF(EntityStorage* Storage);
 };

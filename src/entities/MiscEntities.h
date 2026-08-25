@@ -1,22 +1,11 @@
 #pragma once
 
 #include "engine/entities/Entity.h"
+namespace EngineEntities {
 
-template<typename T>
-struct PointRotatingHandler : public BaseEntityHandler<T> {
-    using BaseEntityHandler<T>::BaseEntityHandler;
-    using Base = BaseEntityHandler<T>;
-    using Parent = BaseEntityHandler<T>;
+    struct EntityClassname("point_rotating") PointRotating : public BaseEntity {
+        ADFSerialize vec3 rotationamount;
 
-    static void PropertyInit() {
-        Base::AddProperty("rotationamount", &T::rotationamount);
-
-        Parent::PropertyInit();
-    }
-};
-
-struct PointRotating : public BaseEntity {
-    vec3 rotationamount;
-
-    void Update();
-};
+        void Update();
+    };
+}

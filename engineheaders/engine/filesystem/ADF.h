@@ -5,11 +5,21 @@
 #include <variant>
 #include <optional>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <inplace_vector>
 #include <sstream>
+#include <meta>
+#include <type_traits>
 
+//! Tag for specified ADF serialization.
+namespace Engine {
+    namespace Internal {
+        constexpr struct {} ADFSerializeAnnotation;
+    }
+}
 
 /*!
 *  \brief Runtime version of an entry from an Amethyst Data Format(.adf) file.
@@ -42,26 +52,26 @@ class ADFEntry {
         EndArray,
         EndFile
     };
-    struct Token {
-        TokenType type;
-        std::optional<std::string> content;
-        inline Token() {}
-        inline Token (TokenType Type, std::optional<std::string> Content = std::nullopt) { type = std::move(Type); content = std::move(Content); }
-    };
-
-    std::variant<std::map<std::string, ADFEntry>, std::string, std::vector<ADFEntry>> data;
-    // This is used for showing which file an error came from
-    Engine::Reference<std::string> Filename;
-
 
     class Tokenizer {
         std::istream* stream;
         const std::string& filepath;
-        static inline constexpr auto eof = std::char_traits<char>::eof();
+        static constexpr auto eof = std::char_traits<char>::eof();
+
+        TokenType CurrentType;
+        std::inplace_vector<char, 256> CurrentContent;
     public:
-        inline Tokenizer(std::istream* Stream, const std::string& FilePath) : filepath(FilePath), stream(std::move(Stream)) {}
-        Token ReadToken();
+        Tokenizer(std::istream* Stream, const std::string& FilePath) : filepath(FilePath), stream(std::move(Stream)) {}
+        void ReadToken();
+
+        TokenType GetCurrentTokenType() { return CurrentType; }
+        std::string GetCurrentTokenContent() { return {CurrentContent.data(), CurrentContent.size()}; }
     };
+
+    
+    std::variant<std::map<std::string, ADFEntry>, std::string, std::vector<ADFEntry>> data;
+    // This is used for showing which file an error came from
+    Engine::Reference<std::string> Filename;
 
     [[noreturn]] void ADFError(const std::string& error) const;
 
@@ -74,13 +84,12 @@ class ADFEntry {
 
     ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename);
     ADFEntry(std::string content, Engine::Reference<std::string> filename) { data = std::move(content); filename = filename; }
-    ADFEntry() {};
 public:
     //! Creates an ADF tree from a .adf file.
     static ENGINEEXPORT ADFEntry FromFile(const std::string& FilePath);
     //! Creates an ADF tree from a stream.
     static ENGINEEXPORT ADFEntry FromStream(std::istream& Stream);
-    inline void ToFile(const std::string& FilePath, bool isCompact = false) const {
+    void ToFile(const std::string& FilePath, bool isCompact = false) const {
         if (!IsMap()) {
             Engine::Error("Attempted to turn a non-Map-type ADF entry into a string, only a Map-type entry can be the root node of a tree!");
         }
@@ -98,7 +107,7 @@ public:
             ToStream(buffer, 0);
         }
     }
-    inline void ToStream(std::ostream Stream, bool isCompact = false) const {
+    void ToStream(std::ostream Stream, bool isCompact = false) const {
         auto sentry = std::ostream::sentry(Stream);
         if (!sentry) {
             Engine::Error("Failed to lock the output stream for an .ADF export!");
@@ -112,54 +121,55 @@ public:
         }
     }
 
+    ADFEntry() {};
     //! Used for manual creation of string-type entries.
-    inline static ADFEntry String(std::string Content = std::string()) { ADFEntry ret; ret.data = Content; return ret; }
+    static ADFEntry String(std::string Content = std::string()) { ADFEntry ret; ret.data = Content; return ret; }
     //! Used for manual creation of map-type entries.
-    inline static ADFEntry Map(std::map<std::string, ADFEntry> Content = std::map<std::string, ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
+    static ADFEntry Map(std::map<std::string, ADFEntry> Content = std::map<std::string, ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
     //! Used for manual creation of array-type entries.
-    inline static ADFEntry Array(std::vector<ADFEntry> Content = std::vector<ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
+    static ADFEntry Array(std::vector<ADFEntry> Content = std::vector<ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
 
-    inline bool IsString() const {
+    bool IsString() const {
         return std::holds_alternative<std::string>(data);
     }
-    inline bool IsMap() const {
+    bool IsMap() const {
         return std::holds_alternative<std::map<std::string, ADFEntry>>(data);
     }
-    inline bool IsArray() const {
+    bool IsArray() const {
         return std::holds_alternative<std::vector<ADFEntry>>(data);
     }
-    inline std::string& GetString() {
+    std::string& GetString() {
         if (!IsString()) {
             ADFError("Tried to get a string from a different type of an ADF entry!");
         }
         return std::get<std::string>(data);
     }
-    inline std::map<std::string, ADFEntry>& GetMap() {
+    std::map<std::string, ADFEntry>& GetMap() {
         if (!IsMap()) {
             ADFError("Tried to get a map from a different type of an ADF entry!");
         }
         return std::get<std::map<std::string, ADFEntry>>(data);
     }
-    inline std::vector<ADFEntry>& GetArray() {
+    std::vector<ADFEntry>& GetArray() {
         if (!IsArray()) {
             ADFError("Tried to get an array from a different type of an ADF entry!");
         }
         return std::get<std::vector<ADFEntry>>(data);
     }
 
-    inline const std::string& GetString() const {
+    const std::string& GetString() const {
         if (!IsString()) {
             ADFError("Tried to get a string value from a different type of an ADF entry!");
         }
         return std::get<std::string>(data);
     }
-    inline const std::map<std::string, ADFEntry>& GetMap() const {
+    const std::map<std::string, ADFEntry>& GetMap() const {
         if (!IsMap()) {
             ADFError("Tried to get a list of children from a different type of an ADF entry!");
         }
         return std::get<std::map<std::string, ADFEntry>>(data);
     }
-    inline const std::vector<ADFEntry>& GetArray() const {
+    const std::vector<ADFEntry>& GetArray() const {
         if (!IsArray()) {
             ADFError("Tried to get an array from a different type of an ADF entry!");
         }
@@ -168,39 +178,39 @@ public:
 
 
 
-    inline ADFEntry& operator[](int i) {
+    ADFEntry& operator[](int i) {
         return GetArray()[i];
     }
-    inline ADFEntry& operator[](const std::string& name) {
+    ADFEntry& operator[](const std::string& name) {
         return GetMap().at(name);
     }
-    inline const ADFEntry& operator[](int i) const {
+    const ADFEntry& operator[](int i) const {
         return GetArray()[i];
     }
-    inline const ADFEntry& operator[](const std::string& name) const {
+    const ADFEntry& operator[](const std::string& name) const {
         return GetMap().at(name);
     }
 
-    inline bool HasChild(const std::string& name) const {
+    bool HasChild(const std::string& name) const {
         return GetMap().contains(name);
     }
-    inline bool HasChildren() const {
+    bool HasChildren() const {
         return !GetMap().empty();
     }
-    inline bool HasElements() const {
+    bool HasElements() const {
         return !GetArray().empty();
     }
 
-    inline bool operator==(const ADFEntry& other) const {
+    bool operator==(const ADFEntry& other) const {
         return data == other.data;
     }
-    inline bool operator==(const ADFEntry&& other) const {
+    bool operator==(const ADFEntry&& other) const {
         return data == other.data;
     }
 
 
     //! Used for manual creation of map-type entries that represent a \ref vec2.
-    inline static ADFEntry Vector2(const vec2 value) {
+    static ADFEntry Vector2(const vec2 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetMap();
 
@@ -210,7 +220,7 @@ public:
         return ret;
     } 
     //! Used for manual creation of map-type entries that represent a \ref vec3.
-    inline static ADFEntry Vector3(const vec3 value) {
+    static ADFEntry Vector3(const vec3 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetMap();
 
@@ -221,7 +231,7 @@ public:
         return ret;
     } 
     //! Used for manual creation of map-type entries that represent a \ref vec4.
-    inline static ADFEntry Vector4(const vec4 value) {
+    static ADFEntry Vector4(const vec4 value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetMap();
 
@@ -233,7 +243,7 @@ public:
         return ret;
     } 
     //! Used for manual creation of map-type entries that represent a \ref quat.
-    inline static ADFEntry Quaternion(const quat value) {
+    static ADFEntry Quaternion(const quat value) {
         ADFEntry ret = Map();
         auto& retmap = ret.GetMap();
 
@@ -246,7 +256,7 @@ public:
     } 
 
     //! Interprets a map-type entry as a 2-component vector.
-    inline vec2 GetVec2() const {
+    vec2 GetVec2() const {
         const auto& map = GetMap();
 
         if (map.contains("x") && map.contains("y")) {
@@ -256,7 +266,7 @@ public:
         ADFError("Tried to get a vec2 from a different type of an ADF entry!");
     }
     //! Interprets a map-type entry as a 3-component vector.
-    inline vec3 GetVec3() const {
+    vec3 GetVec3() const {
         const auto& map = GetMap();
 
         if (map.contains("x") && map.contains("y") && map.contains("z")) {
@@ -266,7 +276,7 @@ public:
         ADFError("Tried to get a vec3 from a different type of an ADF entry!");
     }
     //! Interprets a map-type entry as a 4-component vector.
-    inline vec4 GetVec4() const {
+    vec4 GetVec4() const {
         const auto& map = GetMap();
 
         if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("2")) {
@@ -276,7 +286,7 @@ public:
         ADFError("Tried to get a vec4 from a different type of an ADF entry!");
     }
     //! Interprets a map-type entry as a quaternion(Interpreted as euler angles and converted to a quaternion if a W component is not present.).
-    inline quat GetQuat() const {
+    quat GetQuat() const {
         const auto& map = GetMap();
 
         if (map.contains("x") && map.contains("y") && map.contains("z")) {
@@ -289,4 +299,257 @@ public:
         ADFError("Tried to get a quaternion from a different type of an ADF entry!");
     }
 
+
+
+    // Reflection-based API for easy storing/loading of structures.
+
+    //! Recursively converts an object to an ADFEntry using reflection.(Only converts members that have the ADFSerialize annotation, and if no members have it implicitly stores everything.)
+    template<typename T>
+    static ADFEntry Serialize(const T& Object) {
+        if constexpr (std::meta::is_pointer_type(^^T)) {
+            static_assert(false, "ADFEntry::Serialize: Attempted to serialize a pointer, nope.");
+        }
+
+        constexpr auto TClean = std::meta::dealias(^^T);
+        constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
+        constexpr bool IsVector = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::vector);
+                return res;
+            } else { return false; }
+        }();
+        constexpr bool IsArray = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::array);
+                return res;
+            } else { return false; }
+        }();
+        constexpr bool IsMap = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
+                                     (std::meta::template_of(TClean) == std::meta::dealias(^^std::unordered_map));
+                return res;
+            } else { return false; }
+        }();
+
+        if constexpr (TClean == ^^ADFEntry) {
+            // The object is already an ADFEntry.
+            return Object;
+
+        } else if constexpr (TClean == ^^bool) {
+            // The object is a boolean.
+            return String(Object ? "1" : "0");
+
+        } else if constexpr (TClean == std::meta::dealias(^^std::string)) {
+            // The object is a string.
+            return String(Object);
+
+        } else if constexpr (requires {std::to_string(Object);}) {
+            // The object can be converted to a string.
+            return String(std::to_string(Object));
+
+        } else if constexpr (TClean == ^^vec2) {
+            // The object is a 2-component vector.
+            return Vector2(Object);
+
+        } else if constexpr (TClean == ^^vec3) {
+            // The object is a 3-component vector.
+            return Vector3(Object);
+
+        } else if constexpr (TClean == ^^vec4) {
+            // The object is a 4-component vector.
+            return Vector4(Object);
+
+        } else if constexpr (TClean == ^^quat) {
+            // The object is a quaternion.
+            return Quaternion(Object);
+
+        } else if constexpr (IsArray || IsVector) {
+            // The object is a std::vector or a std::array.
+            ADFEntry ret = ADFEntry::Array();
+            auto& retarray = ret.GetArray();
+
+            retarray.reserve(Object.size());
+            for (auto& Element : Object) {
+                retarray.emplace_back(Serialize(Element));
+            }
+
+            return ret;
+        
+        } else if constexpr (IsMap) {
+            // The object is a std::map<std::string, T>.
+            static_assert(std::meta::template_arguments_of(TClean)[0] == std::meta::dealias(^^std::string), "ADFEntry::Serialize: A serialized map must have it's key be std::string!");
+            ADFEntry ret = ADFEntry::Map();
+            auto& retmap = ret.GetMap();
+
+            for (const auto& Element : Object) {
+                retmap.emplace(Element.first, ADFEntry::Serialize(Element.second));
+            }
+
+            return ret;
+
+        } else if constexpr (std::is_class_v<T> && !std::is_union_v<T>) {
+            // The object is a structure.
+            ADFEntry ret = ADFEntry::Map();
+            auto& retmap = ret.GetMap();
+            
+            static constexpr auto Members = std::define_static_array(std::meta::nonstatic_data_members_of(TClean, std::meta::access_context::unchecked()));
+
+            // Check if none of the members have the ADFSerialize annotation, then implicitly store everything.
+            constexpr bool ImplicitStoreAll = std::none_of(Members.begin(), Members.end(), [](std::meta::info Member) -> bool {
+                return std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0;
+            });
+
+            template for (constexpr auto Member : Members) {
+                if constexpr (ImplicitStoreAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
+                    retmap.emplace(std::meta::identifier_of(Member), Serialize(Object.[:Member:]));
+                }
+            }
+
+            // Now, handle parent classes.
+            static constexpr auto Bases = std::define_static_array(std::meta::bases_of(TClean, std::meta::access_context::unchecked()));
+            template for (constexpr auto Base : Bases) {
+                using BaseType = [:std::meta::type_of(Base):];
+                ADFEntry SerializedBase = Serialize<BaseType>(Object);
+                retmap.merge(SerializedBase.GetMap());
+            }
+
+            return ret;
+
+        } else {
+            static_assert(false, "ADFEntry::Serialize: Cannot turn object into an ADFEntry!");
+        }
+    }
+
+    //! Recursively converts an ADFEntry to an object using reflection.(Only converts members that have the ADFSerialize annotation, and if no members have it implicitly loads everything.)
+    template<typename T>
+    void Deserialize(T& Object) const {
+        if constexpr (std::meta::is_pointer_type(^^T)) {
+            static_assert(false, "ADFEntry::Deserialize: Attempted to deserialize a pointer, nope.");
+        }
+
+        constexpr auto TClean = std::meta::dealias(^^T);
+        constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
+        constexpr bool IsVector = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::vector);
+                return res;
+            } else { return false; }
+        }();
+        constexpr bool IsArray = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::array);
+                return res;
+            } else { return false; }
+        }();
+        constexpr bool IsMap = [IsTemplate, TClean]() -> bool {
+            if constexpr (IsTemplate) {
+                constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
+                                     (std::meta::template_of(TClean) == std::meta::dealias(^^std::unordered_map));
+                return res;
+            } else { return false; }
+        }();
+
+        if constexpr (TClean == ^^ADFEntry) {
+            // The object is already an ADFEntry.
+            Object = *this;
+
+        } else if constexpr (TClean == ^^bool) {
+            // The object is a boolean.
+            Object = GetString() == "1";
+
+        } else if constexpr (TClean == std::meta::dealias(^^std::string)) {
+            // The object is a string.
+            Object = GetString();
+
+        } else if constexpr (requires {std::from_chars(nullptr, nullptr, Object);}) {
+            // The object can be converted from a string.
+            std::string string = GetString();
+            std::from_chars(string.data(), string.data() + string.size(), Object);
+
+        } else if constexpr (TClean == ^^vec2) {
+            // The object is a 2-component vector.
+            Object = GetVec2();
+
+        } else if constexpr (TClean == ^^vec3) {
+            // The object is a 3-component vector.
+            Object = GetVec3();
+
+        } else if constexpr (TClean == ^^vec4) {
+            // The object is a 4-component vector.
+            Object = GetVec4();
+
+        } else if constexpr (TClean == ^^quat) {
+            // The object is a quaternion.
+            Object = GetQuat();
+
+        } else if constexpr (IsArray || IsVector) {
+            // The object is a std::vector or a std::array.
+            auto& array = GetArray();
+            int sizetofill;
+
+            if constexpr (IsVector) {
+                sizetofill = array.size();
+                Object.resize(sizetofill);
+                Object.shrink_to_fit();
+            }
+            if constexpr (IsArray) {
+                sizetofill = std::min(Object.size(), array.size());
+            }
+            for (int i = 0; i < sizetofill; i++) {
+                array[i].Deserialize(Object[i]); 
+            }
+
+        } else if constexpr (IsMap) {
+            // The object is a std::map<std::string, T>.
+            static_assert(std::meta::template_arguments_of(TClean)[0] == std::meta::dealias(^^std::string), "ADFEntry::Deserialize: A serialized map must have it's key be std::string!");
+            
+            auto& map = GetMap();
+            constexpr auto typeinfo = std::meta::template_arguments_of(TClean)[1];
+            using type = [:typeinfo:];
+
+            Object.clear();
+            for (auto& Element : map) {
+                type reselement;
+                Element.second.Deserialize(reselement);
+
+                Object.emplace(Element.first, reselement);
+            }
+
+        } else if constexpr (std::is_class_v<T> && !std::is_union_v<T>) {
+            // The object is a structure.
+            auto& map = GetMap();
+            
+            static constexpr auto Members = std::define_static_array(std::meta::nonstatic_data_members_of(TClean, std::meta::access_context::unchecked()));
+
+            // Check if none of the members have the ADFSerialize annotation, then implicitly store everything.
+            constexpr bool ImplicitLoadAll = std::none_of(Members.begin(), Members.end(), [](std::meta::info Member) -> bool {
+                return std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0;
+            });
+
+            template for (constexpr auto Member : Members) {
+                if constexpr (ImplicitLoadAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
+                    try {
+                        map.at(std::string(std::meta::identifier_of(Member))).Deserialize(Object.[:Member:]);
+                    } catch (const std::out_of_range& e) {}
+                }
+            }
+
+            // Now, handle parent classes.
+            static constexpr auto Bases = std::define_static_array(std::meta::bases_of(TClean, std::meta::access_context::unchecked()));
+            template for (constexpr auto Base : Bases) {
+                using BaseType = [:std::meta::type_of(Base):];
+                Deserialize<BaseType>(Object);
+            }
+
+        } else {
+            static_assert(false, "ADFEntry::Deserialize: Cannot turn an ADFEntry into the object!");
+        }
+    }
 };
+
+#ifdef __INTELLISENSE__ 
+#define ADFSerialize
+#else
+#define ADFSerialize [[= Engine::Internal::ADFSerializeAnnotation ]]
+#endif

@@ -8,7 +8,7 @@
 inline constexpr int SAVEFILE_VERSION = 0;
 inline constexpr int WORLD_DEFAULT_SLOT_AMOUNT = 4096;
 
-static std::map<std::string, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)>> EntityCreationLambdas;
+static std::map<std::string, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)>> EntityCreationLambdas;
 
 ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
     ADFEntry ret = ADFEntry::Map();
@@ -24,7 +24,7 @@ ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
 
     return ret;
 }
-void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<iEntHandler*> parent) {
+void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<EntityHandler*> parent) {
     const auto& entmap = Saved.GetMap();
 
     // This line is needed due to the .rbegin() later, otherwise it segfaults when there's no entities in the storage.
@@ -34,7 +34,7 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
 
     int IndexValidation = -1;
     for (const auto& SavedEntity : entmap) {
-        Engine::Reference<iEntHandler> Handler;
+        Engine::Reference<EntityHandler> Handler;
         
         try {
             Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this, parent);
@@ -91,9 +91,9 @@ void World::Restore(const ADFEntry& Saved) {
 
 
 
-Engine::Reference<iEntHandler> World::MakeEntity(std::string classname, std::optional<iEntHandler*> parent) {
+Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::optional<EntityHandler*> parent) {
 
-    Engine::Reference<iEntHandler> Handler;
+    Engine::Reference<EntityHandler> Handler;
 
     try {
         Handler = EntityCreationLambdas.at(classname)(this, parent);
@@ -132,19 +132,19 @@ World::World(Engine::Reference<Renderer> Renderer) : RenderWorld(Renderer->MakeR
 
 
 
-void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda) {
+void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda) {
     EntityCreationLambdas.emplace(classname, Lambda);
 }
 
 
 
 
-void EntityStorage::AddEntityBack(Engine::Reference<iEntHandler> Entity) {
+void EntityStorage::AddEntityBack(Engine::Reference<EntityHandler> Entity) {
     (*this)[Entity->slot] = Entity;
 }
 
 int EntityStorage::GetFreeIndex() {
-    auto iterator = std::find(begin(), end(), Engine::Reference<iEntHandler>());
+    auto iterator = std::find(begin(), end(), Engine::Reference<EntityHandler>());
     int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
 
     if (iterator == end()) {
@@ -157,8 +157,8 @@ int EntityStorage::GetFreeIndex() {
 void EntityStorage::reserve(uint32_t count) {
     if (count > Size) {
         if(count > PreallocatedSlotAmount) {
-            Engine::Reference<iEntHandler>* OldStorage = begin();
-            DynamicStorage = new Engine::Reference<iEntHandler>[count];
+            Engine::Reference<EntityHandler>* OldStorage = begin();
+            DynamicStorage = new Engine::Reference<EntityHandler>[count];
                 
             for (int i = 0; i < Size; i++) {
                 DynamicStorage[i] = OldStorage[i];
@@ -180,6 +180,6 @@ void EntityStorage::Update() {
 }
 void EntityStorage::Clear() {
     for (auto& Handler : (*this)) {
-        Handler = Engine::Reference<iEntHandler>();
+        Handler = Engine::Reference<EntityHandler>();
     }
 }

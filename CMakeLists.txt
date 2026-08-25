@@ -89,6 +89,7 @@ target_include_directories(amethyst PRIVATE "libs/imgui")
 
 
 target_compile_definitions(amethyst PRIVATE AMETHYSTENGINESRC)
+target_compile_options(amethyst PUBLIC "-freflection")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_options(amethyst PRIVATE "-DDEBUG")

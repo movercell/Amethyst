@@ -4,70 +4,36 @@
 #include "engine/graphics/ModelInstance.h"
 #include "engine/graphics/Light.h"
 
+namespace EngineEntities {
 
-template<typename T>
-struct BasicVisiblePropHandler : public BaseEntityHandler<T> {
-    using BaseEntityHandler<T>::BaseEntityHandler;
-    using Base = BaseEntityHandler<T>;
-    using Parent = BaseEntityHandler<T>;
+    struct EntityClassname("info_target") Target : public BaseEntity {};
 
-    static void PropertyInit() {
-        Base::AddProperty("model", &T::model);
+    struct EntityClassname("prop_dynamic") DynamicProp : public BaseEntity {
+        ADFSerialize std::string model;
+        std::unique_ptr<ModelInstance> modelinstance;
 
-        Parent::PropertyInit();
-    }
-};
+        void Initialize();
+        void Update();
+    };
 
-struct DynamicProp : public BaseEntity {
-    std::string model;
-    std::unique_ptr<ModelInstance> modelinstance;
+    struct EntityClassname("light_spot") LightSpot : public BaseEntity {
+        Engine::Reference<Light> light;
 
-    void Initialize();
-    void Update();
-};
+        ADFSerialize float near = 1.0f;
+        ADFSerialize float far = 256.0f;
+        ADFSerialize vec2 resolution;
+        ADFSerialize float constantfalloff = 0.0f;
+        ADFSerialize float linearfalloff = 0.0f;
+        ADFSerialize float quadraticfalloff = 1.0f;
+        ADFSerialize float intensity = 0.0f;
+        ADFSerialize vec3 color;
 
-template<typename T>
-struct LightSpotHandler : public BaseEntityHandler<T> {
-    using BaseEntityHandler<T>::BaseEntityHandler;
-    using Base = BaseEntityHandler<T>;
-    using Parent = BaseEntityHandler<T>;
+        ADFSerialize float innerfalloffangle = 0.0f;
+        ADFSerialize float outerfalloffangle = 0.0f;
 
-    static void PropertyInit() {
-        Base::AddProperty("near", &T::near);
-        Base::AddProperty("far", &T::far);
-        Base::AddProperty("resolution", &T::resolution);
-        Base::AddProperty("constantfalloff", &T::constantfalloff);
-        Base::AddProperty("linearfalloff", &T::linearfalloff);
-        Base::AddProperty("quadraticfalloff", &T::quadraticfalloff);
-        Base::AddProperty("intensity", &T::intensity);
-        Base::AddProperty("color", &T::color);
+        ADFSerialize bool isconstantlyupdating = false;
 
-        Base::AddProperty("innerfalloffangle", &T::innerfalloffangle);
-        Base::AddProperty("outerfalloffangle", &T::outerfalloffangle);
-
-        Base::AddProperty("isconstantlyupdating", &T::isconstantlyupdating);
-
-        Parent::PropertyInit();
-    }
-};
-
-struct LightSpot : public BaseEntity {
-    float near = 1.0f;
-    float far = 256.0f;
-    vec2 resolution;
-    float constantfalloff = 0.0f;
-    float linearfalloff = 0.0f;
-    float quadraticfalloff = 1.0f;
-    float intensity = 0.0f;
-    vec3 color;
-
-    float innerfalloffangle = 0.0f;
-    float outerfalloffangle = 0.0f;
-
-    bool isconstantlyupdating = false;
-
-    Engine::Reference<Light> light;
-
-    void Initialize();
-    void Update();
-};
+        void Initialize();
+        void Update();
+    };
+}

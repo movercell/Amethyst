@@ -26,7 +26,7 @@
 						"targetname" "hia"
 					}
 					"tags" [
-						"InitializedOnce"
+						"WasInit"
 					]
 				}
 			}
@@ -52,7 +52,7 @@
 				"targetname" "not quoted"
 			}
 			"tags" [
-				"InitializedOnce"
+				"WasInit"
 			]
 		}
 		"000001" {
@@ -83,7 +83,7 @@
 								"targetname" ""
 							}
 							"tags" [
-								"InitializedOnce"
+								"WasInit"
 							]
 						}
 						"000001" {
@@ -112,7 +112,7 @@
 										"targetname" ""
 									}
 									"tags" [
-										"InitializedOnce"
+										"WasInit"
 									]
 								}
 							}
@@ -142,7 +142,7 @@
 								"targetname" ""
 							}
 							"tags" [
-								"InitializedOnce"
+								"WasInit"
 							]
 						}
 						"000002" {
@@ -171,7 +171,7 @@
 										"targetname" ""
 									}
 									"tags" [
-										"InitializedOnce"
+										"WasInit"
 									]
 								}
 							}
@@ -201,7 +201,7 @@
 								"targetname" ""
 							}
 							"tags" [
-								"InitializedOnce"
+								"WasInit"
 							]
 						}
 					}
@@ -231,7 +231,7 @@
 						"targetname" ""
 					}
 					"tags" [
-						"InitializedOnce"
+						"WasInit"
 					]
 				}
 			}
@@ -257,7 +257,7 @@
 				"targetname" ""
 			}
 			"tags" [
-				"InitializedOnce"
+				"WasInit"
 			]
 		}
 		"000003" {
@@ -301,7 +301,7 @@
 				"targetname" ""
 			}
 			"tags" [
-				"InitializedOnce"
+				"WasInit"
 			]
 		}
 	}

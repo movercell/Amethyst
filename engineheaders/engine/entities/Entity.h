@@ -9,78 +9,63 @@
 #include <functional>
 #include "World.h"
 
-struct iEntHandler {
+struct EntityHandler {
     // Set by the world once the entity is made.
     int slot = -1;
     World* world = nullptr;
 
     EntityStorage Children;
 
-    virtual void SetProperty(const std::string& name, const ADFEntry& property) = 0;
+    virtual void SetProperty(const std::string& name, const ADFEntry& data) = 0;
     virtual std::optional<ADFEntry> GetProperty(const std::string& name) = 0;
     virtual void FromADF(const ADFEntry& Saved) = 0;
     virtual ADFEntry ToADF() = 0;
 
+    //! Used for initializing the entity after manually setting it up if you choose not to load it from ADF. 
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
 
     virtual const char* GetClassname() const = 0;
-    virtual std::optional<iEntHandler*> GetParent() const = 0;
+    virtual std::optional<EntityHandler*> GetParent() const = 0;
 
     virtual void AddTag(const std::string& tag) = 0;
     virtual bool HasTag(const std::string& tag) = 0;
 
+    //! Sets the entity's position to vec3(NAN, NAN, NAN).
+    virtual void Banish() = 0;
+    virtual vec3 GetPosition() = 0;
+    virtual quat GetRotation() = 0;
+    virtual std::string GetName() = 0;
     virtual mat4 GetTransformationMatrix() = 0;
 
-    virtual ~iEntHandler() {};
+    //! Gets a void* to the entity. This function is quite unsafe, are you certain that whatever you're doing is worth it?
+    virtual void* GetEntityPtr() = 0;
+
+    virtual ~EntityHandler() {};
 
     //! Removes the entity from it's slot, resulting in destruction when not owned by anything else.
     virtual void Remove() {
         auto parent = GetParent();
         if (parent) {
-            parent.value()->Children[slot] = Engine::Reference<iEntHandler>();
+            parent.value()->Children[slot] = Engine::Reference<EntityHandler>();
             return;
         }
-        (*world)[slot] = Engine::Reference<iEntHandler>();
+        (*world)[slot] = Engine::Reference<EntityHandler>();
     }
 };
 
 
 struct BaseEntity;
 
+namespace Engine { namespace Internal {
+
 template<typename T>
-class BaseEntityHandler : public iEntHandler {
+class EntityTemplateHandler : public EntityHandler {
 protected:
-
-    using EntPropertyLocation = std::variant<int T::*, float T::*, bool T::*, vec2 T::*, vec3 T::*, vec4 T::*, quat T::*, std::string T::*, ADFEntry T::*>;
-
     const char* classname;
-    const std::optional<iEntHandler*> parent;
+    const std::optional<EntityHandler*> parent;
     std::vector<std::string> tags;
-
-    static inline std::map<std::string, EntPropertyLocation> Properties;
-
-    static inline void AddProperty(std::string name, EntPropertyLocation property) { Properties.emplace(name, property); }
-
-    inline ADFEntry PropertyToADF(const EntPropertyLocation Property) {
-        struct Processor {
-            T& Entity;
-            Processor(T& entity) : Entity(entity) {}
-
-            ADFEntry operator()(int T::* entproperty)         {  return ADFEntry::String(std::to_string(Entity.*entproperty)); }
-            ADFEntry operator()(float T::* entproperty)       {  return ADFEntry::String(std::to_string(Entity.*entproperty)); }
-            ADFEntry operator()(bool T::* entproperty)        {  return ADFEntry::String(Entity.*entproperty ? "1" : "0"); }
-            ADFEntry operator()(vec2 T::* entproperty)        {  return ADFEntry::Vector2(Entity.*entproperty); }
-            ADFEntry operator()(vec3 T::* entproperty)        {  return ADFEntry::Vector3(Entity.*entproperty); }
-            ADFEntry operator()(vec4 T::* entproperty)        {  return ADFEntry::Vector4(Entity.*entproperty); }
-            ADFEntry operator()(quat T::* entproperty)        {  return ADFEntry::Quaternion(Entity.*entproperty); }
-            ADFEntry operator()(std::string T::* entproperty) {  return ADFEntry::String(Entity.*entproperty); }
-            ADFEntry operator()(ADFEntry T::* entproperty)    {  return Entity.*entproperty; }
-        };
-
-        return std::visit<ADFEntry>(Processor(Entity), Property);
-    }
-
+    
     inline ADFEntry TagsToADF() const {
         ADFEntry ret = ADFEntry::Array();
         auto& retarr = ret.GetArray();
@@ -96,39 +81,27 @@ public:
     T Entity;
     
 
-    static void PropertyInit() {
-        AddProperty("targetname", &T::targetname);
-        AddProperty("position",   &T::position);
-        AddProperty("scale",      &T::scale);
-        AddProperty("rotation",   &T::rotation);
+    static void RegisterType() {
+
     }
 
 
-    void SetProperty(const std::string& Name, const ADFEntry& Property) {
-        struct Processor {
-            T& Entity;
-            const ADFEntry& Property;
-            Processor(T& entity, const ADFEntry& property) : Entity(entity), Property(property) {}
+    // TODO: Make a better implementation of this.
+    void SetProperty(const std::string& Name, const ADFEntry& Data) {
+        auto tmp = ADFEntry::Map();
+        tmp.GetMap().emplace(Name, Data);
 
-            void operator()(int T::* entproperty)         { Entity.*entproperty  = std::stoi(Property.GetString()); }
-            void operator()(float T::* entproperty)       { Entity.*entproperty  = std::stof(Property.GetString()); }
-            void operator()(bool T::* entproperty)        { Entity.*entproperty  = Property.GetString() == "1"; }
-            void operator()(vec2 T::* entproperty)        { Entity.*entproperty  = Property.GetVec2(); };
-            void operator()(vec3 T::* entproperty)        { Entity.*entproperty  = Property.GetVec3(); };
-            void operator()(vec4 T::* entproperty)        { Entity.*entproperty  = Property.GetVec4(); };
-            void operator()(quat T::* entproperty)        { Entity.*entproperty  = Property.GetQuat(); };
-            void operator()(std::string T::* entproperty) { Entity.*entproperty  = Property.GetString(); }
-            void operator()(ADFEntry T::* entproperty)    { Entity.*entproperty  = Property; }
-        };
-        try { // This `try` statement is here in case of trying to set a propoerty that (does not)/(no longer) exist(s).
-            std::visit<void>(Processor(Entity, Property), Properties.at(Name));
-        } catch(...) {}
+        tmp.Deserialize(Entity);
     }
 
-    std::optional<ADFEntry> GetProperty(const std::string& name) {
+    // TODO: Make a better implementation of this.
+    std::optional<ADFEntry> GetProperty(const std::string& Name) {
+        Entity.OnSave();
+        auto tmp = ADFEntry::Serialize(Entity);
+
         try {
-            return PropertyToADF(Properties[name]);
-        } catch(...) {
+            return tmp.GetMap().at(Name);
+        } catch (const std::out_of_range& e) {
             return std::nullopt;
         }
     }
@@ -137,14 +110,13 @@ public:
         ADFEntry ret = ADFEntry::Map();
         auto& retmap = ret.GetMap();
 
+        Entity.OnSave();
+
         retmap.emplace("children", world->EntityStorageToADF(&Children));
 
         retmap.emplace("tags", TagsToADF());
 
-        auto& propertymap = retmap.emplace("properties", ADFEntry::Map()).first->second.GetMap();
-        for (auto& property : Properties) {
-            propertymap.emplace(property.first, PropertyToADF(property.second));
-        }
+        retmap.emplace("properties", ADFEntry::Serialize(Entity));
 
         retmap.emplace("classname", ADFEntry::String(classname));
 
@@ -153,10 +125,7 @@ public:
     void FromADF(const ADFEntry& Saved) {
         const auto& Data = Saved.GetMap();
 
-        auto& propertymap = Data.at("properties").GetMap();
-        for (const auto& property : propertymap) {
-            SetProperty(property.first, property.second);
-        }
+        Data.at("properties").Deserialize(Entity);
 
         auto& tagarray = Data.at("tags").GetArray();
         for (const auto& tag : tagarray) {
@@ -171,35 +140,43 @@ public:
 
 
     void InitEntity() {
-        Entity.handler = reinterpret_cast<BaseEntityHandler<BaseEntity>*>(this);
+        Entity.handler = this;
         Entity.world = world;
         Entity.Initialize();
         
-        AddTag("InitializedOnce");
+        AddTag("WasInit");
     }
     void UpdateEntity() { Entity.Update(); }
 
     const char* GetClassname() const { return classname; }
-    std::optional<iEntHandler*> GetParent() const { return parent; }
+    std::optional<EntityHandler*> GetParent() const { return parent; }
 
     inline void AddTag(const std::string& tag) { tags.push_back(tag); }
     inline bool HasTag(const std::string& tag) { return std::find(tags.begin(), tags.end(), tag) != tags.end(); }
 
+    void Banish() { Entity.position = vec3(NAN, NAN, NAN); }
+    vec3 GetPosition() { return Entity.position; }
+    quat GetRotation() { return Entity.rotation; }
+    std::string GetName() { return Entity.targetname; }
     mat4 GetTransformationMatrix() { return Entity.TransformationMatrix; }
 
-    BaseEntityHandler(const char* Classname, World* World, std::optional<iEntHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
-    ~BaseEntityHandler() = default;
+    void* GetEntityPtr() { return &Entity; }
+
+    EntityTemplateHandler(const char* Classname, World* World, std::optional<EntityHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
+    ~EntityTemplateHandler() = default;
 };
+
+} /*namespace Internal*/ } /*namespace Engine*/
 
 struct BaseEntity {
     World* world;
-    BaseEntityHandler<BaseEntity>* handler;
+    EntityHandler* handler;
 
-    std::string targetname;
-    vec3 position;
-    vec3 scale = vec3(1.0f, 1.0f, 1.0f);
+    ADFSerialize std::string targetname;
+    ADFSerialize vec3 position;
+    ADFSerialize vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
-    quat rotation;
+    ADFSerialize quat rotation;
 
     mat4 TransformationMatrix;
 
@@ -221,7 +198,7 @@ struct BaseEntity {
 
     // Handler wrapper functions
     inline const char* GetClassname() const { return handler->GetClassname(); }
-    inline std::optional<iEntHandler*> GetParent() const { return handler->GetParent(); };
+    inline std::optional<EntityHandler*> GetParent() const { return handler->GetParent(); };
     inline void AddTag(const std::string& tag) { handler->AddTag(tag); };
     inline bool HasTag(const std::string& tag) { return handler->HasTag(tag); };
 };
@@ -230,14 +207,35 @@ struct BaseEntity {
 
 namespace Engine {
     namespace Internal {
-        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<iEntHandler>(World*, std::optional<iEntHandler*>)> Lambda);
+        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda);
+
+        // Annotation for an entity class
+        struct EntityClassnameAnnotation {
+            const char* classname;
+        };
     }
+
+    template<typename Entity>
+    void RegisterEntityType() {
+        static_assert(std::is_base_of_v<BaseEntity, Entity>, "An entity class must be an extension of BaseEntity!");
+        constexpr auto EntityClassAnnotations = std::define_static_array(std::meta::annotations_of_with_type(^^Entity, ^^Engine::Internal::EntityClassnameAnnotation));
+        static_assert(EntityClassAnnotations.size() == 1, "An entity class must have exactly 1 EntityClassname annotation!");
+
+        constexpr auto EntityClassnameAnnotation = std::meta::extract<Engine::Internal::EntityClassnameAnnotation>(EntityClassAnnotations[0]);
+        const char* classname = EntityClassnameAnnotation.classname;
+
+        Engine::Internal::EntityTemplateHandler<Entity>::RegisterType();
+
+        Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world, std::optional<EntityHandler*> parent) -> Engine::Reference<EntityHandler> {
+            return Engine::Reference(new Engine::UnmanagedInterfacedResource<EntityHandler, Engine::Internal::EntityTemplateHandler<Entity>>(classname, world, parent));
+        });
+    }
+
+    void RegisterDefaultEngineEntityTypes();
 }
 
-template<template <typename> typename Handler, typename Entity>
-void RegisterEntityType(const char* classname) {
-    Handler<Entity>::PropertyInit();
-    Engine::Internal::RegisterEntityCreationLambda(classname, [classname](World* world, std::optional<iEntHandler*> parent) -> Engine::Reference<iEntHandler> {
-        return Engine::Reference(new Engine::UnmanagedInterfacedResource<iEntHandler, Handler<Entity>>(classname, world, parent));
-    });
-}
+#ifdef __INTELLISENSE__ 
+#define EntityClassname(classname) 
+#else
+#define EntityClassname(classname)  [[= Engine::Internal::EntityClassnameAnnotation{std::define_static_string(classname)} ]]
+#endif

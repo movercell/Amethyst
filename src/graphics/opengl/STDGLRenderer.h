@@ -6,7 +6,6 @@
 #include "engine/graphics/Renderer.h"
 #include <vector>
 #include <cstdint>
-#include "engine/weak_vector.h"
 #include "STDGLModel.h"
 #include "STDGLWindow.h"
 #include "STDGLShaderSystem.h"

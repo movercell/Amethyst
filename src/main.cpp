@@ -127,6 +127,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 int main() {
 	Engine::Init();
+	Engine::RegisterDefaultEngineEntityTypes();
+	
 
 	Engine::Reference<Renderer> openglrenderer = Renderer::Make("STDGLRenderer");
 	auto rworld = openglrenderer->MakeRWorld();

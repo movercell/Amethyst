@@ -8,7 +8,7 @@
                 "${workspaceFolder}/src"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/g++",
+            "compilerPath": "/usr/bin/g++-16",
             "cStandard": "c23",
             "cppStandard": "c++26",
             "intelliSenseMode": "linux-gcc-x64",

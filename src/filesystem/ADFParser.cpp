@@ -2,9 +2,8 @@
 #include "engine/filesystem/ADF.h"
 #include <cctype>
 
-ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
+void ADFEntry::Tokenizer::ReadToken() {
     char currchar;
-    std::string TokenContent;
 
     // Skip any whitespace.
     do {
@@ -14,45 +13,48 @@ ADFEntry::Token ADFEntry::Tokenizer::ReadToken() {
     // Any of the other cases
     switch (currchar) {
     case '\"':
-        TokenContent.reserve(256); // TODO: Okay that was not a very bright idea, probably should make a preallocated buffer
+        CurrentContent.clear();
 
         currchar = stream->get(); // Has to be like this as to not include the starting quotation mark.
         while (!(currchar == '\"' || currchar == -1)) {
             if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
 
-            TokenContent.push_back(currchar);
+            CurrentContent.push_back(currchar);
             currchar = stream->get();
         }
 
-        TokenContent.shrink_to_fit();
-
-        return Token(TokenType::String, TokenContent);
+        CurrentType = TokenType::String;
+        return;
     case '{':
-        return Token(TokenType::StartMap);
+        CurrentType = TokenType::StartMap;
+        return;
     case '[':
-        return Token(TokenType::StartArray);
+        CurrentType = TokenType::StartArray;
+        return;
     case '}':
-        return Token(TokenType::EndMap);
+        CurrentType = TokenType::EndMap;
+        return;
     case ']':
-        return Token(TokenType::EndArray);
+        CurrentType = TokenType::EndArray;
+        return;
     case eof:
-        return Token(TokenType::EndFile);
+        CurrentType = TokenType::EndFile;
+        return;
     }
 
     // Unquoted string
     if (std::isgraph(currchar)) {
-        TokenContent.reserve(256);
+        CurrentContent.clear();
 
         do {
             if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
 
-            TokenContent.push_back(currchar);
+            CurrentContent.push_back(currchar);
             currchar = stream->get();
         } while (std::isgraph(currchar) && currchar != '{' && currchar != '}' && currchar != '[' && currchar != ']' && currchar != '\"');
 
-        TokenContent.shrink_to_fit();
-
-        return Token(TokenType::String, TokenContent);
+        CurrentType = TokenType::String;
+        return;
     }
 
     Engine::Error("Unknown character in ADF file!(Is this even an ADF file?)(File: " + filepath + ")");
@@ -68,12 +70,12 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
         std::map<std::string, ADFEntry>& mapdata = std::get<std::map<std::string, ADFEntry>>(data);
 
         while (true) {
-            Token KeyToken = Tokenizer.ReadToken();
+            Tokenizer.ReadToken();
             std::string key;
 
-            switch (KeyToken.type) {
+            switch (Tokenizer.GetCurrentTokenType()) {
             case TokenType::String:
-                key = std::move(KeyToken.content.value());
+                key = Tokenizer.GetCurrentTokenContent();
                 break;
             case TokenType::StartMap:
                 ADFError("A Map-type entry cannot be a key!");
@@ -86,11 +88,11 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
                 return;
             }
 
-            Token EntryToken = Tokenizer.ReadToken();
+            Tokenizer.ReadToken();
 
-            switch (EntryToken.type) {
+            switch (Tokenizer.GetCurrentTokenType()) {
                 case TokenType::String:
-                    mapdata.emplace(std::move(key), ADFEntry(std::move(EntryToken.content.value()), filename));
+                    mapdata.emplace(std::move(key), ADFEntry(Tokenizer.GetCurrentTokenContent(), filename));
                 break;
                 case TokenType::StartMap:
                     mapdata.emplace(std::move(key), ADFEntry(ADFType::map, Tokenizer, filename));
@@ -113,11 +115,11 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
         std::vector<ADFEntry>& arraydata = std::get<std::vector<ADFEntry>>(data);
 
         while (true) {
-            Token Token = Tokenizer.ReadToken();
+            Tokenizer.ReadToken();
 
-            switch (Token.type) {
+            switch (Tokenizer.GetCurrentTokenType()) {
                 case TokenType::String:
-                    arraydata.emplace_back(ADFEntry(std::move(Token.content.value()), filename));
+                    arraydata.emplace_back(ADFEntry(Tokenizer.GetCurrentTokenContent(), filename));
                 break;
                 case TokenType::StartMap:
                     arraydata.emplace_back(ADFEntry(ADFType::map, Tokenizer, filename));
@@ -125,11 +127,11 @@ ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::st
                 case TokenType::StartArray:
                     arraydata.emplace_back(ADFEntry(ADFType::array, Tokenizer, filename));
                 break;
+                case TokenType::EndMap:
+                    ADFError("Mismatched ADF closing brackets!(Tried to end an array with a curly brace)");
                 case TokenType::EndArray:
                 case TokenType::EndFile:
                     return;
-                case TokenType::EndMap:
-                    ADFError("Mismatched ADF closing brackets!(Tried to end an array with a curly brace)");
             }
         }
 

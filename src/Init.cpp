@@ -13,9 +13,11 @@ void Engine::Init() {
 	std::atexit(&exitfunc);
 
     Renderer::AddRenderer("STDGLRenderer", &STDGLRenderer::Make);
+}
 
-    RegisterEntityType<BaseEntityHandler, BaseEntity>("info_target");
-    RegisterEntityType<BasicVisiblePropHandler, DynamicProp>("prop_dynamic");
-    RegisterEntityType<LightSpotHandler, LightSpot>("light_spot");
-    RegisterEntityType<PointRotatingHandler, PointRotating>("point_rotating");
+void Engine::RegisterDefaultEngineEntityTypes() {
+    Engine::RegisterEntityType<EngineEntities::Target>();
+    Engine::RegisterEntityType<EngineEntities::DynamicProp>();
+    Engine::RegisterEntityType<EngineEntities::LightSpot>();
+    Engine::RegisterEntityType<EngineEntities::PointRotating>();
 }
