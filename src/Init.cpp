@@ -16,8 +16,8 @@ void Engine::Init() {
 }
 
 void Engine::RegisterDefaultEngineEntityTypes() {
-    Engine::RegisterEntityType<EngineEntities::Target>();
-    Engine::RegisterEntityType<EngineEntities::DynamicProp>();
-    Engine::RegisterEntityType<EngineEntities::LightSpot>();
-    Engine::RegisterEntityType<EngineEntities::PointRotating>();
+    Engine::RegisterEntityClass<EngineEntities::Target>();
+    Engine::RegisterEntityClass<EngineEntities::DynamicProp>();
+    Engine::RegisterEntityClass<EngineEntities::LightSpot>();
+    Engine::RegisterEntityClass<EngineEntities::PointRotating>();
 }

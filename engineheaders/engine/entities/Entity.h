@@ -167,6 +167,8 @@ public:
 
 } /*namespace Internal*/ } /*namespace Engine*/
 
+
+
 struct BaseEntity {
     World* world;
     EntityHandler* handler;
@@ -215,7 +217,7 @@ namespace Engine {
     }
 
     template<typename Entity>
-    void RegisterEntityType() {
+    void RegisterEntityClass() {
         static_assert(std::is_base_of_v<BaseEntity, Entity>, "An entity class must be an extension of BaseEntity!");
         constexpr auto EntityClassAnnotations = std::define_static_array(std::meta::annotations_of_with_type(^^Entity, ^^Engine::Internal::EntityClassnameAnnotation));
         static_assert(EntityClassAnnotations.size() == 1, "An entity class must have exactly 1 EntityClassname annotation!");

@@ -344,7 +344,7 @@ public:
             // The object is a string.
             return String(Object);
 
-        } else if constexpr (requires {std::to_string(Object);}) {
+        } else if constexpr (requires(std::remove_const_t<T> testobj) {std::from_chars(nullptr, nullptr, testobj);}) { // It's from_chars because to_string can invoke a conversion, especially for object that have an `operator bool`.
             // The object can be converted to a string.
             return String(std::to_string(Object));
 
