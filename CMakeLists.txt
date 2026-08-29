@@ -52,7 +52,7 @@ endif()
 # The main engine source code.
 add_executable(amethyst
 	src/main.cpp
-	
+	src/GameDLLHandler.cpp
 	src/utils/EngineMisc.cpp
 	src/graphics/Rendering.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
@@ -73,12 +73,13 @@ add_executable(amethyst
 	src/entities/MiscEntities.cpp
 )
 
+set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
 
 # Link the libraries.
-target_link_libraries(amethyst glad)
-target_link_libraries(amethyst glfw)
-target_link_libraries(amethyst imgui)
-target_link_libraries(amethyst assimp)
+target_link_libraries(amethyst PRIVATE glad)
+target_link_libraries(amethyst PRIVATE glfw)
+target_link_libraries(amethyst PRIVATE imgui)
+target_link_libraries(amethyst PRIVATE assimp)
 
 
 target_include_directories(amethyst PRIVATE include)
@@ -100,11 +101,24 @@ if(UNIX)
 	target_compile_options(amethyst PRIVATE "-fvisibility=hidden")
 endif()
 
-if(WIN32)
-	set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
-	target_link_options(amethyst PRIVATE "-Wl,--out-implib,${CMAKE_CURRENT_BINARY_DIR}/libamethyst.dll.a")
+
+
+# testgame
+add_library(testgame SHARED
+	testgame_src/main.cpp
+)
+target_include_directories(testgame PRIVATE engineheaders)
+target_include_directories(testgame PRIVATE "libs/imgui")
+target_link_libraries(testgame amethyst)
+target_compile_options(testgame PUBLIC "-freflection")
+set_target_properties(testgame PROPERTIES OUTPUT_NAME "game")
+if(UNIX)
+	target_compile_options(testgame PRIVATE "-fvisibility=hidden")
 endif()
 
-if(MSVC)
-	target_compile_options(amethyst PRIVATE "/Zc:lambda")
-endif()
+# Copy to the game directory.
+add_custom_command(TARGET testgame POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:testgame>
+        "${CMAKE_CURRENT_SOURCE_DIR}/testgame/"
+)

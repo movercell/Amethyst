@@ -232,7 +232,7 @@ namespace Engine {
         });
     }
 
-    void RegisterDefaultEngineEntityTypes();
+    void ENGINEEXPORT RegisterDefaultEngineEntityTypes();
 }
 
 #ifdef __INTELLISENSE__ 

@@ -22,11 +22,17 @@
     #define GAMEEXPORT __attribute__ ((visibility ("default")))
 #endif
 
+// Declarations of the game DLL's functions so that they get properly made as `extern "C"` and GAMEEXPORT by default.
+extern "C" {
+    void GAMEEXPORT gameinit();
+    void GAMEEXPORT gameloop();
+} 
 
 namespace Engine {
     void ENGINEEXPORT Warning(const std::string& text);
     void ENGINEEXPORT Print(const std::string& text);
     [[noreturn]] void ENGINEEXPORT Error(const std::string& text);
+    void ENGINEEXPORT QueueShutdown();
 }
 
 struct alignas(sizeof(float) * 4) vec3 {

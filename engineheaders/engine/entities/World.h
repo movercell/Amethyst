@@ -12,7 +12,7 @@
 
 struct EntityHandler;
 
-class EntityStorage {
+class ENGINEEXPORT EntityStorage {
     using iterator = Engine::Reference<EntityHandler>*;
 
     static inline constexpr int PreallocatedSlotAmount = 4;
@@ -64,6 +64,7 @@ class ENGINEEXPORT World : public EntityStorage {
     Engine::Reference<RWorld> RenderWorld;
     std::string MapName = "";
 
+    World() {};
 public:
     void Restore(const ADFEntry& Saved);
     ADFEntry Save();
@@ -73,8 +74,8 @@ public:
 
     void Clear();
 
-    World(Engine::Reference<RWorld> Renderworld);
-    World(Engine::Reference<Renderer> Renderer);
+    static Engine::Reference<World> Make(Engine::Reference<RWorld> Renderworld);
+    static Engine::Reference<World> Make(Engine::Reference<Renderer> Renderer);
 
     Engine::Reference<RWorld> GetRWorld() { return RenderWorld; }
 

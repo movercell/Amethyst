@@ -123,11 +123,17 @@ void World::Clear() {
 
 
 
-World::World(Engine::Reference<RWorld> Renderworld) : RenderWorld(Renderworld) {
-    reserve(WORLD_DEFAULT_SLOT_AMOUNT);
+Engine::Reference<World> World::Make(Engine::Reference<RWorld> Renderworld) {
+    auto result = new Engine::UnmanagedResource<World>(World());
+    result->resource.RenderWorld = Renderworld;
+    result->resource.reserve(WORLD_DEFAULT_SLOT_AMOUNT);
+    return result;
 }
-World::World(Engine::Reference<Renderer> Renderer) : RenderWorld(Renderer->MakeRWorld()) {
-    reserve(WORLD_DEFAULT_SLOT_AMOUNT);
+Engine::Reference<World> World::Make(Engine::Reference<Renderer> Renderer) {
+    auto result = new Engine::UnmanagedResource<World>(World());
+    result->resource.RenderWorld = Renderer->MakeRWorld();
+    result->resource.reserve(WORLD_DEFAULT_SLOT_AMOUNT);
+    return result;
 }
 
 
