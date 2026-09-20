@@ -4,7 +4,7 @@
 #include "engine/filesystem/ADF.h"
 
 STDGLModel::STDGLModel(std::string path) {
-    ModelInfo_t Info;
+    ModelInfoMaxSizeBuffer Info;
     auto ModelADFFull = ADFEntry::FromFile("models/" + path);
 
     if (!ModelADFFull.HasChild("Model")) {
@@ -98,7 +98,7 @@ STDGLModel::STDGLModel(std::string path) {
     glNamedBufferData(EBO, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    glNamedBufferData(ModelInfo, sizeof(ModelInfo_t), &Info, GL_STATIC_DRAW);
+    glNamedBufferData(ModelInfo, sizeof(ModelInfo_t) + sizeof(std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>) * LODCount, &Info, GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);	

@@ -49,7 +49,10 @@ struct STDGLModel {
         std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBuffers; 
         float Radius = 0.0f;
         std::array<float, STDGLMODEL_LOD_MAX_COUNT> LODDistances;
-        std::array<std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> InstanceIndices;
+        // This buffer also has the instance indices
+    };
+    struct ModelInfoMaxSizeBuffer : ModelInfo_t {
+        std::array<std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> ModelIndices;
     };
 
     STDGLModel(std::string path = "error.adf");
