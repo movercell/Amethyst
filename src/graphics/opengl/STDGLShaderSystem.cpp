@@ -2,7 +2,8 @@
 #include "Shadinclude.hpp"
 #include "engine/master.h"
 
-void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs) {
+
+void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs, bool isRecompile) {
     const auto& ShaderDefMap = ShaderDefs["Compute"].GetMap();
     if (ShaderDefMap.empty()) return;
 
@@ -46,161 +47,129 @@ void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs) {
             continue;
         }
 
-        ComputeShaders.emplace(shader.first, ComputeShader(computeProgram, Shaderpath.GetString()));
+        if (isRecompile) {
+            try {
+                glDeleteProgram(ComputeShaders.at(shader.first));
+                ComputeShaders.at(shader.first) = computeProgram;
+            } catch(std::out_of_range e) {
+                Engine::Warning("Did you add a new compute shader entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
+                glDeleteProgram(computeProgram);
+            }
+        } else {
+            ComputeShaders.emplace(shader.first, computeProgram);
+        }
+        ComputeShaders.emplace(shader.first, computeProgram);
 
     }
 }
 
-void STDGLShaderSystem::InitGraphic(const ADFEntry& ShaderDefs) {
-    // Vertex shaders.
-    const auto& VertexShaderDefMap = ShaderDefs["Vertex"].GetMap();
-    VertexShaders.reserve(VertexShaderDefMap.size());
+void STDGLShaderSystem::CompileShaders(const ADFEntry& ShaderDefs, const std::string& ShaderTypeName, const GLuint ShaderType, std::map<std::string, GLuint>& OutTo, bool isRecompile) {
+    const auto& ShaderDefMap = ShaderDefs[ShaderTypeName].GetMap();
 
-    for (const auto& shader : VertexShaderDefMap) {
+    for (const auto& shader : ShaderDefMap) {
         if (!shader.second.HasChild("Source")) {
-            Engine::Warning("Vertex shader " + shader.first + " does not have a \"Source\", ignoring!");
-            continue;
+            Engine::Error(ShaderTypeName + " shader " + shader.first + " does not have a \"Source\"!");
         }
         auto Shaderpath = shader.second["Source"];
         std::string ShaderSrc = Shadinclude::load("scripts/shaders/opengl/" + Shaderpath.GetString()); 
         
+        GLuint Shader = glCreateShader(ShaderType);
         auto ShaderSrc_Cstr = ShaderSrc.c_str();
-        GLuint vertexShader = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &ShaderSrc_Cstr);
+        int ShaderSrcLength = ShaderSrc.length();
+        glShaderSource(Shader, 1, &ShaderSrc_Cstr, &ShaderSrcLength);
+        glCompileShader(Shader);
 
         int success;
         char infoLog[512];
-        glGetProgramiv(vertexShader, GL_LINK_STATUS, &success);
+        glGetShaderiv(Shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << Shaderpath.GetString() << std::endl;
-            std::cout << infoLog << std::endl;
-            Engine::Warning("Vertex shader compilation error! Log printed to std::cout");
-            glDeleteShader(vertexShader);
-            continue;
+            glGetShaderInfoLog(Shader, 512, NULL, infoLog);
+            Engine::Warning(ShaderTypeName + " shader compilation error!\nIn file:" + Shaderpath.GetString() + '\n' + infoLog);
+            glDeleteShader(Shader);
+            Shader = 0;
         }
 
-        VertexShaders.emplace_back(vertexShader, Shaderpath.GetString());
-        VertexShaderNameToIndex.emplace(shader.first, VertexShaders.size() - 1);
-    }
-
-
-
-    // Fragment + Depth shaders.
-    const auto& FragmentShaderDefMap = ShaderDefs["Fragment"].GetMap();
-    FragmentShaders.reserve(FragmentShaderDefMap.size());
-
-    for (const auto& shader : FragmentShaderDefMap) {
-        // First, fragment.
-        {
-            if (!shader.second.HasChild("Source")) {
-                Engine::Warning("Fragment shader " + shader.first + " does not have a \"Source\", ignoring!");
-                continue;
+        if (isRecompile) {
+            try {
+                glDeleteShader(OutTo.at(shader.first));
+                OutTo.at(shader.first) = Shader;
+            } catch(std::out_of_range e) {
+                Engine::Warning("Did you add a new shader entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
+                glDeleteShader(Shader);
             }
-            auto Shaderpath = shader.second["Source"];
-            std::string ShaderSrc = Shadinclude::load("scripts/shaders/opengl/" + Shaderpath.GetString()); 
-
-            auto ShaderSrc_Cstr = ShaderSrc.c_str();
-            GLuint fragmentShader = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &ShaderSrc_Cstr);
-
-            int success;
-            char infoLog[512];
-            glGetProgramiv(fragmentShader, GL_LINK_STATUS, &success);
-            if (!success) {
-                glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
-                std::cout << Shaderpath.GetString() << std::endl;
-                std::cout << infoLog << std::endl;
-                std::cout << Shaderpath.GetString() << std::endl;
-                Engine::Warning("Fragment shader compilation error! Log printed to std::cout");
-                glDeleteShader(fragmentShader);
-                continue;
-            }
-
-            FragmentShaders.emplace_back(fragmentShader, Shaderpath.GetString());
-            FragmentShaderNameToIndex.emplace(shader.first, FragmentShaders.size() - 1);
-
-        }
-
-
-        // Then, depth.
-        {
-            ADFEntry Shaderpath = ADFEntry::String("generic.ds");
-            if (shader.second.HasChild("DepthSource")) {
-                Shaderpath = shader.second["DepthSource"];
-            }
-            std::string ShaderSrc = Shadinclude::load("scripts/shaders/opengl/" + Shaderpath.GetString()); 
-
-            auto ShaderSrc_Cstr = ShaderSrc.c_str();
-            GLuint depthShader = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &ShaderSrc_Cstr);
-
-            int success;
-            char infoLog[512];
-            glGetProgramiv(depthShader, GL_LINK_STATUS, &success);
-            if (!success) {
-                glGetProgramInfoLog(depthShader, 512, NULL, infoLog);
-                std::cout << Shaderpath.GetString() << std::endl;
-                std::cout << infoLog << std::endl;
-                Engine::Warning("Depth shader compilation error! Log printed to std::cout");
-                glDeleteShader(depthShader);
-                // Since the fragment shader entry already exists it means that it needs to just skip the current depth shader and add the null shader to the list.
-                depthShader = 0;
-            }
-
-            DepthShaders.emplace_back(depthShader, Shaderpath.GetString());
+        } else {
+            OutTo.emplace(shader.first, Shader);
         }
     }
 }
 
+void STDGLShaderSystem::CompilePrograms(const ADFEntry& ShaderDefs, bool isRecompile) {
+    const auto& ProgramDefs = ShaderDefs["Programs"].GetMap();
+    for (const auto& program : ProgramDefs) {
+        const auto& programmap = program.second.GetMap();
+        GLuint vert  = VertexShaders.at(programmap.at("Shader_Vertex").GetString());
+        GLuint frag  = FragmentShaders.at(programmap.at("Shader_Fragment").GetString());
+        GLuint depth = DepthShaders.at(programmap.at("Shader_Depth").GetString());
 
-void STDGLShaderSystem::Init() {
+        GLuint Program = glCreateProgram();
+        glAttachShader(Program, vert);
+        glAttachShader(Program, frag);
+        glLinkProgram(Program);
+
+        int success;
+        char infoLog[512];
+        glGetProgramiv(Program, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(Program, 512, NULL, infoLog);
+            Engine::Warning("Program link error!\nIn program:" + program.first + '\n' + infoLog);
+            glDeleteProgram(Program);
+            Program = 0;
+        }
+
+        GLuint DepthProgram = glCreateProgram();
+        glAttachShader(DepthProgram, vert);
+        glAttachShader(DepthProgram, depth);
+        glLinkProgram(DepthProgram);
+        
+        glGetProgramiv(DepthProgram, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(DepthProgram, 512, NULL, infoLog);
+            Engine::Warning("(Depth)Program link error!\nIn program:" + program.first + '\n' + infoLog);
+            glDeleteProgram(DepthProgram);
+            DepthProgram = 0;
+        }
+
+        bool MaterialShouldBeBoundAtDepth = false;
+        if (programmap.contains("MaterialShouldBeBoundAtDepth")) MaterialShouldBeBoundAtDepth = programmap.at("MaterialShouldBeBoundAtDepth").GetString() == "1" ? true : false;
+
+        ShaderProgram ShaderProgramObject = ShaderProgram(Program, DepthProgram, MaterialShouldBeBoundAtDepth);
+        if (isRecompile) {
+            try {
+                ShaderPrograms.at(program.first).Destroy();
+                ShaderPrograms.at(program.first) = ShaderProgramObject;
+            } catch(std::out_of_range e) {
+                Engine::Warning("Did you add a new program entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
+                glDeleteProgram(Program);
+                glDeleteProgram(DepthProgram);
+            }
+        } else {
+            ShaderPrograms.emplace(program.first, ShaderProgramObject);
+        }
+    }
+}
+
+void STDGLShaderSystem::InitGraphic(const ADFEntry& ShaderDefs, bool isRecompile) {
+    CompileShaders(ShaderDefs, "Vertex", GL_VERTEX_SHADER, VertexShaders, isRecompile);
+    CompileShaders(ShaderDefs, "Fragment", GL_FRAGMENT_SHADER, FragmentShaders, isRecompile);
+    CompileShaders(ShaderDefs, "Depth", GL_FRAGMENT_SHADER, DepthShaders, isRecompile);
+
+    CompilePrograms(ShaderDefs, isRecompile);
+}
+
+
+void STDGLShaderSystem::Init_All(bool isRecompile) {
     auto glshadersadf = ADFEntry::FromFile("scripts/shaders/glshaders.adf")["Shaders"];
 
-    InitCompute(glshadersadf);
-    InitGraphic(glshadersadf);
-}
-
-
-
-std::pair<GLuint, GLuint> STDGLShaderSystem::GetShaderPipeline(const std::string& VertexName, const std::string& FragmentName) {
-    uint16_t VertexID;
-    uint16_t FragmentID;
-
-    try {
-        VertexID = VertexShaderNameToIndex.at(VertexName);
-    } catch(...) {
-        Engine::Warning("Attempted to use a non-existent vertex shader with the name of: \"" + VertexName + "\"");
-        return {0, 0};
-    }
-    try {
-        FragmentID = FragmentShaderNameToIndex.at(FragmentName);
-    } catch(...) {
-        Engine::Warning("Attempted to use a non-existent fragment shader with the name of: \"" + FragmentName + "\"");
-        return {0, 0};
-    }
-
-
-    ShaderPipelineKey Key      = ShaderPipelineKey(VertexID, FragmentID, false);
-    ShaderPipelineKey DepthKey = ShaderPipelineKey(VertexID, FragmentID, true);
-    try {
-        return {CachedShaderPipelines.at(Key.KeyAsInt),
-                CachedShaderPipelines.at(DepthKey.KeyAsInt)};
-    } catch(...) {
-        // Pipeline not cached, have to create it.
-        GLuint VertexShader = VertexShaders[VertexID].ShaderObject;
-        GLuint FragmentShader = FragmentShaders[VertexID].ShaderObject;
-        GLuint DepthShader = DepthShaders[VertexID].ShaderObject;
-
-        GLuint PipelineID;
-        glCreateProgramPipelines(1, &PipelineID);
-        glUseProgramStages(PipelineID, GL_VERTEX_SHADER_BIT, VertexShader);
-        glUseProgramStages(PipelineID, GL_FRAGMENT_SHADER_BIT, FragmentShader);
-        CachedShaderPipelines.emplace(Key.KeyAsInt, PipelineID);
-
-        GLuint DepthPipelineID;
-        glCreateProgramPipelines(1, &DepthPipelineID);
-        glUseProgramStages(DepthPipelineID, GL_VERTEX_SHADER_BIT, VertexShader);
-        glUseProgramStages(DepthPipelineID, GL_FRAGMENT_SHADER_BIT, DepthShader);
-        CachedShaderPipelines.emplace(DepthKey.KeyAsInt, DepthPipelineID);
-
-        return {PipelineID, DepthPipelineID};
-    }
+    InitCompute(glshadersadf, isRecompile);
+    InitGraphic(glshadersadf, isRecompile);
 }

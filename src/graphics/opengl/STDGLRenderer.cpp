@@ -37,7 +37,7 @@ void STDGLRenderer::Init() {
     glfwWindowHint(GLFW_NO_ERROR, GLFW_TRUE);
 #endif
 
-    GLFWwindow* data = glfwCreateWindow(1, 1, "The “onosecond” is the second after you make a terrible mistake. The second when you realise what you just did", nullptr, nullptr);
+    GLFWwindow* data = glfwCreateWindow(1, 1, "The \"onosecond\" is the second after you make a terrible mistake. The second when you realise what you just did", nullptr, nullptr);
     glfwMakeContextCurrent(data);
 
     glfwSwapInterval(1); // TODO: add a vsync setting
@@ -208,14 +208,13 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
 
 template<bool isDepth>
 void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
-    // Draw.
-    glUseProgram(0);
     GLuint tmpshader;
     if constexpr (isDepth)
-        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").second;
+        tmpshader = ShaderSystem.GetShaderProgram("Engine_PBRGeneric")->DepthProgram;
     else
-        tmpshader = ShaderSystem.GetShaderPipeline("Generic", "Generic").first;
-    glBindProgramPipeline(tmpshader);
+        tmpshader = ShaderSystem.GetShaderProgram("Engine_PBRGeneric")->Program;
+    glUseProgram(tmpshader);
+
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
         

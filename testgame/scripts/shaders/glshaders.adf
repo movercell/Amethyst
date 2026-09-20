@@ -10,7 +10,11 @@ Shaders {
     Fragment {
         Generic {
             Source "generic.fs"
-            DepthSource "generic.ds"
+        }
+    }
+    Depth {
+        Generic {
+            Source "generic.ds"
         }
     }
     Compute {
@@ -19,6 +23,21 @@ Shaders {
         }
         STDGLModel_InstanceReplicator {
             Source "STDGLModel_InstanceReplicator.cs"
+        }
+    }
+    Programs {
+        Engine_PBRGeneric {
+            Shader_Vertex Generic
+            Shader_Fragment Generic
+            Shader_Depth Generic
+            MaterialShouldBeBoundAtDepth 0
+            MaterialLayout {
+                Variables {
+                    "Albedo" "texture"
+                    "Roughness_Metalness_EncodedNormal" "texture"
+                }
+                DefaultValues {}
+            }
         }
     }
 }

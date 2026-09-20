@@ -5,48 +5,56 @@
 #include <map>
 #include "engine/filesystem/ADF.h"
 
-class STDGLShaderSystem {
-    struct ComputeShader {
-        GLuint ProgramObject;
-        std::string SourcePath;
-        ComputeShader(GLuint prg, std::string& path) { ProgramObject = prg; SourcePath = path; }
+
+struct STDGLShaderSystem {
+    struct ShaderProgram {
+        bool MaterialShouldBeBoundAtDepth = false;
+        GLuint Program = 0;
+        GLuint DepthProgram = 0;
+
+    protected:
+        ShaderProgram(GLuint program, GLuint depthprogram, bool materialshouldbeboundatdepth) { Program = program; DepthProgram = depthprogram; MaterialShouldBeBoundAtDepth = materialshouldbeboundatdepth; }
+        void Destroy() { glDeleteProgram(Program); glDeleteProgram(DepthProgram); }
+
+        friend struct STDGLShaderSystem;
     };
-    std::map<std::string, ComputeShader> ComputeShaders;
+private:
+    std::map<std::string, GLuint> ComputeShaders;
 
-    std::map<std::string, uint16_t> VertexShaderNameToIndex;
-    std::map<std::string, uint16_t> FragmentShaderNameToIndex;
+    std::map<std::string, GLuint> VertexShaders;
+    std::map<std::string, GLuint> FragmentShaders;
+    std::map<std::string, GLuint> DepthShaders;
+    std::map<std::string, ShaderProgram> ShaderPrograms;
 
-    struct Shader {
-        GLuint ShaderObject;
-        std::string SourcePath;
-        Shader(GLuint shad, std::string& path) { ShaderObject = shad; SourcePath = path; }
-    };
-    std::vector<Shader> VertexShaders;
-    std::vector<Shader> FragmentShaders;
-    std::vector<Shader> DepthShaders; // Uses the same indices as fragment shaders
+    void CompileShaders(const ADFEntry& ShaderDefs, const std::string& ShaderTypeName, const GLuint ShaderType, std::map<std::string, GLuint>& OutTo, bool isRecompile);
+    void CompilePrograms(const ADFEntry& ShaderDefs, bool isRecompile);
 
-    struct ShaderPipelineKey {
-        union {
-            struct {
-                uint16_t VertexShaderID;
-                uint16_t FragmentShaderID;
-                bool IsDepth;
-            };
-            uint64_t KeyAsInt = 0;
-        };
-        ShaderPipelineKey(uint16_t vert, uint16_t frag, bool isdepth) { VertexShaderID = vert; FragmentShaderID = frag; IsDepth = isdepth; }
-    };
-    std::map<uint64_t, GLuint> CachedShaderPipelines;
-
-
-    void InitCompute(const ADFEntry& ShaderDefs);
-    void InitGraphic(const ADFEntry& ShaderDefs);
+    void InitCompute(const ADFEntry& ShaderDefs, bool isRecompile);
+    void InitGraphic(const ADFEntry& ShaderDefs, bool isRecompile);
+    void Init_All(bool isRecompile);
 public:
-    void Init();
+    void Init() { Init_All(false); };
 
     inline GLuint GetComputeShader(std::string name) {
-        return ComputeShaders.at(name).ProgramObject;
+        return ComputeShaders.at(name);
+    } 
+    // The first element of the pair is the normal version of the shader program, while the second element is the depth-only version.
+    inline ShaderProgram* GetShaderProgram(const std::string& Name) {
+        try {
+            return &ShaderPrograms.at(Name);
+        } catch(std::out_of_range e) {
+            return nullptr;
+        }
+    };
+    // Recompiles all shaders and programs.
+    inline void Recompile() { Init_All(true); }
+
+    ~STDGLShaderSystem() {
+        for (auto& shader : VertexShaders) glDeleteShader(shader.second);
+        for (auto& shader : FragmentShaders) glDeleteShader(shader.second);
+        for (auto& shader : DepthShaders) glDeleteShader(shader.second);
+
+        for (auto& program : ShaderPrograms) program.second.Destroy();
+        for (auto& program : ComputeShaders) glDeleteProgram(program.second);
     }
-    // The first element of the pair is the normal version of the shader pipeline, while the second element is the depth-only version.
-    std::pair<GLuint, GLuint> GetShaderPipeline(const std::string& VertexName, const std::string& FragmentName);
 };
