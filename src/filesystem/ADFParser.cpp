@@ -3,11 +3,11 @@
 #include <cctype>
 
 void ADFEntry::Tokenizer::ReadToken() {
-    char currchar;
+    int currchar;
 
     // Skip any whitespace.
     do {
-        currchar = stream->get();
+        currchar = buffer->sbumpc();
     } while (std::isspace(currchar));
 
     // Any of the other cases
@@ -15,12 +15,12 @@ void ADFEntry::Tokenizer::ReadToken() {
     case '\"':
         CurrentContent.clear();
 
-        currchar = stream->get(); // Has to be like this as to not include the starting quotation mark.
-        while (!(currchar == '\"' || currchar == -1)) {
-            if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
+        currchar = buffer->sbumpc(); // Has to be like this as to not include the starting quotation mark.
+        while (!(currchar == '\"' || currchar == eof)) {
+            if (currchar == '\\') currchar = buffer->sbumpc(); // For escaping special characters.
 
             CurrentContent.push_back(currchar);
-            currchar = stream->get();
+            currchar = buffer->sbumpc();
         }
 
         CurrentType = TokenType::String;
@@ -47,10 +47,10 @@ void ADFEntry::Tokenizer::ReadToken() {
         CurrentContent.clear();
 
         do {
-            if (currchar == '\\') currchar = stream->get(); // For escaping special characters.
+            if (currchar == '\\') currchar = buffer->sbumpc(); // For escaping special characters.
 
             CurrentContent.push_back(currchar);
-            currchar = stream->get();
+            currchar = buffer->sbumpc();
         } while (std::isgraph(currchar) && currchar != '{' && currchar != '}' && currchar != '[' && currchar != ']' && currchar != '\"');
 
         CurrentType = TokenType::String;
@@ -155,14 +155,30 @@ void ADFEntry::ADFError(const std::string& error) const {
     Engine::Error(output.str());
 }
 
-ENGINEEXPORT ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
+ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
     auto Stream = Filesystem::GetFileAsStream(FilePath, std::ios::in | std::ios_base::binary);
-    Tokenizer Tokenizer(&Stream, FilePath);
+
+    if (Stream.fail()) {
+        Engine::Print("ADF file not found!(probably)(" + FilePath + (')'));
+        return Map();
+    }
+    
+    auto sentry = std::istream::sentry(Stream, true);
+    if (!sentry) {
+        Engine::Error("Failed to lock the input stream for an ADF parse!");
+    }
+
+    Tokenizer Tokenizer(Stream.rdbuf(), FilePath);
     auto filename = new Engine::UnmanagedResource<std::string>(FilePath);
     return ADFEntry(ADFType::map, Tokenizer, filename);
 }
-ENGINEEXPORT ADFEntry ADFEntry::FromStream(std::istream& Stream) {
-    Tokenizer Tokenizer(&Stream, "[dynamic stream]");
+ADFEntry ADFEntry::FromStream(std::istream& Stream) {
+    auto sentry = std::istream::sentry(Stream, true);
+    if (!sentry) {
+        Engine::Error("Failed to lock the input stream for an ADF parse!");
+    }
+
+    Tokenizer Tokenizer(Stream.rdbuf(), "[dynamic stream]");
     return ADFEntry(ADFType::map, Tokenizer, nullptr);
 }
 
@@ -207,7 +223,7 @@ void ADFEntry::ToStreamObjectFormatHelper(std::streambuf* buffer, int Indentatio
     }
 }
 
-ENGINEEXPORT void ADFEntry::ToStream(std::streambuf* buffer, int IndentationLevel) const {
+void ADFEntry::ToStream(std::streambuf* buffer, int IndentationLevel) const {
     if (IsArray()) {
         const auto& array = GetArray();
 
@@ -260,7 +276,7 @@ void ADFEntry::ToStreamCompactObjectFormatHelper(std::streambuf* buffer) const {
     }
 }
 
-ENGINEEXPORT void ADFEntry::ToStreamCompact(std::streambuf* buffer) const {
+void ADFEntry::ToStreamCompact(std::streambuf* buffer) const {
     if (IsArray()) {
         const auto& array = GetArray();
 
@@ -275,5 +291,39 @@ ENGINEEXPORT void ADFEntry::ToStreamCompact(std::streambuf* buffer) const {
             
             kvpair.second.ToStreamCompactObjectFormatHelper(buffer);
         }
+    }
+}
+
+
+
+void ADFEntry::ToFile(const std::string& FilePath, bool isCompact) const {
+    if (!IsMap()) {
+        Engine::Error("Attempted to turn a non-Map-type ADF entry into a string, only a Map-type entry can be the root node of a tree!");
+    }
+    auto out = Filesystem::GetFileOutputStream(FilePath, std::ios::binary);
+
+    auto sentry = std::ofstream::sentry(out);
+    if (!sentry) {
+        Engine::Error("Failed to create an output stream for an ADF export!");
+    }
+
+    auto buffer = out.rdbuf();
+    if (isCompact) {
+        ToStreamCompact(buffer);
+    } else {
+        ToStream(buffer, 0);
+    }
+}
+void ADFEntry::ToStream(std::ostream Stream, bool isCompact) const {
+    auto sentry = std::ostream::sentry(Stream);
+    if (!sentry) {
+        Engine::Error("Failed to lock the output stream for an ADF export!");
+    }
+
+    auto buffer = Stream.rdbuf();
+    if (isCompact) {
+        ToStreamCompact(buffer);
+    } else {
+        ToStream(buffer, 0);
     }
 }

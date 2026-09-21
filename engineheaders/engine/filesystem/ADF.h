@@ -54,14 +54,14 @@ class ADFEntry {
     };
 
     class Tokenizer {
-        std::istream* stream;
+        std::streambuf* buffer;
         const std::string& filepath;
         static constexpr auto eof = std::char_traits<char>::eof();
 
         TokenType CurrentType;
         std::inplace_vector<char, 256> CurrentContent;
     public:
-        Tokenizer(std::istream* Stream, const std::string& FilePath) : filepath(FilePath), stream(std::move(Stream)) {}
+        Tokenizer(std::streambuf* Buffer, const std::string& FilePath) : filepath(FilePath), buffer(Buffer) {}
         void ReadToken();
 
         TokenType GetCurrentTokenType() { return CurrentType; }
@@ -75,11 +75,11 @@ class ADFEntry {
 
     [[noreturn]] ENGINEEXPORT void ADFError(const std::string& error) const;
 
-    ENGINEEXPORT void ToStream(std::streambuf* buffer, int IndentationLevel) const;
+    void ToStream(std::streambuf* buffer, int IndentationLevel) const;
     void ToStreamObjectFormatHelper(std::streambuf* buffer, int IndentationLevel) const;
     void ToStreamStringFormatHelper(std::streambuf* buffer, const std::string& str) const;
 
-    ENGINEEXPORT void ToStreamCompact(std::streambuf* buffer) const;
+    void ToStreamCompact(std::streambuf* buffer) const;
     void ToStreamCompactObjectFormatHelper(std::streambuf* buffer) const;
 
     ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename);
@@ -89,37 +89,8 @@ public:
     static ENGINEEXPORT ADFEntry FromFile(const std::string& FilePath);
     //! Creates an ADF tree from a stream.
     static ENGINEEXPORT ADFEntry FromStream(std::istream& Stream);
-    void ToFile(const std::string& FilePath, bool isCompact = false) const {
-        if (!IsMap()) {
-            Engine::Error("Attempted to turn a non-Map-type ADF entry into a string, only a Map-type entry can be the root node of a tree!");
-        }
-        auto out = Filesystem::GetFileOutputStream(FilePath, std::ios::binary);
-
-        auto sentry = std::ofstream::sentry(out);
-        if (!sentry) {
-            Engine::Error("Failed to create an output stream for an .ADF export!");
-        }
-
-        auto buffer = out.rdbuf();
-        if (isCompact) {
-            ToStreamCompact(buffer);
-        } else {
-            ToStream(buffer, 0);
-        }
-    }
-    void ToStream(std::ostream Stream, bool isCompact = false) const {
-        auto sentry = std::ostream::sentry(Stream);
-        if (!sentry) {
-            Engine::Error("Failed to lock the output stream for an .ADF export!");
-        }
-
-        auto buffer = Stream.rdbuf();
-        if (isCompact) {
-            ToStreamCompact(buffer);
-        } else {
-            ToStream(buffer, 0);
-        }
-    }
+    ENGINEEXPORT void ToFile(const std::string& FilePath, bool isCompact = false) const;
+    ENGINEEXPORT void ToStream(std::ostream Stream, bool isCompact = false) const;
 
     ADFEntry() {};
     //! Used for manual creation of string-type entries.
