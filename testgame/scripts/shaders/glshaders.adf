@@ -12,6 +12,7 @@ Shaders {
             Source "generic.fs"
         }
     }
+    // These are fragment shaders that draw only depth.
     Depth {
         Generic {
             Source "generic.ds"

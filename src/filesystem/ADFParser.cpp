@@ -37,6 +37,40 @@ void ADFEntry::Tokenizer::ReadToken() {
     case ']':
         CurrentType = TokenType::EndArray;
         return;
+    case '/':
+        currchar = buffer->sbumpc();
+
+        // This type of comment.
+        if (currchar == '/') {
+            do {
+                currchar = buffer->sbumpc();
+            } while (!(currchar == '\n' || currchar == '\r' || currchar == eof));
+
+            ReadToken();
+            return;
+        }
+        
+        /* This type of comment. */
+        if (currchar == '*') {
+            while (true) {
+                do {
+                    currchar = buffer->sbumpc();
+                } while (!(currchar == '*' || currchar == eof));
+
+                currchar = buffer->sbumpc();
+                if (currchar == '/' || currchar == eof) {
+                    ReadToken();
+                    return;
+                } else {
+                    buffer->sungetc();
+                }
+            }
+        }
+
+        // This forward slash is actually a part of an unquoted string.
+        buffer->sungetc();
+        currchar = '/';
+        break;
     case eof:
         CurrentType = TokenType::EndFile;
         return;
@@ -57,7 +91,7 @@ void ADFEntry::Tokenizer::ReadToken() {
         return;
     }
 
-    Engine::Error("Unknown character in ADF file!(Is this even an ADF file?)(File: " + filepath + ")");
+    Engine::Error("Unknown character in an ADF file!(Is this even an ADF file?)(File: " + filepath + ")");
 }
 
 ADFEntry::ADFEntry(ADFType Type, Tokenizer& Tokenizer, Engine::Reference<std::string> filename) {

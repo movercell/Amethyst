@@ -59,7 +59,7 @@ class ADFEntry {
         static constexpr auto eof = std::char_traits<char>::eof();
 
         TokenType CurrentType;
-        std::inplace_vector<char, 256> CurrentContent;
+        std::inplace_vector<char, 1024> CurrentContent;
     public:
         Tokenizer(std::streambuf* Buffer, const std::string& FilePath) : filepath(FilePath), buffer(Buffer) {}
         void ReadToken();
