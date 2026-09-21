@@ -2,7 +2,7 @@
     "MapName" ""
     "SavefileVersion" "0"
     "Entities" {
-        "000000" {
+        "000100" {
             "classname" "prop_dynamic"
             "properties" {
                 "targetname" not\ quoted
@@ -27,7 +27,7 @@
             }
             "tags" []
         }
-        "000001" {
+        "000101" {
             "classname" "prop_dynamic"
             "properties" {
                 "position" { x 512 y 256 z 32 }
@@ -93,7 +93,7 @@
             }
             "tags" []
         }
-        "000003" {
+        "000102" {
             "classname" "light_spot"
             "properties" {
                 "position" { x 407 y 107 z 167 }
@@ -107,6 +107,15 @@
                 "color" { x "0.6" y 0 z 0 }
                 "innerfalloffangle" 50
                 "outerfalloffangle" 55
+            }
+            "children" {}
+            "tags" []
+        }
+        "000103" {
+            "classname" "info_player_start"
+            "properties" {
+                position { x 0 y 128 z 64 }
+                rotation { x 15 y -45 z 0 }
             }
             "children" {}
             "tags" []

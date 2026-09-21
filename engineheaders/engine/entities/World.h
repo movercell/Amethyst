@@ -19,6 +19,7 @@ class ENGINEEXPORT EntityStorage {
     Engine::Reference<EntityHandler> PreallocatedSlots[PreallocatedSlotAmount];
     Engine::Reference<EntityHandler>* DynamicStorage;
     uint32_t Size = 0;
+    uint32_t PreservedSlotAmount = 0;
 public:
     void AddEntityBack(Engine::Reference<EntityHandler> Entity);
 
@@ -26,6 +27,10 @@ public:
 
     void Update();
     void Clear();
+    void PreseserveSlots(uint32_t count) {
+        PreservedSlotAmount = count;
+        reserve(count);
+    }
 
     uint32_t size() { return Size; }
     void reserve(uint32_t count);
@@ -61,21 +66,29 @@ public:
 
 
 class ENGINEEXPORT World : public EntityStorage {
+    std::string Name;
     Engine::Reference<RWorld> RenderWorld;
     std::string MapName = "";
 
-    World() {};
+    std::optional<ADFEntry> QueuedLoad;
+
+    World(std::string name);
 public:
-    void Restore(const ADFEntry& Saved);
     ADFEntry Save();
+    //! Immediately loads a Savefile, can cause bad flickering if used improperly.
+    void LoadImmediate(const ADFEntry& Saved);
+    //! Queues a Load for the next update.
+    void Load(ADFEntry Saved) { QueuedLoad = Saved; }
+
+    void Update();
 
     //! Returns an uninitalized entity, or nullptr if classname is not valid.
-    Engine::Reference<EntityHandler> MakeEntity(std::string classname, std::optional<EntityHandler*> parent = std::nullopt);
+    Engine::Reference<EntityHandler> MakeEntity(std::string classname, std::optional<EntityHandler*> parent = std::nullopt, std::optional<int> forcedslot = std::nullopt);
 
     void Clear();
 
-    static Engine::Reference<World> Make(Engine::Reference<RWorld> Renderworld);
-    static Engine::Reference<World> Make(Engine::Reference<Renderer> Renderer);
+    static Engine::Reference<World> Make(std::string name, Engine::Reference<RWorld> Renderworld);
+    static Engine::Reference<World> Make(std::string name, Engine::Reference<Renderer> Renderer);
 
     Engine::Reference<RWorld> GetRWorld() { return RenderWorld; }
 

@@ -14,7 +14,7 @@ class GameDLL {
 
 public:
     GameDLL();
-    ~GameDLL();
+    //~GameDLL(); <- No destructor should be there because the engine will still be filled with GameDLL virtual pointers after the end of the object's scope
 
     inline void init() { gameinit_proxy(); }
     inline void loop() { gameloop_proxy(); }

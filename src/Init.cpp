@@ -10,7 +10,7 @@ static void exitfunc() {
 
 void Engine::Init() {
     glfwInit();
-	std::atexit(&exitfunc);
+	std::atexit(&exitfunc); // To make it outlive the game dll internal global objects.
 
     Renderer::AddRenderer("STDGLRenderer", &STDGLRenderer::Make);
 }

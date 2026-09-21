@@ -24,7 +24,7 @@ struct EntityHandler {
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
 
-    virtual const char* GetClassname() const = 0;
+    virtual std::string_view GetClassname() const = 0;
     virtual std::optional<EntityHandler*> GetParent() const = 0;
 
     virtual void AddTag(const std::string& tag) = 0;
@@ -61,7 +61,7 @@ namespace Engine { namespace Internal {
 template<typename T>
 class EntityTemplateHandler : public EntityHandler {
 protected:
-    const char* classname;
+    const std::string_view classname;
     const std::optional<EntityHandler*> parent;
     std::vector<std::string> tags;
     
@@ -117,7 +117,7 @@ public:
 
         retmap.emplace("properties", ADFEntry::Serialize(Entity));
 
-        retmap.emplace("classname", ADFEntry::String(classname));
+        retmap.emplace("classname", ADFEntry::String(std::string(classname)));
 
         return ret;
     }
@@ -147,7 +147,7 @@ public:
     }
     void UpdateEntity() { Entity.Update(); }
 
-    const char* GetClassname() const { return classname; }
+    std::string_view GetClassname() const { return classname; }
     std::optional<EntityHandler*> GetParent() const { return parent; }
 
     inline void AddTag(const std::string& tag) { tags.push_back(tag); }
@@ -161,7 +161,7 @@ public:
 
     void* GetEntityPtr() { return &Entity; }
 
-    EntityTemplateHandler(const char* Classname, World* World, std::optional<EntityHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
+    EntityTemplateHandler(const std::string_view Classname, World* World, std::optional<EntityHandler*> Parent) : classname(Classname), parent(Parent) { world = World; }
     ~EntityTemplateHandler() = default;
 };
 
@@ -178,6 +178,7 @@ struct BaseEntity {
     ADFSerialize vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
     ADFSerialize quat rotation;
+    ADFSerialize uint64_t spawnflags = 0;
 
     mat4 TransformationMatrix;
 
@@ -197,8 +198,8 @@ struct BaseEntity {
     }
     virtual void OnSave() {}
 
-    // Handler wrapper functions
-    inline const char* GetClassname() const { return handler->GetClassname(); }
+    // Handler wrapper functions.
+    inline const std::string_view GetClassname() const { return handler->GetClassname(); }
     inline std::optional<EntityHandler*> GetParent() const { return handler->GetParent(); };
     inline void AddTag(const std::string& tag) { handler->AddTag(tag); };
     inline bool HasTag(const std::string& tag) { return handler->HasTag(tag); };
@@ -208,7 +209,7 @@ struct BaseEntity {
 
 namespace Engine {
     namespace Internal {
-        void ENGINEEXPORT RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda);
+        void ENGINEEXPORT RegisterEntityCreationLambda(std::string_view classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda);
 
         // Annotation for an entity class
         struct EntityClassnameAnnotation {
@@ -223,7 +224,7 @@ namespace Engine {
         static_assert(EntityClassAnnotations.size() == 1, "An entity class must have exactly 1 EntityClassname annotation!");
 
         constexpr auto EntityClassnameAnnotation = std::meta::extract<Engine::Internal::EntityClassnameAnnotation>(EntityClassAnnotations[0]);
-        const char* classname = EntityClassnameAnnotation.classname;
+        std::string_view classname = EntityClassnameAnnotation.classname;
 
         Engine::Internal::EntityTemplateHandler<Entity>::RegisterType();
 

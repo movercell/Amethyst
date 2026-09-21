@@ -73,7 +73,7 @@ class ADFEntry {
     // This is used for showing which file an error came from
     Engine::Reference<std::string> Filename;
 
-    [[noreturn]] void ADFError(const std::string& error) const;
+    [[noreturn]] ENGINEEXPORT void ADFError(const std::string& error) const;
 
     ENGINEEXPORT void ToStream(std::streambuf* buffer, int IndentationLevel) const;
     void ToStreamObjectFormatHelper(std::streambuf* buffer, int IndentationLevel) const;

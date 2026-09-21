@@ -29,9 +29,8 @@ namespace Engine {
         Reference() { Resource = nullptr; }
         Reference(const Reference& other) { Resource = other.Resource; if (Resource) Resource->IncrementReference(); }
         Reference(Reference&& other) noexcept { Resource = other.Resource; other.Resource = nullptr; }
-        Reference& operator=(const Reference& other) { Resource = other.Resource; if (Resource) Resource->IncrementReference(); return *this; }
-        Reference& operator=(Reference&& other) noexcept { Resource = other.Resource; other.Resource = nullptr; return *this; }
-
+        Reference& operator=(const Reference& other) { if (Resource) Resource->DecrementReference(); Resource = other.Resource; if (Resource) Resource->IncrementReference(); return *this; }
+        Reference& operator=(Reference&& other) noexcept { if (Resource) Resource->DecrementReference(); Resource = other.Resource; other.Resource = nullptr; return *this; }
 
         ~Reference() { if (Resource) Resource->DecrementReference(); }
 

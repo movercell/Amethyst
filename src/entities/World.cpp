@@ -7,8 +7,9 @@
 
 inline constexpr int SAVEFILE_VERSION = 0;
 inline constexpr int WORLD_DEFAULT_SLOT_AMOUNT = 4096;
+inline constexpr int WORLD_PRESERVED_SLOT_AMOUNT = 32;
 
-static std::map<std::string, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)>> EntityCreationLambdas;
+static std::map<std::string_view, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)>> EntityCreationLambdas;
 
 ADFEntry World::EntityStorageToADF(EntityStorage* Storage) {
     ADFEntry ret = ADFEntry::Map();
@@ -34,6 +35,10 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
 
     int IndexValidation = -1;
     for (const auto& SavedEntity : entmap) {
+        if (SavedEntity.first.length() != 6) {
+            Engine::Error("Corrupted Savefile: Entity slot index string is not 6 characters in legth.");
+        }
+
         Engine::Reference<EntityHandler> Handler;
         
         try {
@@ -68,7 +73,7 @@ ADFEntry World::Save() {
 
     return ret;
 }
-void World::Restore(const ADFEntry& Saved) {
+void World::LoadImmediate(const ADFEntry& Saved) {
     const auto& Savefile = Saved["Savefile"];
     
     int Saveversion = std::stoi(Savefile["SavefileVersion"].GetString());
@@ -80,7 +85,7 @@ void World::Restore(const ADFEntry& Saved) {
         Engine::Error("Savefile updating is not yet supported!");
     }
     
-
+    Clear();
     if (Savefile.HasChild("Mapname")) {
         MapName = Savefile["Mapname"].GetString();
         // TODO: add map file loading here
@@ -91,7 +96,7 @@ void World::Restore(const ADFEntry& Saved) {
 
 
 
-Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::optional<EntityHandler*> parent) {
+Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::optional<EntityHandler*> parent, std::optional<int> forcedslot) {
 
     Engine::Reference<EntityHandler> Handler;
 
@@ -103,10 +108,10 @@ Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::o
 
     int index;
     if (parent) {
-        index = parent.value()->Children.GetFreeIndex();
+        index = forcedslot ? forcedslot.value() : parent.value()->Children.GetFreeIndex();
         parent.value()->Children[index] = Handler;
     } else {
-        index = GetFreeIndex();
+        index = forcedslot ? forcedslot.value() : GetFreeIndex();
         (*this)[index] = Handler;
     }
 
@@ -121,24 +126,37 @@ void World::Clear() {
     MapName = "";
 }
 
+void World::Update() {
+    if (QueuedLoad) {
+        LoadImmediate(QueuedLoad.value());
+        QueuedLoad.reset();
+    }
 
+    EntityStorage::Update();
+}
 
-Engine::Reference<World> World::Make(Engine::Reference<RWorld> Renderworld) {
-    auto result = new Engine::UnmanagedResource<World>(World());
+World::World(std::string name) {
+    Name = name;
+    reserve(WORLD_DEFAULT_SLOT_AMOUNT);
+
+    // Need to preserve the preserved slots.
+    PreseserveSlots(WORLD_PRESERVED_SLOT_AMOUNT);
+}
+
+Engine::Reference<World> World::Make(std::string name, Engine::Reference<RWorld> Renderworld) {
+    auto result = new Engine::UnmanagedResource<World>(World(name));
     result->resource.RenderWorld = Renderworld;
-    result->resource.reserve(WORLD_DEFAULT_SLOT_AMOUNT);
     return result;
 }
-Engine::Reference<World> World::Make(Engine::Reference<Renderer> Renderer) {
-    auto result = new Engine::UnmanagedResource<World>(World());
+Engine::Reference<World> World::Make(std::string name, Engine::Reference<Renderer> Renderer) {
+    auto result = new Engine::UnmanagedResource<World>(World(name));
     result->resource.RenderWorld = Renderer->MakeRWorld();
-    result->resource.reserve(WORLD_DEFAULT_SLOT_AMOUNT);
     return result;
 }
 
 
 
-void Engine::Internal::RegisterEntityCreationLambda(const char* classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda) {
+void Engine::Internal::RegisterEntityCreationLambda(std::string_view classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda) {
     EntityCreationLambdas.emplace(classname, Lambda);
 }
 
@@ -150,7 +168,7 @@ void EntityStorage::AddEntityBack(Engine::Reference<EntityHandler> Entity) {
 }
 
 int EntityStorage::GetFreeIndex() {
-    auto iterator = std::find(begin(), end(), Engine::Reference<EntityHandler>());
+    auto iterator = std::find(begin() + PreservedSlotAmount, end(), Engine::Reference<EntityHandler>());
     int ret = iterator - begin(); // Yes this works even when not enough space, since end is one after the last element. 
 
     if (iterator == end()) {

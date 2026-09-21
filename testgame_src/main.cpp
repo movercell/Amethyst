@@ -1,5 +1,3 @@
-#undef AMETHYSTENGINESRC
-
 #include <array>
 #include <bit>
 #include "engine/graphics/Camera.h"
@@ -18,6 +16,8 @@
 #include "engine/filesystem/ADF.h"
 #include "engine/entities/Entity.h"
 
+#include "entities/player.h"
+
 Engine::Reference<Renderer> renderer;
 Engine::Reference<RWorld> rworld;
 Engine::Reference<Window> window;
@@ -30,16 +30,19 @@ Engine::Reference<World> world;
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
 	static bool isUsingCamera = false;
-	static float Pitch = 0.0f;
-	static float Yaw = 0.0f;
-	static vec3 CameraPosition = vec3(1.0f, 1.0f, 1.0f);
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
 		isUsingCamera = !isUsingCamera;
 		window->SetEatCursor(isUsingCamera);
 	}
 
-	Camera* camera = renderer->GetCamera("cam2");
+	auto PlayerEntityHandler = (*world)[0];
+	if (!PlayerEntityHandler || PlayerEntityHandler->GetClassname() != "player") return;
+	Entity_Player* PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
+
+	static Engine::Reference<Camera> camera; // Static so that if the player disappears then the camera would still exist for the UI drawing.(Including stuff like level loads!)
+	camera = PlayerEntity->PlayerCamera;
+
 	float velocity = 100.0f * deltaTime;
 	vec3 direction;
 	if (isUsingCamera && window->IsWindowInFocus()) {
@@ -56,7 +59,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
     	    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
     	        direction -= vec3(0, 0, 1);
 		direction = direction.norm();
-		CameraPosition += direction * velocity;
+		PlayerEntity->position += direction * velocity;
 
 
 		static vec2 lastmouse = vec2(0, 0);
@@ -68,16 +71,14 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		
 		mouseoffset.x *= 7.5f * deltaTime;
     	mouseoffset.y *= 7.5f * deltaTime;
-    	Yaw   -= mouseoffset.x;
-    	Pitch += mouseoffset.y;
+    	PlayerEntity->yaw   -= mouseoffset.x;
+    	PlayerEntity->pitch += mouseoffset.y;
 
-        if (Pitch > 89.0f)
-            Pitch = 89.0f;
-        if (Pitch < -89.0f)
-            Pitch = -89.0f;
+        if (PlayerEntity->pitch > 89.0f)
+            PlayerEntity->pitch = 89.0f;
+        if (PlayerEntity->pitch < -89.0f)
+            PlayerEntity->pitch = -89.0f;
 	}
-	camera->SetPosition(CameraPosition);
-	camera->SetAngles(vec3(Pitch, Yaw));
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
@@ -104,26 +105,36 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 	ImGui::Begin("Hello from ui function");
 		ImGui::Text("Delta		 : %f", deltaTime);
-		ImGui::Text("Camera pitch: %f", Pitch);
-		ImGui::Text("Camera yaw  : %f", Yaw);
-		ImGui::Text("Camera X	 : %f", CameraPosition.x);
-		ImGui::Text("Camera Y	 : %f", CameraPosition.y);
-		ImGui::Text("Camera Z	 : %f", CameraPosition.z);
-		if (ImGui::Button("Delete model 0"))
+		ImGui::Text("Player pitch: %f", PlayerEntity->pitch);
+		ImGui::Text("Player yaw  : %f", PlayerEntity->yaw);
+		ImGui::Text("Player X	 : %f", PlayerEntity->position.x);
+		ImGui::Text("Player Y	 : %f", PlayerEntity->position.y);
+		ImGui::Text("Player Z	 : %f", PlayerEntity->position.z);
+		if (ImGui::Button("Delete model 0")) {
 			models[0].reset();
+		}
+		if (ImGui::Button("Quicksave(F5)") || ImGui::IsKeyPressed(ImGuiKey_F5, false)) {
+			world->Save().ToFile("saves/quick.adf", true);
+		}
+		if (ImGui::Button("Quickload(F6)") || ImGui::IsKeyPressed(ImGuiKey_F6, false)) {
+			world->Load(ADFEntry::FromFile("saves/quick.adf"));
+		}
+
 	ImGui::End();
 };
 
 void gameinit() {
 	Engine::RegisterDefaultEngineEntityTypes();
 	
+	Engine::RegisterEntityClass<Entity_Player>();
+	Engine::RegisterEntityClass<Entity_PlayerStart>();
 
 	renderer = Renderer::Make("STDGLRenderer");
 	rworld = renderer->MakeRWorld();
 
-	world = World::Make(rworld);
+	world = World::Make("Primary", rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
-	world->Restore(savefile);
+	world->LoadImmediate(savefile);
 
 	auto newsavefile = world->Save();
 	newsavefile.ToFile("saves/hi.adf");
@@ -133,8 +144,6 @@ void gameinit() {
 
 	window = renderer->MakeWindow(800, 600, "Amethyst");
 	window->SetUIFunction(mainuifunction);
-	//cameras[0] = rworld->MakeCamera(vec2(800, 600), "cam1");
-	cameras[1] = rworld->MakeCamera(vec2(800 * 2, 600 * 2), "cam2");
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.adf");

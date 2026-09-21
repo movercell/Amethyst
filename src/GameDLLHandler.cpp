@@ -29,8 +29,4 @@ GameDLL::GameDLL() {
     }
 }
 
-GameDLL::~GameDLL() {
-    dlclose(dllhandle);
-}
-
 #endif

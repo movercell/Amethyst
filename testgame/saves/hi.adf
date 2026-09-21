@@ -1,6 +1,35 @@
 "Savefile" {
 	"Entities" {
 		"000000" {
+			"children" {}
+			"classname" "player"
+			"properties" {
+				"pitch" "15.000003"
+				"position" {
+					"x" "0"
+					"y" "128"
+					"z" "64"
+				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+				"yaw" "-45"
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
+		"000100" {
 			"children" {
 				"000000" {
 					"children" {}
@@ -23,6 +52,7 @@
 							"y" "3"
 							"z" "5"
 						}
+						"spawnflags" "0"
 						"targetname" "hia"
 					}
 					"tags" [
@@ -49,13 +79,14 @@
 					"y" "3"
 					"z" "5"
 				}
+				"spawnflags" "0"
 				"targetname" "not quoted"
 			}
 			"tags" [
 				"WasInit"
 			]
 		}
-		"000001" {
+		"000101" {
 			"children" {
 				"000000" {
 					"children" {
@@ -80,6 +111,7 @@
 									"y" "1"
 									"z" "1"
 								}
+								"spawnflags" "0"
 								"targetname" ""
 							}
 							"tags" [
@@ -109,6 +141,7 @@
 											"y" "1"
 											"z" "1"
 										}
+										"spawnflags" "0"
 										"targetname" ""
 									}
 									"tags" [
@@ -139,6 +172,7 @@
 									"y" "1"
 									"z" "1"
 								}
+								"spawnflags" "0"
 								"targetname" ""
 							}
 							"tags" [
@@ -168,6 +202,7 @@
 											"y" "1"
 											"z" "1"
 										}
+										"spawnflags" "0"
 										"targetname" ""
 									}
 									"tags" [
@@ -198,6 +233,7 @@
 									"y" "1"
 									"z" "1"
 								}
+								"spawnflags" "0"
 								"targetname" ""
 							}
 							"tags" [
@@ -228,6 +264,7 @@
 							"y" "1"
 							"z" "1"
 						}
+						"spawnflags" "0"
 						"targetname" ""
 					}
 					"tags" [
@@ -254,13 +291,14 @@
 					"y" "1"
 					"z" "1"
 				}
+				"spawnflags" "0"
 				"targetname" ""
 			}
 			"tags" [
 				"WasInit"
 			]
 		}
-		"000003" {
+		"000102" {
 			"children" {}
 			"classname" "light_spot"
 			"properties" {
@@ -298,6 +336,7 @@
 					"y" "1"
 					"z" "1"
 				}
+				"spawnflags" "0"
 				"targetname" ""
 			}
 			"tags" [
