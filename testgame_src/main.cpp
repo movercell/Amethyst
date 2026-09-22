@@ -27,21 +27,58 @@ std::array<Engine::Reference<Camera>, 2> cameras;
 std::array<Engine::Reference<Light>, 2> lights;
 Engine::Reference<World> world;
 
+std::optional<ADFEntry> QueuedLoad;
+
+enum class GameState {
+	Normal,
+	Loading,
+	Paused
+};
+GameState CurrentGameState = GameState::Normal;
+
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
-	static bool isUsingCamera = false;
+	// Loading screen stuff.
+	static float CurrentLoadingPopupAlpha = 0.0f;
+	static const char* CurrentLoadingPopupText = "";
+	bool IsLoading = CurrentGameState == GameState::Loading;
+	if (IsLoading)
+		CurrentLoadingPopupAlpha = 1.0f;
+	if (CurrentLoadingPopupAlpha > 0.0f) {
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, CurrentLoadingPopupAlpha);
+		// They are separately named so that their sizes are fit to their text.(If ImGuiWindowFlags_AlwaysAutoResize is set then there's still a frame of wrong size.)
+		ImGui::Begin(CurrentLoadingPopupText, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove);
+		ImGui::TextUnformatted(CurrentLoadingPopupText);
+		ImGui::End();
+		ImGui::PopStyleVar();
+		CurrentLoadingPopupAlpha -= deltaTime * 1.5f;
+	}
+	if (IsLoading)
+		return; // No need to draw the rest of the UI while the game is loading as it'll look very broken.
+
+	// Pause menu logic.
+	if (ImGui::IsKeyPressed(ImGuiKey_Escape, false)) {
+		if (CurrentGameState == GameState::Normal) {
+			CurrentGameState = GameState::Paused;
+		} else if (CurrentGameState == GameState::Paused) {
+			CurrentGameState = GameState::Normal;
+		}
+	}
+	
+	// The actual main UI.
+	static bool shouldUseCamera = false;
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
-		isUsingCamera = !isUsingCamera;
-		window->SetEatCursor(isUsingCamera);
+		shouldUseCamera = !shouldUseCamera;
 	}
+	bool isUsingCamera = shouldUseCamera && CurrentGameState == GameState::Normal;
+	window->SetEatCursor(isUsingCamera);
 
 	auto PlayerEntityHandler = (*world)[0];
 	if (!PlayerEntityHandler || PlayerEntityHandler->GetClassname() != "player") return;
 	Entity_Player* PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
 
-	static Engine::Reference<Camera> camera; // Static so that if the player disappears then the camera would still exist for the UI drawing.(Including stuff like level loads!)
-	camera = PlayerEntity->PlayerCamera;
+	Engine::Reference<Camera> camera = PlayerEntity->PlayerCamera;
 
 	float velocity = 100.0f * deltaTime;
 	vec3 direction;
@@ -100,7 +137,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	ImGui::End();
 	ImGui::PopStyleVar(3);
 
-	if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+	if (ImGui::IsKeyPressed(ImGuiKey_F4)) {
 		Engine::QueueShutdown();
 	}
 	ImGui::Begin("Hello from ui function");
@@ -114,10 +151,13 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 			models[0].reset();
 		}
 		if (ImGui::Button("Quicksave(F5)") || ImGui::IsKeyPressed(ImGuiKey_F5, false)) {
+			CurrentLoadingPopupText = "Saved!";
+			CurrentLoadingPopupAlpha = 1.0f;
 			world->Save().ToFile("saves/quick.adf", true);
 		}
 		if (ImGui::Button("Quickload(F6)") || ImGui::IsKeyPressed(ImGuiKey_F6, false)) {
-			world->Load(ADFEntry::FromFile("saves/quick.adf"));
+			CurrentLoadingPopupText = "Loading...";
+			QueuedLoad = ADFEntry::FromFile("saves/quick.adf");
 		}
 
 	ImGui::End();
@@ -134,7 +174,7 @@ void gameinit() {
 
 	world = World::Make("Primary", rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
-	world->LoadImmediate(savefile);
+	world->Load(savefile);
 
 	auto newsavefile = world->Save();
 	newsavefile.ToFile("saves/hi.adf");
@@ -171,7 +211,9 @@ void gameinit() {
 
 }
 
-void gameloop() {
+
+
+static void GameStateHandler_Normal() {
 	static float position = 0;
 	if (models[0])
 		models[0]->SetMatrix(mat4(1, 0, 0, -128));
@@ -179,9 +221,9 @@ void gameloop() {
 	models[3]->SetMatrix(mat4());
 
 	models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
-																					0, 10, 0, 0,
-																					0, 0, 10, 10,
-																					0, 0, 0, 1));
+																				0, 10, 0, 0,
+																				0, 0, 10, 10,
+																				0, 0, 0, 1));
 	position += 32.0f * deltaTime;
 	if (position > 360.0f) position -= 360.0f;
 
@@ -197,4 +239,38 @@ void gameloop() {
 	world->Update();
 
 	renderer->Draw();
+
+	if (QueuedLoad) {
+		CurrentGameState = GameState::Loading;
+	}
+}
+
+
+static void GameStateHandler_Loading() {
+	world->Load(QueuedLoad.value());
+	QueuedLoad.reset();
+	// Need to update and draw normally at least once so that everything is set up correctly.
+	GameStateHandler_Normal();
+
+	CurrentGameState = GameState::Normal;
+}
+
+
+static void GameStateHandler_Paused() {
+	renderer->Draw();
+}
+
+
+void gameloop() {
+	switch (CurrentGameState) {
+	case GameState::Normal:
+		GameStateHandler_Normal();
+		break;
+	case GameState::Loading:
+		GameStateHandler_Loading();
+		break;
+	case GameState::Paused:
+		GameStateHandler_Paused();
+		break;
+	}
 }

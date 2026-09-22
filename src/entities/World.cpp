@@ -73,7 +73,7 @@ ADFEntry World::Save() {
 
     return ret;
 }
-void World::LoadImmediate(const ADFEntry& Saved) {
+void World::Load(const ADFEntry& Saved) {
     const auto& Savefile = Saved["Savefile"];
     
     int Saveversion = std::stoi(Savefile["SavefileVersion"].GetString());
@@ -120,20 +120,12 @@ Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::o
     return Handler;
 }
 
-
 void World::Clear() {
     EntityStorage::Clear();
     MapName = "";
 }
 
-void World::Update() {
-    if (QueuedLoad) {
-        LoadImmediate(QueuedLoad.value());
-        QueuedLoad.reset();
-    }
 
-    EntityStorage::Update();
-}
 
 World::World(std::string name) {
     Name = name;

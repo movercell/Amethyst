@@ -70,17 +70,11 @@ class ENGINEEXPORT World : public EntityStorage {
     Engine::Reference<RWorld> RenderWorld;
     std::string MapName = "";
 
-    std::optional<ADFEntry> QueuedLoad;
-
     World(std::string name);
 public:
     ADFEntry Save();
     //! Immediately loads a Savefile, can cause bad flickering if used improperly.
-    void LoadImmediate(const ADFEntry& Saved);
-    //! Queues a Load for the next update.
-    void Load(ADFEntry Saved) { QueuedLoad = Saved; }
-
-    void Update();
+    void Load(const ADFEntry& Saved);
 
     //! Returns an uninitalized entity, or nullptr if classname is not valid.
     Engine::Reference<EntityHandler> MakeEntity(std::string classname, std::optional<EntityHandler*> parent = std::nullopt, std::optional<int> forcedslot = std::nullopt);
