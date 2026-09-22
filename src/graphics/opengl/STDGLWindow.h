@@ -25,4 +25,6 @@ struct STDGLWindow : public Window {
     void Draw();
     void SetName(std::string name);
     void SetResolution(int x, int y);
+    int GetWidth();
+    int GetHeight();
 };

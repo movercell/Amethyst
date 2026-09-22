@@ -40,6 +40,13 @@ void STDGLWindow::SetResolution(int x, int y) {
     Update();
 }
 
+int STDGLWindow::GetWidth() {
+   return Width;
+}
+int STDGLWindow::GetHeight() {
+   return Height;
+}
+
 void STDGLWindow::Update() {
     if (data != nullptr) {
         ImGui::SetCurrentContext(UIData);

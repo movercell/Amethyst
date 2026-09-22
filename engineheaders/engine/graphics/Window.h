@@ -32,4 +32,8 @@ public:
     virtual void SetName(std::string name) = 0;
     //! Sets the resolution of the window.
     virtual void SetResolution(int x, int y) = 0;
+    //! Gets the width of the window.
+    virtual int GetWidth() = 0;
+    //! Gets the height of the window.
+    virtual int GetHeight() = 0;
 };

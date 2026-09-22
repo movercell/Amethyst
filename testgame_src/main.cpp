@@ -36,6 +36,30 @@ enum class GameState {
 };
 GameState CurrentGameState = GameState::Normal;
 
+
+constexpr float MainMenuXOffsetRatio = 0.05f;
+constexpr float MainMenuYOffsetRatio = 0.5f;
+constexpr float MainMenuWidthRatio = 0.35f;
+constexpr float MainMenuButtonHeightRatio = 0.15f;
+constexpr float MainMenuButtonStylishBarWidthRatio = 0.05f;
+constexpr ImColor MainMenuButtonStylishBarHoveredColor = ImColor(153, 102, 204, 255);
+constexpr ImColor MainMenuButtonStylishBarNotHoveredColor = ImColor(53, 2, 104, 255);
+constexpr float MainMenuButtonTextOffset = 0.02f;
+
+static bool MainMenuButton(const char* Label, float MainMenuWidth) {
+	bool result = ImGui::Button(Label, ImVec2(-1.0f, MainMenuWidth * MainMenuButtonHeightRatio));
+
+	ImDrawList* DrawList = ImGui::GetWindowDrawList();
+	ImVec2 min = ImGui::GetItemRectMin();
+	ImVec2 size = ImGui::GetItemRectSize();
+	size.x *= MainMenuButtonStylishBarWidthRatio;
+	ImVec2 max = ImVec2(min.x + size.x, min.y + size.y);
+	bool isHovered = ImGui::IsItemHovered();
+	DrawList->AddRectFilled(min, max, isHovered ? MainMenuButtonStylishBarHoveredColor : MainMenuButtonStylishBarNotHoveredColor);
+
+	return result;
+}
+
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
 
 	// Loading screen stuff.
@@ -56,7 +80,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	if (IsLoading)
 		return; // No need to draw the rest of the UI while the game is loading as it'll look very broken.
 
-	// Pause menu logic.
+
+	// Pause logic.
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape, false)) {
 		if (CurrentGameState == GameState::Normal) {
 			CurrentGameState = GameState::Paused;
@@ -64,15 +89,45 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 			CurrentGameState = GameState::Normal;
 		}
 	}
+
+	// Main/pause menu
+	if (CurrentGameState == GameState::Paused) {
+		ImGui::SetNextWindowPos(ImVec2(window->GetWidth() * MainMenuXOffsetRatio, window->GetHeight() * MainMenuYOffsetRatio));
+		float MainMenuWidth = window->GetWidth() * MainMenuWidthRatio;
+		ImGui::SetNextWindowSize(ImVec2(MainMenuWidth, -1.0f));
+		ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(MainMenuButtonStylishBarWidthRatio + MainMenuButtonTextOffset, 0.5f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+		if (MainMenuButton("Resume", MainMenuWidth)) {
+			CurrentGameState = GameState::Normal;
+		}
+		if (MainMenuButton("Quit", MainMenuWidth)) {
+			Engine::QueueShutdown();
+		}
+
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
+
+		ImGui::End();
+	}
 	
-	// The actual main UI.
+	// In-game.
 	static bool shouldUseCamera = false;
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
 		shouldUseCamera = !shouldUseCamera;
 	}
-	bool isUsingCamera = shouldUseCamera && CurrentGameState == GameState::Normal;
-	window->SetEatCursor(isUsingCamera);
+	static char previsUsingCamera = 2; // So that it's not equal by default.
+	char isUsingCamera = shouldUseCamera && CurrentGameState == GameState::Normal;
+	if (isUsingCamera != previsUsingCamera) {
+		previsUsingCamera = isUsingCamera;
+		window->SetEatCursor(isUsingCamera);
+	}
 
 	auto PlayerEntityHandler = (*world)[0];
 	if (!PlayerEntityHandler || PlayerEntityHandler->GetClassname() != "player") return;
@@ -80,6 +135,18 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 	Engine::Reference<Camera> camera = PlayerEntity->PlayerCamera;
 
+	// Always calculate the mouse offset because the controls logic CAN get skipped.
+	static vec2 lastmouse = vec2(0, 0);
+	vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
+	if (ImGui::IsKeyPressed(ImGuiKey_Z, false))
+		lastmouse = currmouse;
+	vec2 mouseoffset = currmouse - lastmouse;
+	lastmouse = currmouse;
+
+	mouseoffset.x *= 7.5f * deltaTime;
+	mouseoffset.y *= 7.5f * deltaTime;
+
+	// Camera controls.
 	float velocity = 100.0f * deltaTime;
 	vec3 direction;
 	if (isUsingCamera && window->IsWindowInFocus()) {
@@ -98,16 +165,6 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		direction = direction.norm();
 		PlayerEntity->position += direction * velocity;
 
-
-		static vec2 lastmouse = vec2(0, 0);
-		vec2 currmouse = std::bit_cast<vec2>(ImGui::GetMousePos());
-		if (ImGui::IsKeyPressed(ImGuiKey_Z, false))
-			lastmouse = currmouse;
-		vec2 mouseoffset = currmouse - lastmouse;
-		lastmouse = currmouse;
-		
-		mouseoffset.x *= 7.5f * deltaTime;
-    	mouseoffset.y *= 7.5f * deltaTime;
     	PlayerEntity->yaw   -= mouseoffset.x;
     	PlayerEntity->pitch += mouseoffset.y;
 
