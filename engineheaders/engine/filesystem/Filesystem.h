@@ -3,9 +3,11 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 #include "engine/master.h"
 
 namespace Filesystem {
     std::ifstream ENGINEEXPORT GetFileAsStream(const std::string& name, const std::ios_base::openmode& flags);
     std::ofstream ENGINEEXPORT GetFileOutputStream(const std::string& name, const std::ios_base::openmode& flags);
+    std::filesystem::path ENGINEEXPORT GetGameDirectoryPath();
 }

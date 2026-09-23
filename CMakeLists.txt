@@ -107,6 +107,7 @@ endif()
 add_library(testgame SHARED
 	testgame_src/main.cpp
 	testgame_src/entities/player.cpp
+	testgame_src/ui.cpp
 )
 target_include_directories(testgame PRIVATE engineheaders)
 target_include_directories(testgame PRIVATE "libs/imgui")
