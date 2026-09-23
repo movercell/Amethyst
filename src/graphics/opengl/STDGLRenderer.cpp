@@ -12,6 +12,7 @@
 #include "STDGLRWorld.h"
 #include "GLMisc.h"
 #include "STDGLWindow.h"
+#include "imgui_internal.h"
 
 Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
@@ -49,6 +50,16 @@ void STDGLRenderer::Init() {
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
 
+    FontAtlas = new ImFontAtlas;
+    glCreateTextures(GL_TEXTURE_2D, 1, &FontAtlasTexture);
+    glTextureParameteri(FontAtlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(FontAtlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    FontAtlas->AddFontDefaultBitmap();
+    FontAtlas->RendererHasTextures = true;
+    FontAtlas->SetTexID(FontAtlasTexture);
+    FontAtlas->TexList[0]->Status = ImTextureStatus_OK;
+    BuildFonts();
+
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
 
@@ -59,6 +70,8 @@ void STDGLRenderer::Init() {
 }
 
 STDGLRenderer::~STDGLRenderer() {
+    delete FontAtlas;
+    glDeleteTextures(1, &FontAtlasTexture);
     glfwDestroyWindow(rendererData);
 }
 
@@ -67,6 +80,39 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
     auto res = new Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>(this, selfResource, rendererData, x, y, name);
     WindowVector.push_back(res);
     return Engine::Reference(res);
+}
+
+// TODO: Add glyph ranges support to this function
+ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale) {
+    auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
+    if (!fontfile) {
+        Engine::Warning("Failed to load font: " + path);
+        return FontAtlas->AddFontDefault();
+    }
+    
+    char* buffer;
+    // Reserve the needed space.
+    fontfile.seekg(0, std::ios::end);
+    int fontfilesize = fontfile.tellg();
+    buffer = new char[fontfilesize];
+    fontfile.seekg(0, std::ios::beg);
+    fontfile.read(buffer, fontfilesize);
+
+    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale);
+}
+void STDGLRenderer::ClearAllFonts() {
+    FontAtlas->Clear();
+}
+void STDGLRenderer::BuildFonts() {
+    glfwMakeContextCurrent(rendererData);
+
+    unsigned char* data;
+    int width;
+    int height;
+    FontAtlas->GetTexDataAsRGBA32(&data, &width, &height); 
+
+    glBindTextureUnit(0, FontAtlasTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 
@@ -167,6 +213,7 @@ void STDGLRenderer::Draw() {
     FrameCounter++;
 
     // Draw windows.
+    ImFontAtlasUpdateNewFrame(FontAtlas, FrameCounter, true);
     for (auto& window : WindowVector) {
         window->resource.Draw();
     }

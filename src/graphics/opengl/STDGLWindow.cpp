@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include "STDGLWindow.h"
 #include "GLFW/glfw3.h"
+#include "engine/filesystem/Filesystem.h"
 #include "engine/graphics/Renderer.h"
 #include "GLMisc.h"
 #include <imgui.h>
@@ -73,7 +74,7 @@ void STDGLWindow::Update() {
 
     {
 	    IMGUI_CHECKVERSION();
-	    UIData = ImGui::CreateContext();
+	    UIData = ImGui::CreateContext(rendererRef->GetFontAtlas());
         ImGui::SetCurrentContext(UIData);
 	    ImGuiIO& io = ImGui::GetIO();
 	    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls

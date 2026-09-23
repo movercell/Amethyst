@@ -30,6 +30,9 @@ protected:
     
     uint64_t FrameCounter = 0;
 
+    ImFontAtlas* FontAtlas;
+    GLuint FontAtlasTexture = 0;
+
     void Init();
 
     template<typename Container, typename Interface, typename T>
@@ -53,4 +56,9 @@ public:
     const uint64_t& GetFrameCounter();
     void Draw();
     Engine::Reference<Window> MakeWindow(int x, int y, std::string name);
+    ImFont* LoadFont(const std::string& path, float scale);
+    void ClearAllFonts();
+    void BuildFonts();
+
+    ImFontAtlas* GetFontAtlas() { return FontAtlas; }
 };
