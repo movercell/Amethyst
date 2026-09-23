@@ -1,8 +1,14 @@
 #include "ui.h"
 #include "main.h"
 
-static bool MainMenuButton(const char* Label, float MainMenuWidth) {
-	bool result = ImGui::Button(Label, ImVec2(-1.0f, MainMenuWidth * MainMenuButtonHeightRatio));
+MainMenu_t MainMenu;
+
+
+void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
+    if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
+        return;
+
+	bool isPressed = ImGui::Button(text.c_str(), ImVec2(-1.0f, MainMenuWidth * MainMenuButtonHeightRatio));
 
 	ImDrawList* DrawList = ImGui::GetWindowDrawList();
 	ImVec2 min = ImGui::GetItemRectMin();
@@ -12,7 +18,46 @@ static bool MainMenuButton(const char* Label, float MainMenuWidth) {
 	bool isHovered = ImGui::IsItemHovered();
 	DrawList->AddRectFilled(min, max, isHovered ? MainMenuButtonStylishBarHoveredColor : MainMenuButtonStylishBarNotHoveredColor);
 
-	return result;
+    if (isPressed) {
+        // Do the console command.
+    }
+}
+
+void MainMenu_t::Do() {
+    MainMenuType CurrentMenuType;
+    auto PlayerEntityHandler = (*world)[0];
+	if (PlayerEntityHandler) {
+        if (PlayerEntityHandler->GetClassname() == "player") CurrentMenuType = MainMenuType::Pause;
+        if (PlayerEntityHandler->GetClassname() == "player_mainmenu") CurrentMenuType = MainMenuType::Main;
+    } else {
+        CurrentMenuType = MainMenuType::None;
+    }
+
+    if (CurrentMenuType == MainMenuType::Pause)
+        if (CurrentGameState != GameState::Paused)
+            return;
+
+    ImGui::SetNextWindowPos(ImVec2(window->GetWidth() * MainMenuXOffsetRatio, window->GetHeight() * MainMenuYOffsetRatio));
+    float MainMenuWidth = window->GetWidth() * MainMenuWidthRatio;
+    ImGui::SetNextWindowSize(ImVec2(MainMenuWidth, -1.0f));
+    ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(MainMenuButtonStylishBarWidthRatio + MainMenuButtonTextOffset, 0.5f));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+
+    for (auto& button : Buttons) {
+            button.Do(MainMenuWidth, CurrentMenuType);
+    }
+
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(3);
+
+    ImGui::End();
+	
 }
 
 std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, Window* window) {
@@ -46,30 +91,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 
 	// Main/pause menu
-	if (CurrentGameState == GameState::Paused) {
-		ImGui::SetNextWindowPos(ImVec2(window->GetWidth() * MainMenuXOffsetRatio, window->GetHeight() * MainMenuYOffsetRatio));
-		float MainMenuWidth = window->GetWidth() * MainMenuWidthRatio;
-		ImGui::SetNextWindowSize(ImVec2(MainMenuWidth, -1.0f));
-		ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
-
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
-		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(MainMenuButtonStylishBarWidthRatio + MainMenuButtonTextOffset, 0.5f));
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-
-		if (MainMenuButton("Resume", MainMenuWidth)) {
-			CurrentGameState = GameState::Normal;
-		}
-		if (MainMenuButton("Quit", MainMenuWidth)) {
-			Engine::QueueShutdown();
-		}
-
-		ImGui::PopStyleVar(2);
-		ImGui::PopStyleColor(3);
-
-		ImGui::End();
-	}
+	MainMenu.Do();
 	
 	// In-game.
 	static bool shouldUseCamera = false;
@@ -85,7 +107,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	}
 
 	auto PlayerEntityHandler = (*world)[0];
-	if (!PlayerEntityHandler || PlayerEntityHandler->GetClassname() != "player") return;
+	if (!PlayerEntityHandler || !(PlayerEntityHandler->GetClassname() == "player" || PlayerEntityHandler->GetClassname() == "player_mainmenu")) return;
 	Entity_Player* PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
 
 	Engine::Reference<Camera> camera = PlayerEntity->PlayerCamera;
@@ -171,3 +193,10 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 	ImGui::End();
 };
+
+
+void UIInit() {
+    ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
+
+    MainMenuLayout.Deserialize(MainMenu);
+}

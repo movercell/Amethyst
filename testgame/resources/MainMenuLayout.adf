@@ -1,0 +1,34 @@
+"MainMenuLayout" {
+    "Buttons" [
+        {
+            "text" "Resume"
+            "concommand" "menu_pause"
+            "exclusivity" "2"
+        }
+        {
+            "text" "New game"
+            "concommand" "menu_newgame"
+            "exclusivity" "0"
+        }
+        {
+            "text" "Save"
+            "concommand" "menu_save"
+            "exclusivity" "2"
+        }
+        {
+            "text" "Load"
+            "concommand" "menu_load"
+            "exclusivity" "0"
+        }
+        {
+            "text" "Quit to main menu"
+            "concommand" "menu_quittomenu"
+            "exclusivity" "2"
+        }
+        {
+            "text" "Quit"
+            "concommand" "menu_quit"
+            "exclusivity" "0"
+        }
+    ]
+}

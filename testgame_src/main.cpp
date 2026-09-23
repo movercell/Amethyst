@@ -28,9 +28,13 @@ void gameinit() {
 	
 	Engine::RegisterEntityClass<Entity_Player>();
 	Engine::RegisterEntityClass<Entity_PlayerStart>();
+	Engine::RegisterEntityClass<Entity_Player_MainMenu>();
+	Engine::RegisterEntityClass<Entity_PlayerStart_MainMenu>();
 
 	renderer = Renderer::Make("STDGLRenderer");
 	rworld = renderer->MakeRWorld();
+
+	UIInit();
 
 	world = World::Make("Primary", rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
