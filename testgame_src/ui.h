@@ -10,9 +10,12 @@ constexpr float MainMenuYOffsetRatio = 0.5f;
 constexpr float MainMenuWidthRatio = 0.35f;
 constexpr float MainMenuButtonHeightRatio = 0.15f;
 constexpr float MainMenuButtonStylishBarWidthRatio = 0.05f;
-constexpr ImColor MainMenuButtonStylishBarHoveredColor = ImColor(153, 102, 204, 255);
-constexpr ImColor MainMenuButtonStylishBarNotHoveredColor = ImColor(53, 2, 104, 255);
-constexpr float MainMenuButtonTextOffset = 0.02f;
+constexpr float MainMenuButtonStylishBarHoveredAppearanceSpeed = 5.0f;
+constexpr float MainMenuButtonSelectedSizeIncrease = 0.2f;
+constexpr float MainMenuButtonTextOffsetRatio = 0.04f;
+constexpr ImColor MainMenuButtonActiveColor = ImColor(153, 102, 204, 255);
+constexpr ImColor MainMenuButtonNotActiveColor = ImColor(53, 2, 104, 255);
+constexpr float MainMenuButtonActivatedTextColorAppearanceSpeed = 10.0f;
 
 extern std::function<void(Renderer*, Window*)> mainuifunction;
 
@@ -23,10 +26,12 @@ enum MainMenuType {
 };
 
 struct MainMenuButton {
-
     ADFSerialize std::string text;
     ADFSerialize std::string concommand;
     ADFSerialize int exclusivity = MainMenuType::None;
+
+    float selectedamount = 0.0f;
+    float activatedamount = 0.0f;
 
     void Do(float MainMenuWidth, MainMenuType CurrentMenuType);
 };
