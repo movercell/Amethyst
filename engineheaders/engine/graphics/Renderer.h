@@ -10,8 +10,9 @@
 #include <memory>
 
 
-class ImFont;
-class ImFontAtlas;
+struct ImFont;
+struct ImFontConfig;
+struct ImFontAtlas;
 
 /*!
 *  \brief The standard renderer interface, every renderer must conform to it.
@@ -35,7 +36,7 @@ public:
     //! Makes a renderer with the passed in classname.(E.g. "STDGLRenderer")
     static Engine::Reference<Renderer> Make(std::string classname);
     //! Loads a font.
-    virtual ImFont* LoadFont(const std::string& path, float scale) = 0;
+    virtual ImFont* LoadFont(const std::string& path, float scale, ImFontConfig* config = nullptr, void* glyphranges = nullptr) = 0;
     //! Clears all fonts.
     virtual void ClearAllFonts() = 0;
     //! Builds the font atlas.

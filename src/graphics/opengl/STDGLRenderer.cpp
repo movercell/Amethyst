@@ -82,8 +82,7 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
     return Engine::Reference(res);
 }
 
-// TODO: Add glyph ranges support to this function
-ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale) {
+ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConfig* config, void* glyphranges) {
     auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
     if (!fontfile) {
         Engine::Warning("Failed to load font: " + path);
@@ -98,7 +97,7 @@ ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale) {
     fontfile.seekg(0, std::ios::beg);
     fontfile.read(buffer, fontfilesize);
 
-    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale);
+    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale, config, reinterpret_cast<ImWchar*>(glyphranges));
 }
 void STDGLRenderer::ClearAllFonts() {
     FontAtlas->Clear();

@@ -56,7 +56,7 @@ public:
     const uint64_t& GetFrameCounter();
     void Draw();
     Engine::Reference<Window> MakeWindow(int x, int y, std::string name);
-    ImFont* LoadFont(const std::string& path, float scale);
+    ImFont* LoadFont(const std::string& path, float scale, ImFontConfig* config, void* glyphranges);
     void ClearAllFonts();
     void BuildFonts();
 

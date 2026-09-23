@@ -4,11 +4,13 @@
 MainMenu_t MainMenu;
 
 ImFont* MainMenuButtonFont;
+ImFont* MainMenuButtonBoldFont;
 
 void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
         return;
 
+	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, 0.0f);
 	vec4 TextColor = (vec4(1.0f, 1.0f, 1.0f) * (1.0f - activatedamount)) + (std::bit_cast<vec4>(MainMenuButtonActiveColor) * (activatedamount));
 	TextColor.w = 1.0f;
 
@@ -20,9 +22,10 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	bool isPressed = ImGui::Button(text.c_str(), ImVec2(buttonwidth, buttonheight));
 	ImGui::PopStyleColor(1);
 	ImGui::PopStyleVar(1);
+	if (isHovered) ImGui::PopFont();
 
-	bool isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
-	bool isActive = ImGui::IsItemActive();
+	isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
+	isActive = ImGui::IsItemActive();
 
 	selectedamount = std::clamp(selectedamount + deltaTime * MainMenuButtonStylishBarHoveredAppearanceSpeed * (isHovered ? 1 : -1), 0.0f, 1.0f);
 	activatedamount = std::clamp(activatedamount + deltaTime * MainMenuButtonActivatedTextColorAppearanceSpeed * (isActive ? 1 : -1), 0.0f, 1.0f);
@@ -218,6 +221,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 void UIInit() {
     ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
 
-	MainMenuButtonFont = renderer->LoadFont("resources/fonts/Arimo.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
+	MainMenuButtonFont = renderer->LoadFont("resources/fonts/arimo-latin-400-normal.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
+	MainMenuButtonBoldFont = renderer->LoadFont("resources/fonts/arimo-latin-700-normal.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
     MainMenuLayout.Deserialize(MainMenu);
 }

@@ -31,6 +31,8 @@ struct MainMenuButton {
     ADFSerialize std::string concommand;
     ADFSerialize int exclusivity = MainMenuType::None;
 
+    bool isHovered = false;
+    bool isActive = false;
     float selectedamount = 0.0f;
     float activatedamount = 0.0f;
 
