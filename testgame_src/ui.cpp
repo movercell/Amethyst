@@ -221,7 +221,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 void UIInit() {
     ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
 
+	ImFontConfig fontconfig;
+	fontconfig.OversampleH = 1;
+	fontconfig.OversampleV = 1;
 	MainMenuButtonFont = renderer->LoadFont("resources/fonts/arimo-latin-400-normal.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
 	MainMenuButtonBoldFont = renderer->LoadFont("resources/fonts/arimo-latin-700-normal.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
+
     MainMenuLayout.Deserialize(MainMenu);
 }
