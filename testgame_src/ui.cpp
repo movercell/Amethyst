@@ -31,7 +31,8 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	ImVec2 size = ImGui::GetItemRectSize();
 	size.x *= MainMenuButtonStylishBarWidthRatio;
 	ImVec2 max = ImVec2(min.x + (size.x * selectedamount), min.y + size.y);
-	DrawList->AddRectFilled(min, max, isHovered ? MainMenuButtonActiveColor : MainMenuButtonNotActiveColor);
+	vec4 FancyBarColor = std::bit_cast<vec4>(MainMenuButtonActiveColor) * selectedamount + std::bit_cast<vec4>(MainMenuButtonNotActiveColor) * (1.0 - selectedamount);
+	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(FancyBarColor));
 
     if (isPressed) {
 		Engine::Print(text);
