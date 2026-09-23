@@ -6,13 +6,14 @@
 #include "engine/filesystem/ADF.h"
 
 constexpr float MainMenuXOffsetRatio = 0.05f;
-constexpr float MainMenuYOffsetRatio = 0.5f;
+constexpr float MainMenuYOffsetRatio = 0.4f;
 constexpr float MainMenuWidthRatio = 0.35f;
 constexpr float MainMenuButtonHeightRatio = 0.15f;
 constexpr float MainMenuButtonStylishBarWidthRatio = 0.05f;
 constexpr float MainMenuButtonStylishBarHoveredAppearanceSpeed = 5.0f;
 constexpr float MainMenuButtonSelectedSizeIncrease = 0.2f;
 constexpr float MainMenuButtonTextOffsetRatio = 0.04f;
+constexpr float MainMenuButtonFontSizeRatio = 0.6f;
 constexpr ImColor MainMenuButtonActiveColor = ImColor(153, 102, 204, 255);
 constexpr ImColor MainMenuButtonNotActiveColor = ImColor(53, 2, 104, 255);
 constexpr float MainMenuButtonActivatedTextColorAppearanceSpeed = 10.0f;

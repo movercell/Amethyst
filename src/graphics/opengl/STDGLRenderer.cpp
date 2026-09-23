@@ -87,7 +87,7 @@ ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale) {
     auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
     if (!fontfile) {
         Engine::Warning("Failed to load font: " + path);
-        return FontAtlas->AddFontDefault();
+        return FontAtlas->AddFontDefaultBitmap();
     }
     
     char* buffer;

@@ -34,8 +34,6 @@ void gameinit() {
 	renderer = Renderer::Make("STDGLRenderer");
 	rworld = renderer->MakeRWorld();
 
-	UIInit();
-
 	world = World::Make("Primary", rworld);
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
 	world->Load(savefile);
@@ -48,6 +46,8 @@ void gameinit() {
 
 	window = renderer->MakeWindow(800, 600, "Amethyst");
 	window->SetUIFunction(mainuifunction);
+	UIInit();
+	
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
 	models[1] = rworld->MakeModelInstance(".glb");
 	models[2] = rworld->MakeModelInstance("cube.adf");

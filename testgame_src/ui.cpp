@@ -3,6 +3,7 @@
 
 MainMenu_t MainMenu;
 
+ImFont* MainMenuButtonFont;
 
 void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
@@ -60,8 +61,9 @@ void MainMenu_t::Do() {
     ImGui::SetNextWindowSize(ImVec2(-1.0f, -1.0f));
     ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
 
+	ImGui::PushFont(MainMenuButtonFont);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.1f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
 	ImGui::PushStyleColor(ImGuiCol_NavHighlight, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
@@ -72,6 +74,7 @@ void MainMenu_t::Do() {
 
     ImGui::PopStyleVar(1);
     ImGui::PopStyleColor(4);
+	ImGui::PopFont();
 
     ImGui::End();
 	
@@ -215,5 +218,6 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 void UIInit() {
     ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
 
+	MainMenuButtonFont = renderer->LoadFont("resources/fonts/Arimo.ttf", window->GetWidth() * MainMenuWidthRatio * MainMenuButtonHeightRatio * MainMenuButtonFontSizeRatio);
     MainMenuLayout.Deserialize(MainMenu);
 }

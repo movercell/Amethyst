@@ -14,5 +14,6 @@ enum class GameState {
 
 extern std::optional<ADFEntry> QueuedLoad;
 extern GameState CurrentGameState;
+extern Engine::Reference<Renderer> renderer;
 extern Engine::Reference<Window> window;
 extern Engine::Reference<World> world;
