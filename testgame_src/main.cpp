@@ -11,6 +11,8 @@
 #include "main.h"
 #include "ui.h"
 
+#include "engine/Console.h"
+
 Engine::Reference<Renderer> renderer;
 Engine::Reference<RWorld> rworld;
 Engine::Reference<Window> window;

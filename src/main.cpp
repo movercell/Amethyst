@@ -10,7 +10,7 @@
 #include <cstdint>
 
 #include "engine/master.h"
-#include "GameDLLHandler.h"
+#include "utils/GameDLLHandler.h"
 
 // Time between current frame and last frame
 float ENGINEEXPORT deltaTime = 0.0f;	

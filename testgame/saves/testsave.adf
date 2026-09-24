@@ -5,7 +5,7 @@
         "000100" {
             "classname" "prop_dynamic"
             "properties" {
-                "targetname" not\ quoted
+                "targetname" "quoted"
                 "position" { x 128 y 0 z 128 }
                 "model" "multimesh.adf"
                 "rotation" { x 45 y 180 z 45 }
