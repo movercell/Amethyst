@@ -15,6 +15,15 @@ void Engine::Internal::RegisterConsoleCommand(std::string Name, ConsoleCommand* 
                 }
 
 void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::string Do) {
+    if (InWorld == nullptr) {
+        Engine::Warning("Ran command in a world passed in as nullptr!");
+        return;
+    }
+    if (!(*InWorld)[AsEntityFromSlot]) {
+        Engine::Warning("Ran command as an invalid entity!");
+        return;
+    }
+
     int i = 0;
     while (i < Do.length()) {
         std::vector<std::string> params;

@@ -24,7 +24,7 @@
             "exclusivity" "2"
         }
         {
-            "text" "DearImGUI demo window"
+            "text" "Dear ImGUI demo window"
             "concommand" "ui_showdemo"
             "exclusivity" "0"
         }
