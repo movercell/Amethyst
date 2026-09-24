@@ -31,7 +31,6 @@ protected:
     uint64_t FrameCounter = 0;
 
     ImFontAtlas* FontAtlas;
-    GLuint FontAtlasTexture = 0;
 
     void Init();
 
@@ -56,9 +55,8 @@ public:
     const uint64_t& GetFrameCounter();
     void Draw();
     Engine::Reference<Window> MakeWindow(int x, int y, std::string name);
-    ImFont* LoadFont(const std::string& path, float scale, ImFontConfig* config, void* glyphranges);
-    void ClearAllFonts();
-    void BuildFonts();
+    ImFont* LoadFont(const std::string& path, float scale, ImFontConfig* config);
+    void UnloadFont(ImFont* Font);
 
     ImFontAtlas* GetFontAtlas() { return FontAtlas; }
 };

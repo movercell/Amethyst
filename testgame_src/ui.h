@@ -12,18 +12,19 @@ constexpr float MainMenuButtonHeightRatio = 0.15f;
 constexpr float MainMenuButtonStylishBarWidthRatio = 0.05f;
 constexpr float MainMenuButtonStylishBarHoveredAppearanceSpeed = 5.0f;
 constexpr float MainMenuButtonSelectedSizeIncrease = 0.2f;
+constexpr float MainMenuButtonSelectedBackgroundAlpha = 0.2f;
 constexpr float MainMenuButtonTextOffsetRatio = 0.04f;
 constexpr float MainMenuButtonFontSizeRatio = 0.6f;
-constexpr ImColor MainMenuButtonActiveColor = ImColor(153, 102, 204, 255);
-constexpr ImColor MainMenuButtonNotActiveColor = ImColor(53, 2, 104, 255);
-constexpr float MainMenuButtonActivatedTextColorAppearanceSpeed = 10.0f;
+constexpr vec4 MainMenuButtonActiveColor = vec4(153, 102, 204, 255) / 255;
+constexpr vec4 MainMenuButtonNotActiveColor = vec4(53, 2, 104, 255) / 255;
+constexpr float MainMenuButtonActivatedTextColorAppearanceSpeed = 14.0f;
 
 extern std::function<void(Renderer*, Window*)> mainuifunction;
 
 enum MainMenuType {
     None = 0,
     Main = 1,
-    Pause = 2
+    InGame = 2
 };
 
 struct MainMenuButton {
@@ -42,7 +43,7 @@ struct MainMenuButton {
 struct MainMenu_t {
     ADFSerialize std::vector<MainMenuButton> Buttons;
     
-    void Do();
+    void Do(MainMenuType CurrentMenuType);
 };
 
 void UIInit();

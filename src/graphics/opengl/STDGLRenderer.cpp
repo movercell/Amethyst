@@ -50,15 +50,8 @@ void STDGLRenderer::Init() {
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
 
-    FontAtlas = new ImFontAtlas;
-    glCreateTextures(GL_TEXTURE_2D, 1, &FontAtlasTexture);
-    glTextureParameteri(FontAtlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(FontAtlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    FontAtlas = IM_NEW(ImFontAtlas);
     FontAtlas->AddFontDefaultBitmap();
-    FontAtlas->RendererHasTextures = true;
-    FontAtlas->SetTexID(FontAtlasTexture);
-    FontAtlas->TexList[0]->Status = ImTextureStatus_OK;
-    BuildFonts();
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
@@ -70,8 +63,7 @@ void STDGLRenderer::Init() {
 }
 
 STDGLRenderer::~STDGLRenderer() {
-    delete FontAtlas;
-    glDeleteTextures(1, &FontAtlasTexture);
+    IM_DELETE(FontAtlas);
     glfwDestroyWindow(rendererData);
 }
 
@@ -82,7 +74,7 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
     return Engine::Reference(res);
 }
 
-ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConfig* config, void* glyphranges) {
+ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConfig* config) {
     auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
     if (!fontfile) {
         Engine::Warning("Failed to load font: " + path);
@@ -97,21 +89,10 @@ ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConf
     fontfile.seekg(0, std::ios::beg);
     fontfile.read(buffer, fontfilesize);
 
-    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale, config, reinterpret_cast<ImWchar*>(glyphranges));
+    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale, config);
 }
-void STDGLRenderer::ClearAllFonts() {
-    FontAtlas->Clear();
-}
-void STDGLRenderer::BuildFonts() {
-    glfwMakeContextCurrent(rendererData);
-
-    unsigned char* data;
-    int width;
-    int height;
-    FontAtlas->GetTexDataAsRGBA32(&data, &width, &height); 
-
-    glBindTextureUnit(0, FontAtlasTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+void STDGLRenderer::UnloadFont(ImFont* Font) {
+    FontAtlas->RemoveFont(Font);
 }
 
 

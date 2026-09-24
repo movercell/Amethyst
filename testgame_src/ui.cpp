@@ -6,12 +6,21 @@ MainMenu_t MainMenu;
 ImFont* MainMenuButtonFont;
 ImFont* MainMenuButtonBoldFont;
 
+static MainMenuType GetCurrentMenuType() {
+    auto PlayerEntityHandler = (*world)[0];
+	if (PlayerEntityHandler) {
+        if (PlayerEntityHandler->GetClassname() == "player") return MainMenuType::InGame;
+        if (PlayerEntityHandler->GetClassname() == "player_mainmenu") return MainMenuType::Main;
+    }
+    return MainMenuType::None;
+}
+
 void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
         return;
 
 	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, 0.0f);
-	vec4 TextColor = (vec4(1.0f, 1.0f, 1.0f) * (1.0f - activatedamount)) + (std::bit_cast<vec4>(MainMenuButtonActiveColor) * (activatedamount));
+	vec4 TextColor = (vec4(1.0f, 1.0f, 1.0f) * (1.0f - activatedamount)) + (MainMenuButtonActiveColor * (activatedamount));
 	TextColor.w = 1.0f;
 
 	ImGui::PushStyleColor(ImGuiCol_Text, std::bit_cast<ImVec4>(TextColor));
@@ -35,7 +44,7 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	ImVec2 size = ImGui::GetItemRectSize();
 	size.x *= MainMenuButtonStylishBarWidthRatio;
 	ImVec2 max = ImVec2(min.x + (size.x * selectedamount), min.y + size.y);
-	vec4 FancyBarColor = std::bit_cast<vec4>(MainMenuButtonActiveColor) * selectedamount + std::bit_cast<vec4>(MainMenuButtonNotActiveColor) * (1.0 - selectedamount);
+	vec4 FancyBarColor = MainMenuButtonActiveColor * selectedamount + MainMenuButtonNotActiveColor * (1.0 - selectedamount);
 	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(FancyBarColor));
 
     if (isPressed) {
@@ -45,17 +54,18 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
     }
 }
 
-void MainMenu_t::Do() {
-    MainMenuType CurrentMenuType;
-    auto PlayerEntityHandler = (*world)[0];
-	if (PlayerEntityHandler) {
-        if (PlayerEntityHandler->GetClassname() == "player") CurrentMenuType = MainMenuType::Pause;
-        if (PlayerEntityHandler->GetClassname() == "player_mainmenu") CurrentMenuType = MainMenuType::Main;
-    } else {
-        CurrentMenuType = MainMenuType::None;
-    }
+void MainMenu_t::Do(MainMenuType CurrentMenuType) {
+    // Pause logic.
+	if (ImGui::IsKeyPressed(ImGuiKey_Escape, false) && CurrentMenuType == MainMenuType::InGame) {
+		if (CurrentGameState == GameState::Normal) {
+			CurrentGameState = GameState::Paused;
+		} else if (CurrentGameState == GameState::Paused) {
+			CurrentGameState = GameState::Normal;
+		}
+	}
 
-    if (CurrentMenuType == MainMenuType::Pause)
+	// Fully in the gameplay, no need to draw the main menu.
+    if (CurrentMenuType == MainMenuType::InGame)
         if (CurrentGameState != GameState::Paused)
             return;
 
@@ -66,8 +76,8 @@ void MainMenu_t::Do() {
 
 	ImGui::PushFont(MainMenuButtonFont);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.1f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.2f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, MainMenuButtonSelectedBackgroundAlpha));
 	ImGui::PushStyleColor(ImGuiCol_NavHighlight, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
 
@@ -103,18 +113,9 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	if (IsLoading)
 		return; // No need to draw the rest of the UI while the game is loading as it'll look very broken.
 
-
-	// Pause logic.
-	if (ImGui::IsKeyPressed(ImGuiKey_Escape, false)) {
-		if (CurrentGameState == GameState::Normal) {
-			CurrentGameState = GameState::Paused;
-		} else if (CurrentGameState == GameState::Paused) {
-			CurrentGameState = GameState::Normal;
-		}
-	}
-
 	// Main/pause menu
-	MainMenu.Do();
+	MainMenuType CurrentMenuType = GetCurrentMenuType();
+	MainMenu.Do(CurrentMenuType);
 	
 	// In-game.
 	static bool shouldUseCamera = false;
@@ -123,14 +124,16 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		shouldUseCamera = !shouldUseCamera;
 	}
 	static char previsUsingCamera = 2; // So that it's not equal by default.
-	char isUsingCamera = shouldUseCamera && CurrentGameState == GameState::Normal;
+	char isUsingCamera = shouldUseCamera && CurrentGameState == GameState::Normal && CurrentMenuType == InGame;
 	if (isUsingCamera != previsUsingCamera) {
 		previsUsingCamera = isUsingCamera;
 		window->SetEatCursor(isUsingCamera);
 	}
 
+	// Safety check
+	if (CurrentMenuType == MainMenuType::None) return;
+
 	auto PlayerEntityHandler = (*world)[0];
-	if (!PlayerEntityHandler || !(PlayerEntityHandler->GetClassname() == "player" || PlayerEntityHandler->GetClassname() == "player_mainmenu")) return;
 	Entity_Player* PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
 
 	Engine::Reference<Camera> camera = PlayerEntity->PlayerCamera;
