@@ -1,5 +1,6 @@
 #include "ui.h"
 #include "main.h"
+#include "engine/Console.h"
 
 MainMenu_t MainMenu;
 
@@ -48,9 +49,8 @@ void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType)
 	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(StylishBarColor));
 
     if (isPressed) {
-		Engine::Print(text);
 		// TODO: Play a sound
-        // TODO: Do the console command.
+        Engine::ExecuteConsoleCommand(world, 0, concommand);
     }
 }
 

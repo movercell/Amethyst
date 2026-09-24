@@ -5,10 +5,10 @@
 namespace Engine {
     class ConsoleCommand;
 
-    void ExecuteConsoleCommand(World* InWorld, BaseEntity* AsEntity, std::vector<std::string> Do);
+    void ENGINEEXPORT ExecuteConsoleCommand(Engine::Reference<World> InWorld, int AsEntityFromSlot, std::string Do);
 
     namespace Internal {
-        void RegisterConsoleCommand(std::string Name, ConsoleCommand* Command);
+        void ENGINEEXPORT RegisterConsoleCommand(std::string Name, ConsoleCommand* Command);
     }
 
     /*! \brief Console command, can be used in the console.
@@ -16,7 +16,7 @@ namespace Engine {
     * WARNING: To be located in static memory only!
     */
     class ConsoleCommand {
-        std::function<void(World*, BaseEntity*, std::vector<std::string>)> Command;
+        std::function<void(Engine::Reference<World>, int, std::vector<std::string>)> Command;
 
     public:
         ConsoleCommand(std::string Name, decltype(Command) Function) : Command(Function) {
@@ -25,7 +25,7 @@ namespace Engine {
         #endif
         }
         
-        void operator()(World* InWorld, BaseEntity* AsEntity, std::vector<std::string> Do) { Command(InWorld, AsEntity, Do); }
+        void operator()(Engine::Reference<World> InWorld, int AsEntityFromSlot, std::vector<std::string> Do) { Command(InWorld, AsEntityFromSlot, Do); }
 
 
         // Static memory only.

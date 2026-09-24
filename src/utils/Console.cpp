@@ -7,6 +7,6 @@ void Engine::Internal::RegisterConsoleCommand(std::string Name, ConsoleCommand* 
     commands.emplace(Name, Command);
 }
 
-void Engine::ExecuteConsoleCommand(World* InWorld, BaseEntity* AsEntity, std::vector<std::string> Do) {
-
+void Engine::ExecuteConsoleCommand(Engine::Reference<World> InWorld, int AsEntityFromSlot, std::string Do) {
+    Engine::Print("Concommand " + Do);
 }
