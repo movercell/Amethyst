@@ -177,6 +177,14 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
             PlayerEntity->pitch = 89.0f;
         if (PlayerEntity->pitch < -89.0f)
             PlayerEntity->pitch = -89.0f;
+
+		// These are failsafes.(They can get triggered if the player does alt+tab in fullscreen with camera controls active.)
+		if (PlayerEntity->yaw > 2000.0f)    PlayerEntity->yaw = 0.0f;
+		if (PlayerEntity->yaw < -2000.0f)   PlayerEntity->yaw = 0.0f;
+
+		// To avoid floating point imprecision at longer playtimes
+		while (PlayerEntity->yaw > 360.0f)  PlayerEntity->yaw -= 360.0f;
+		while (PlayerEntity->yaw < -360.0f) PlayerEntity->yaw += 360.0f;
 	}
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -225,12 +233,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 void UIInit() {
     ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
+    MainMenuLayout.Deserialize(MainMenu);
 
 	ImFontConfig fontconfig;
 	fontconfig.OversampleH = 1;
 	fontconfig.OversampleV = 1;
-	MainMenuButtonFont = renderer->LoadFont("resources/fonts/arimo-latin-400-normal.ttf", &fontconfig);
-	MainMenuButtonBoldFont = renderer->LoadFont("resources/fonts/arimo-latin-700-normal.ttf", &fontconfig);
-
-    MainMenuLayout.Deserialize(MainMenu);
+	MainMenuButtonFont = renderer->LoadFont(MainMenu.MainMenuButtonFontPath, &fontconfig);
+	MainMenuButtonBoldFont = renderer->LoadFont(MainMenu.MainMenuButtonFontBoldPath, &fontconfig);
 }

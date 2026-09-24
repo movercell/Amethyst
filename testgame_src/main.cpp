@@ -38,7 +38,7 @@ void gameinit() {
 
 	window = renderer->MakeWindow(800, 600, "Amethyst");
 	window->SetUIFunction(mainuifunction);
-	window->SetFullscreen(false);
+	window->SetFullscreen(true);
 	UIInit();
 
 	auto savefile = ADFEntry::FromFile("saves/testsave.adf");

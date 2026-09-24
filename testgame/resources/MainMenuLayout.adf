@@ -13,6 +13,9 @@
     ButtonNotActiveColor { "x" "0.4" "y" "0.2" "z" "0.6" "w" "1.0"}
     ButtonActivatedTextColorAppearanceSpeed "14.0"
 
+    "MainMenuButtonFontPath" "resources/fonts/arimo-latin-400-normal.ttf"
+    "MainMenuButtonFontBoldPath" "resources/fonts/arimo-latin-700-normal.ttf"
+
     "Buttons" [
         {
             "text" "Resume"

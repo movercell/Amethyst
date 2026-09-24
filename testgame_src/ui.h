@@ -42,6 +42,9 @@ struct MainMenu_t {
     vec4  ButtonActiveColor = vec4(153, 102, 204, 255) / 255;
     vec4  ButtonNotActiveColor = vec4(53, 2, 104, 255) / 255;
     float ButtonActivatedTextColorAppearanceSpeed = 14.0f;
+
+    std::string MainMenuButtonFontPath;
+    std::string MainMenuButtonFontBoldPath;
     
     void Do(MainMenuType CurrentMenuType);
 };
