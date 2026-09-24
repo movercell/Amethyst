@@ -23,7 +23,7 @@ struct MainMenuButton {
     float selectedamount = 0.0f;
     float activatedamount = 0.0f;
 
-    void Do(float MainMenuWidth, MainMenuType CurrentMenuType);
+    void Do(float Width, float Height, MainMenuType CurrentMenuType);
 };
 
 struct MainMenu_t {
@@ -33,6 +33,7 @@ struct MainMenu_t {
     float YOffsetRatio = 0.4f;
     float WidthRatio = 0.35f;
     float ButtonHeightRatio = 0.15f;
+    float ButtonHeightCapRatio = 0.7f;
     float ButtonStylishBarWidthRatio = 0.05f;
     float ButtonStylishBarHoveredAppearanceSpeed = 5.0f;
     float ButtonSelectedSizeIncrease = 0.2f;

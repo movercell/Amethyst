@@ -15,7 +15,7 @@ static MainMenuType GetCurrentMenuType() {
     return MainMenuType::None;
 }
 
-void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
+void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType) {
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
         return;
 
@@ -23,13 +23,11 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	TextColor.w = 1.0f;
 
 	ImGui::PushStyleColor(ImGuiCol_Text, std::bit_cast<ImVec4>(TextColor));
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(MainMenuWidth * MainMenu.ButtonStylishBarWidthRatio * selectedamount + MainMenuWidth * MainMenu.ButtonTextOffsetRatio, ImGui::GetStyle().FramePadding.y));
-	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, MainMenuWidth * MainMenu.ButtonHeightRatio * MainMenu.ButtonFontSizeRatio);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(Width * MainMenu.ButtonStylishBarWidthRatio * selectedamount + Width * MainMenu.ButtonTextOffsetRatio, ImGui::GetStyle().FramePadding.y));
+	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, Height * MainMenu.ButtonFontSizeRatio);
 
-	float buttonwidth = MainMenuWidth;
-	float buttonheight = buttonwidth * MainMenu.ButtonHeightRatio;
-	buttonheight += buttonheight * MainMenu.ButtonSelectedSizeIncrease * selectedamount;
-	bool isPressed = ImGui::Button(text.c_str(), ImVec2(buttonwidth, buttonheight));
+	Height += Height * MainMenu.ButtonSelectedSizeIncrease * selectedamount;
+	bool isPressed = ImGui::Button(text.c_str(), ImVec2(Width, Height));
 
 	if (isHovered) ImGui::PopFont();
 	ImGui::PopStyleColor(1);
@@ -46,8 +44,8 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	ImVec2 size = ImGui::GetItemRectSize();
 	size.x *= MainMenu.ButtonStylishBarWidthRatio;
 	ImVec2 max = ImVec2(min.x + (size.x * selectedamount), min.y + size.y);
-	vec4 FancyBarColor = MainMenu.ButtonActiveColor * selectedamount + MainMenu.ButtonNotActiveColor * (1.0 - selectedamount);
-	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(FancyBarColor));
+	vec4 StylishBarColor = MainMenu.ButtonActiveColor * selectedamount + MainMenu.ButtonNotActiveColor * (1.0 - selectedamount);
+	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(StylishBarColor));
 
     if (isPressed) {
 		Engine::Print(text);
@@ -73,10 +71,12 @@ void MainMenu_t::Do(MainMenuType CurrentMenuType) {
 
     ImGui::SetNextWindowPos(ImVec2(window->GetWidth() * MainMenu.XOffsetRatio, window->GetHeight() * MainMenu.YOffsetRatio));
     float MainMenuWidth = window->GetWidth() * MainMenu.WidthRatio;
+	float MainMenuButtonHeight = std::min(MainMenuWidth * MainMenu.ButtonHeightRatio, window->GetHeight() * MainMenu.ButtonHeightCapRatio);
+
     ImGui::SetNextWindowSize(ImVec2(-1.0f, -1.0f));
     ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
 
-	ImGui::PushFont(MainMenuButtonFont, MainMenuWidth * MainMenu.ButtonHeightRatio * MainMenu.ButtonFontSizeRatio);
+	ImGui::PushFont(MainMenuButtonFont, MainMenuButtonHeight * MainMenu.ButtonFontSizeRatio);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.2f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, MainMenu.ButtonSelectedBackgroundAlpha));
@@ -84,7 +84,7 @@ void MainMenu_t::Do(MainMenuType CurrentMenuType) {
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
 
     for (auto& button : Buttons) {
-            button.Do(MainMenuWidth, CurrentMenuType);
+            button.Do(MainMenuWidth, MainMenuButtonHeight, CurrentMenuType);
     }
 
     ImGui::PopStyleVar(1);
