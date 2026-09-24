@@ -33,12 +33,17 @@ bool STDGLWindow::IsWindowInFocus() {
 
 void STDGLWindow::SetName(std::string name) {
     Name = name;
-    Update();
+    NeedsUpdate = true;
 }
 void STDGLWindow::SetResolution(int x, int y) {
     Width = x;
     Height = y;
-    Update();
+    NeedsUpdate = true;
+}
+void STDGLWindow::SetFullscreen(bool state) {
+    if (Fullscreen == state) return;
+    Fullscreen = state;
+    NeedsUpdate = true;
 }
 
 int STDGLWindow::GetWidth() {
@@ -59,6 +64,10 @@ void STDGLWindow::Update() {
 		glfwDestroyWindow(data);
     }
 
+    GLFWmonitor* primarymonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* videomode = glfwGetVideoMode(primarymonitor);
+    GLFWmonitor* monitor = nullptr;
+
     glfwDefaultWindowHints();
 
 	glfwWindowHint(GLFW_SAMPLES, 16);
@@ -66,9 +75,26 @@ void STDGLWindow::Update() {
     // TODO: Should add a setting to make it override NO_ERROR even in release
     glfwWindowHint(GLFW_NO_ERROR, GLFW_TRUE);
 #endif
-
-    data = glfwCreateWindow(Width, Height, Name.c_str(), nullptr, reinterpret_cast<GLFWwindow*>(rendererData));
+    if (Fullscreen) {
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+        glfwWindowHint(GLFW_RED_BITS, videomode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, videomode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, videomode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, videomode->refreshRate);
+        glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+        Width = videomode->width;
+        Height = videomode->height;
+        monitor = primarymonitor;
+    }
+    data = glfwCreateWindow(Width, Height, Name.c_str(), monitor, reinterpret_cast<GLFWwindow*>(rendererData));
     glfwSwapInterval(1); // TODO: add a vsync setting
+
+    if (Fullscreen) {
+        int xpos, ypos;
+        glfwGetMonitorPos(primarymonitor, &xpos, &ypos);
+        glfwSetWindowPos(data, xpos, ypos);
+    }
 
     ProcessCursorEating();
 
@@ -111,6 +137,11 @@ STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* Rende
 }
 
 void STDGLWindow::Draw() {
+    if (NeedsUpdate) {
+        Update();
+        NeedsUpdate = false;
+    }
+
     glfwMakeContextCurrent(data);
     glViewport(0, 0, Width, Height);
     

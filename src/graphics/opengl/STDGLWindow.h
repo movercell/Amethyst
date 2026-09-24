@@ -11,8 +11,12 @@ struct STDGLWindow : public Window {
     ImGuiContext* UIData = nullptr;
     GLFWwindow* data = nullptr;
     bool ShouldEatCursor = false;
+    bool Fullscreen = false;
     int Width;
     int Height;
+
+    bool NeedsUpdate = true;
+    
     void ProcessCursorEating();
     void Update();
 
@@ -27,4 +31,5 @@ struct STDGLWindow : public Window {
     void SetResolution(int x, int y);
     int GetWidth();
     int GetHeight();
+    void SetFullscreen(bool state);
 };

@@ -1,4 +1,18 @@
 "MainMenuLayout" {
+    XOffsetRatio "0.05"
+    YOffsetRatio "0.4"
+    WidthRatio "0.4"
+    ButtonHeightRatio "0.12"
+    ButtonStylishBarWidthRatio "0.05"
+    ButtonStylishBarHoveredAppearanceSpeed "5.0"
+    ButtonSelectedSizeIncrease "0.2"
+    ButtonSelectedBackgroundAlpha "0.2"
+    ButtonTextOffsetRatio "0.04"
+    ButtonFontSizeRatio "0.6"
+    ButtonActiveColor { "x" "0.6" "y" "0.4" "z" "0.8" "w" "1.0"}
+    ButtonNotActiveColor { "x" "0.4" "y" "0.2" "z" "0.6" "w" "1.0"}
+    ButtonActivatedTextColorAppearanceSpeed "14.0"
+
     "Buttons" [
         {
             "text" "Resume"

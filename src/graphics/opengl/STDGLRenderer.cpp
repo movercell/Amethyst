@@ -13,6 +13,8 @@
 #include "GLMisc.h"
 #include "STDGLWindow.h"
 #include "imgui_internal.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
 
 Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
@@ -50,8 +52,12 @@ void STDGLRenderer::Init() {
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
 
-    FontAtlas = IM_NEW(ImFontAtlas);
-    FontAtlas->AddFontDefaultBitmap();
+    IMGUI_CHECKVERSION();
+    BaseImGuiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(BaseImGuiContext);
+    ImGui_ImplGlfw_InitForOpenGL(data, false);
+    ImGui_ImplOpenGL3_Init();
+    GetFontAtlas()->AddFontDefaultBitmap();
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
@@ -63,7 +69,12 @@ void STDGLRenderer::Init() {
 }
 
 STDGLRenderer::~STDGLRenderer() {
-    IM_DELETE(FontAtlas);
+
+    ImGui::SetCurrentContext(BaseImGuiContext);
+    ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
     glfwDestroyWindow(rendererData);
 }
 
@@ -74,11 +85,11 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
     return Engine::Reference(res);
 }
 
-ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConfig* config) {
+ImFont* STDGLRenderer::LoadFont(const std::string& path, ImFontConfig* config) {
     auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
     if (!fontfile) {
         Engine::Warning("Failed to load font: " + path);
-        return FontAtlas->AddFontDefaultBitmap();
+        return GetFontAtlas()->AddFontDefaultBitmap();
     }
     
     char* buffer;
@@ -89,12 +100,14 @@ ImFont* STDGLRenderer::LoadFont(const std::string& path, float scale, ImFontConf
     fontfile.seekg(0, std::ios::beg);
     fontfile.read(buffer, fontfilesize);
 
-    return FontAtlas->AddFontFromMemoryTTF(buffer, fontfilesize, scale, config);
+    return GetFontAtlas()->AddFontFromMemoryTTF(buffer, fontfilesize, 0.0f, config);
 }
 void STDGLRenderer::UnloadFont(ImFont* Font) {
-    FontAtlas->RemoveFont(Font);
+    GetFontAtlas()->RemoveFont(Font);
 }
-
+ImFontAtlas* STDGLRenderer::GetFontAtlas() {
+    return BaseImGuiContext->IO.Fonts;
+}
 
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(rendererData);
@@ -193,7 +206,7 @@ void STDGLRenderer::Draw() {
     FrameCounter++;
 
     // Draw windows.
-    ImFontAtlasUpdateNewFrame(FontAtlas, FrameCounter, true);
+    ImFontAtlasUpdateNewFrame(GetFontAtlas(), FrameCounter, true);
     for (auto& window : WindowVector) {
         window->resource.Draw();
     }

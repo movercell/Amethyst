@@ -46,6 +46,7 @@ void gameinit() {
 
 	window = renderer->MakeWindow(800, 600, "Amethyst");
 	window->SetUIFunction(mainuifunction);
+	window->SetFullscreen(true);
 	UIInit();
 	
 	models[0] = rworld->MakeModelInstance("multimesh.adf");

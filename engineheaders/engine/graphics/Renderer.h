@@ -36,7 +36,7 @@ public:
     //! Makes a renderer with the passed in classname.(E.g. "STDGLRenderer")
     static Engine::Reference<Renderer> Make(std::string classname);
     //! Loads a font.
-    virtual ImFont* LoadFont(const std::string& path, float scale, ImFontConfig* config = nullptr) = 0;
+    virtual ImFont* LoadFont(const std::string& path, ImFontConfig* config = nullptr) = 0;
     //! Unloads a font.
     virtual void UnloadFont(ImFont* Font) = 0;
     //! Gets the font atlas.

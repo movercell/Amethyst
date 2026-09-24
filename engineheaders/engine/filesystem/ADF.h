@@ -250,7 +250,7 @@ public:
     vec4 GetVec4() const {
         const auto& map = GetMap();
 
-        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("2")) {
+        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("w")) {
             return vec4(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
         }
 

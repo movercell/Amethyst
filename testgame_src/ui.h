@@ -5,20 +5,6 @@
 #include "engine/graphics/Renderer.h"
 #include "engine/filesystem/ADF.h"
 
-constexpr float MainMenuXOffsetRatio = 0.05f;
-constexpr float MainMenuYOffsetRatio = 0.4f;
-constexpr float MainMenuWidthRatio = 0.35f;
-constexpr float MainMenuButtonHeightRatio = 0.15f;
-constexpr float MainMenuButtonStylishBarWidthRatio = 0.05f;
-constexpr float MainMenuButtonStylishBarHoveredAppearanceSpeed = 5.0f;
-constexpr float MainMenuButtonSelectedSizeIncrease = 0.2f;
-constexpr float MainMenuButtonSelectedBackgroundAlpha = 0.2f;
-constexpr float MainMenuButtonTextOffsetRatio = 0.04f;
-constexpr float MainMenuButtonFontSizeRatio = 0.6f;
-constexpr vec4 MainMenuButtonActiveColor = vec4(153, 102, 204, 255) / 255;
-constexpr vec4 MainMenuButtonNotActiveColor = vec4(53, 2, 104, 255) / 255;
-constexpr float MainMenuButtonActivatedTextColorAppearanceSpeed = 14.0f;
-
 extern std::function<void(Renderer*, Window*)> mainuifunction;
 
 enum MainMenuType {
@@ -41,7 +27,21 @@ struct MainMenuButton {
 };
 
 struct MainMenu_t {
-    ADFSerialize std::vector<MainMenuButton> Buttons;
+    std::vector<MainMenuButton> Buttons;
+
+    float XOffsetRatio = 0.05f;
+    float YOffsetRatio = 0.4f;
+    float WidthRatio = 0.35f;
+    float ButtonHeightRatio = 0.15f;
+    float ButtonStylishBarWidthRatio = 0.05f;
+    float ButtonStylishBarHoveredAppearanceSpeed = 5.0f;
+    float ButtonSelectedSizeIncrease = 0.2f;
+    float ButtonSelectedBackgroundAlpha = 0.2f;
+    float ButtonTextOffsetRatio = 0.04f;
+    float ButtonFontSizeRatio = 0.6f;
+    vec4  ButtonActiveColor = vec4(153, 102, 204, 255) / 255;
+    vec4  ButtonNotActiveColor = vec4(53, 2, 104, 255) / 255;
+    float ButtonActivatedTextColorAppearanceSpeed = 14.0f;
     
     void Do(MainMenuType CurrentMenuType);
 };
