@@ -14,7 +14,7 @@ void Engine::Internal::RegisterConsoleCommand(std::string Name, ConsoleCommand* 
                     CurrentContent.clear(); \
                 }
 
-void Engine::ExecuteConsoleCommand(Engine::Reference<World> InWorld, int AsEntityFromSlot, std::string Do) {
+void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::string Do) {
     int i = 0;
     while (i < Do.length()) {
         std::vector<std::string> params;

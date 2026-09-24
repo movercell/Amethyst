@@ -40,7 +40,7 @@
         }
         {
             "text" "Quit to main menu"
-            "concommand" "menu_quittomenu"
+            "concommand" "menu_quittomainmenu"
             "exclusivity" "2"
         }
         {

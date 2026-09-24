@@ -7,10 +7,6 @@ MainMenu_t MainMenu;
 ImFont* MainMenuButtonFont;
 ImFont* MainMenuButtonBoldFont;
 
-Engine::ConsoleCommand menu_saveCommand("menu_save", [](auto InWorld, auto AsEntityInSlot, auto Do) {
-	Engine::Print("Console command!");
-});
-
 static MainMenuType GetCurrentMenuType() {
     auto PlayerEntityHandler = (*world)[0];
 	if (PlayerEntityHandler) {
@@ -19,6 +15,19 @@ static MainMenuType GetCurrentMenuType() {
     }
     return MainMenuType::None;
 }
+
+Engine::ConsoleCommand menu_pauseCommand("menu_pause", [](auto InWorld, auto AsEntityInSlot, auto Do) {
+	if (GetCurrentMenuType() == MainMenuType::InGame) {
+		if (CurrentGameState == GameState::Normal) {
+			CurrentGameState = GameState::Paused;
+		} else if (CurrentGameState == GameState::Paused) {
+			CurrentGameState = GameState::Normal;
+		}
+	}
+});
+Engine::ConsoleCommand menu_quitCommand("menu_quit", [](auto InWorld, auto AsEntityInSlot, auto Do) {
+	Engine::QueueShutdown();
+});
 
 void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType) {
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
@@ -54,18 +63,14 @@ void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType)
 
     if (isPressed) {
 		// TODO: Play a sound
-        Engine::ExecuteConsoleCommand(world, 0, concommand);
+        Engine::ExecuteConsoleCommand(world.get(), 0, concommand);
     }
 }
 
 void MainMenu_t::Do(MainMenuType CurrentMenuType) {
     // Pause logic.
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape, false) && CurrentMenuType == MainMenuType::InGame) {
-		if (CurrentGameState == GameState::Normal) {
-			CurrentGameState = GameState::Paused;
-		} else if (CurrentGameState == GameState::Paused) {
-			CurrentGameState = GameState::Normal;
-		}
+		Engine::ExecuteConsoleCommand(world.get(), 0, "menu_pause");
 	}
 
 	// Fully in the gameplay, no need to draw the main menu.
