@@ -5,7 +5,7 @@
 
 namespace Engine {
     //! Handles simple C-style escape sequences.
-    char CharacterEscapeResult(char original) {
+    inline char CharacterEscapeResult(char original) {
         switch (original)
         {
         case '\'':

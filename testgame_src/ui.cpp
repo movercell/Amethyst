@@ -7,6 +7,10 @@ MainMenu_t MainMenu;
 ImFont* MainMenuButtonFont;
 ImFont* MainMenuButtonBoldFont;
 
+Engine::ConsoleCommand menu_saveCommand("menu_save", [](auto InWorld, auto AsEntityInSlot, auto Do) {
+	Engine::Print("Console command!");
+});
+
 static MainMenuType GetCurrentMenuType() {
     auto PlayerEntityHandler = (*world)[0];
 	if (PlayerEntityHandler) {
