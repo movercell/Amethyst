@@ -35,19 +35,17 @@ void gameinit() {
 	rworld = renderer->MakeRWorld();
 
 	world = World::Make("Primary", rworld);
-	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
-	world->Load(savefile);
-
-	auto newsavefile = world->Save();
-	newsavefile.ToFile("saves/hi.adf");
-	newsavefile.ToFile("saves/hicompacted.adf", true);
-
-	auto tmpentityhandler = (*world)[0];
 
 	window = renderer->MakeWindow(800, 600, "Amethyst");
 	window->SetUIFunction(mainuifunction);
-	window->SetFullscreen(true);
+	window->SetFullscreen(false);
 	UIInit();
+
+	auto savefile = ADFEntry::FromFile("saves/testsave.adf");
+	world->Load(savefile);
+	auto newsavefile = world->Save();
+	newsavefile.ToFile("saves/hi.adf");
+	newsavefile.ToFile("saves/hicompacted.adf", true);
 	
 	models[0] = rworld->MakeModelInstance("multimesh.adf");
 	models[1] = rworld->MakeModelInstance(".glb");

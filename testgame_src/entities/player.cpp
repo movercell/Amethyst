@@ -1,7 +1,8 @@
 #include "player.h"
+#include "../main.h"
 
 void Entity_Player::Initialize() {
-    PlayerCamera = world->GetRWorld()->MakeCamera(vec2(800 * 2, 600 * 2), "maincamera");
+    PlayerCamera = world->GetRWorld()->MakeCamera(vec2(window->GetWidth() * 2, window->GetHeight() * 2), "maincamera");
 }
 void Entity_Player::Update() {
     PlayerCamera->SetPosition(position);
@@ -26,7 +27,7 @@ void Entity_PlayerStart::Initialize() {
 
 
 void Entity_Player_MainMenu::Initialize() {
-    PlayerCamera = world->GetRWorld()->MakeCamera(vec2(800 * 2, 600 * 2), "maincamera");
+    PlayerCamera = world->GetRWorld()->MakeCamera(vec2(window->GetWidth() * 2, window->GetHeight() * 2), "maincamera");
     PlayerCamera->SetPosition(position);
     PlayerCamera->SetRotation(rotation);
 }

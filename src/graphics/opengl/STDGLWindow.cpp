@@ -133,7 +133,6 @@ STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* Rende
     Width = ResX;
     Height = ResY;
     Name = name;
-    Update();
 }
 
 void STDGLWindow::Draw() {

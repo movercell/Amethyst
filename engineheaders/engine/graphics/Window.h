@@ -36,6 +36,6 @@ public:
     virtual int GetWidth() = 0;
     //! Gets the height of the window.
     virtual int GetHeight() = 0;
-    //! Sets fullscreen mode(In Amethyst it's always borderless window, not exclusive!)
+    //! Sets fullscreen mode
     virtual void SetFullscreen(bool state) = 0;
 };

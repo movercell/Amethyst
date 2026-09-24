@@ -25,7 +25,7 @@ void MainMenuButton::Do(float MainMenuWidth, MainMenuType CurrentMenuType) {
 	ImGui::PushStyleColor(ImGuiCol_Text, std::bit_cast<ImVec4>(TextColor));
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(MainMenuWidth * MainMenu.ButtonStylishBarWidthRatio * selectedamount + MainMenuWidth * MainMenu.ButtonTextOffsetRatio, ImGui::GetStyle().FramePadding.y));
 	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, MainMenuWidth * MainMenu.ButtonHeightRatio * MainMenu.ButtonFontSizeRatio);
-	
+
 	float buttonwidth = MainMenuWidth;
 	float buttonheight = buttonwidth * MainMenu.ButtonHeightRatio;
 	buttonheight += buttonheight * MainMenu.ButtonSelectedSizeIncrease * selectedamount;

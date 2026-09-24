@@ -5,7 +5,7 @@
     ButtonHeightRatio "0.12"
     ButtonStylishBarWidthRatio "0.05"
     ButtonStylishBarHoveredAppearanceSpeed "5.0"
-    ButtonSelectedSizeIncrease "0.2"
+    ButtonSelectedSizeIncrease "0.3"
     ButtonSelectedBackgroundAlpha "0.2"
     ButtonTextOffsetRatio "0.04"
     ButtonFontSizeRatio "0.6"
