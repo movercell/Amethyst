@@ -55,6 +55,7 @@ add_executable(amethyst
 	src/utils/EngineMisc.cpp
 	src/utils/GameDLLHandler.cpp
 	src/utils/Console.cpp
+	src/utils/EngineConsoleCommands.cpp
 	src/graphics/Rendering.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp
@@ -69,11 +70,13 @@ add_executable(amethyst
 	src/Init.cpp
 	src/filesystem/Filesystem.cpp
 	src/filesystem/ADFParser.cpp
+	src/engineui/BaseEngineUI.cpp
 	src/entities/World.cpp
 	src/entities/BasicEntities.cpp
 	src/entities/MiscEntities.cpp
 )
 
+target_include_directories(amethyst PRIVATE "src/")
 set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
 
 # Link the libraries.

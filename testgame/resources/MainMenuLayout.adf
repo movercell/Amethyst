@@ -24,6 +24,11 @@
             "exclusivity" "2"
         }
         {
+            "text" "DearImGUI demo window"
+            "concommand" "ui_showdemo"
+            "exclusivity" "0"
+        }
+        {
             "text" "New game"
             "concommand" "menu_newgame"
             "exclusivity" "0"

@@ -2,6 +2,8 @@
 
 #include "engine/entities/Entity.h"
 
+#define ConsoleCommandLambda [](World* InWorld, int AsEntityFromSlot, std::vector<std::string> Do)
+
 namespace Engine {
     class ConsoleCommand;
 
@@ -17,9 +19,11 @@ namespace Engine {
     */
     class ConsoleCommand {
         std::function<void(World*, int, std::vector<std::string>)> Command;
+        bool isPersitent; // TODO
 
     public:
-        ConsoleCommand(std::string Name, decltype(Command) Function) : Command(Function) {
+        ConsoleCommand(std::string Name, decltype(Command) Function, bool Persitent = false) : Command(Function), isPersitent(Persitent) {
+            // This cannot be done in engine because the map of console commands may not exist yet.
         #ifndef AMETHYSTENGINESRC
             Engine::Internal::RegisterConsoleCommand(std::move(Name), this);
         #endif

@@ -8,6 +8,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#include "engineui/BaseEngineUI.h"
 
 void STDGLWindow::SetEatCursor(bool state) {
     ShouldEatCursor = state;
@@ -154,6 +155,7 @@ void STDGLWindow::Draw() {
     } else {
         Engine::Error("A window was drawn without a UI function!");
     }
+    Engine::DrawEngineUI();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

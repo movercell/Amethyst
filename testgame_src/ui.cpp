@@ -16,7 +16,7 @@ static MainMenuType GetCurrentMenuType() {
     return MainMenuType::None;
 }
 
-Engine::ConsoleCommand menu_pauseCommand("menu_pause", [](auto InWorld, auto AsEntityInSlot, auto Do) {
+Engine::ConsoleCommand menu_pauseCommand("menu_pause", ConsoleCommandLambda {
 	if (GetCurrentMenuType() == MainMenuType::InGame) {
 		if (CurrentGameState == GameState::Normal) {
 			CurrentGameState = GameState::Paused;
@@ -25,7 +25,7 @@ Engine::ConsoleCommand menu_pauseCommand("menu_pause", [](auto InWorld, auto AsE
 		}
 	}
 });
-Engine::ConsoleCommand menu_quitCommand("menu_quit", [](auto InWorld, auto AsEntityInSlot, auto Do) {
+Engine::ConsoleCommand menu_quitCommand("menu_quit", ConsoleCommandLambda {
 	Engine::QueueShutdown();
 });
 
