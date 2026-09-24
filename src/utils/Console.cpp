@@ -21,7 +21,27 @@ void Engine::ExecuteConsoleCommand(Engine::Reference<World> InWorld, int AsEntit
         std::inplace_vector<char, 1024> CurrentContent;
 
         while (i < Do.length()) {
-            // TODO: "
+            // Quation mark.
+            if (Do[i] == '\"') {
+                i++;
+                while (i < Do.length() && Do[i] != '\"') {
+                    // Escape.(Yes this is just copied.)
+                    if (Do[i] == '\\') {
+                        i++;
+                        // Failsafe when last char.
+                        if (i == Do.size())
+                            break;
+                        CurrentContent.push_back(Engine::CharacterEscapeResult(Do[i]));
+                        i++;
+                        continue;
+                    }
+
+                    CurrentContent.push_back(Do[i]);
+                    i++;
+                }
+                PUSH_PARAM;
+                i++;
+            }
 
             // Semicolon.
             if (Do[i] == ';') {
@@ -36,6 +56,8 @@ void Engine::ExecuteConsoleCommand(Engine::Reference<World> InWorld, int AsEntit
                 if (i == Do.size())
                     break;
                 CurrentContent.push_back(Engine::CharacterEscapeResult(Do[i]));
+                i++;
+                continue;
             }
             // Whitespace.
             if (!std::isgraph(Do[i])) {
