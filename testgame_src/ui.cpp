@@ -1,11 +1,14 @@
 #include "ui.h"
 #include "main.h"
 #include "engine/Console.h"
+#include "imgui_stdlib.h"
 
 MainMenu_t MainMenu;
 
 ImFont* MainMenuButtonFont;
 ImFont* MainMenuButtonBoldFont;
+
+ConsoleVariable<float> player_speedVariable = {"player_speed", 100.0f, false, "Player camera speed", 0.0f, 1024.0f};
 
 static MainMenuType GetCurrentMenuType() {
     auto PlayerEntityHandler = (*world)[0];
@@ -190,7 +193,7 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	if (CurrentMenuType == MainMenuType::Main) return;
 
 	// Camera controls.
-	float velocity = 100.0f * deltaTime;
+	float velocity = player_speedVariable * deltaTime;
 	vec3 direction;
 	if (isUsingCamera && window->IsWindowInFocus()) {
     	    if (ImGui::IsKeyDown(ImGuiKey_W))
@@ -242,6 +245,12 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		if (ImGui::Button("Quickload(F6)") || ImGui::IsKeyPressed(ImGuiKey_F6, false)) {
 			CurrentLoadingPopupText = "Loading...";
 			QueuedLoad = ADFEntry::FromFile("saves/quick.adf");
+		}
+
+		static std::string CurrentCommand;
+		ImGui::InputText("Console command", &CurrentCommand);
+		if (ImGui::Button("Execute command")) {
+			Engine::ExecuteConsoleCommand(world.get(), 0, CurrentCommand);
 		}
 
 	ImGui::End();

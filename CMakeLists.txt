@@ -81,7 +81,7 @@ set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
 # Link the libraries.
 target_link_libraries(amethyst PRIVATE glad)
 target_link_libraries(amethyst PRIVATE glfw)
-target_link_libraries(amethyst PRIVATE imgui)
+target_link_libraries(amethyst PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,imgui>)
 target_link_libraries(amethyst PRIVATE assimp)
 
 
