@@ -247,9 +247,9 @@ namespace Engine {
 }
 
 #define RegisterEntityClass(Entity) \
-    namespace Engine { namespace Internal { \
+    namespace Engine { namespace Internal { namespace EntityRegistrations { \
         inline RegisterEntityClassObject<Entity> Entity ## Registration; \
-    }}
+    }}}
 
 #ifdef __INTELLISENSE__ 
 #define EntityClassname(classname) 
