@@ -3,7 +3,6 @@
 #include "engine/entities/Entity.h"
 #include "entities/BasicEntities.h"
 #include "entities/MiscEntities.h"
-#include "utils/EngineConsoleCommands.h"
 
 static void exitfunc() {
 	glfwTerminate();
@@ -12,8 +11,6 @@ static void exitfunc() {
 void Engine::Init() {
     glfwInit();
 	std::atexit(&exitfunc); // To make it outlive the game dll internal global objects.
-
-    Engine::RegisterEngineConsoleCommands();
 
     Renderer::AddRenderer("STDGLRenderer", &STDGLRenderer::Make);
 }

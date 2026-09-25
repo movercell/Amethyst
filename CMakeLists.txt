@@ -55,7 +55,6 @@ add_executable(amethyst
 	src/utils/EngineMisc.cpp
 	src/utils/GameDLLHandler.cpp
 	src/utils/Console.cpp
-	src/utils/EngineConsoleCommands.cpp
 	src/graphics/Rendering.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp

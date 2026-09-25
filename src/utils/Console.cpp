@@ -2,10 +2,14 @@
 #include "engine/StringUtils.h"
 
 
-static std::map<std::string, Engine::ConsoleCommand*> commands;
+// To avoid initialization order fiasco when creating a console command in the engine itself.
+static inline auto& GetCommandMap() {
+    static std::map<std::string, ConsoleCommand*> commands;
+    return commands;
+}
 
 void Engine::Internal::RegisterConsoleCommand(std::string Name, ConsoleCommand* Command) {
-    commands.emplace(Name, Command);
+    GetCommandMap().emplace(Name, Command);
 }
 
 #define PUSH_PARAM \
@@ -82,7 +86,7 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
         PUSH_PARAM;
 
         try {
-            commands.at(params[0])->operator()(InWorld, AsEntityFromSlot, params);
+            GetCommandMap().at(params[0])->operator()(InWorld, AsEntityFromSlot, params);
         } catch( std::out_of_range e ) {
             Engine::Print(std::string("Unknown console command: " + params[0]));
         }
