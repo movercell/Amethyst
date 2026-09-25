@@ -4,7 +4,7 @@
 
 ConsoleCommand r_commandCommand("r_command", ConsoleCommandLambda {
     InWorld->GetRWorld()->GetRenderer()->RendererCommand(Do);
-});
+}, "Passes the command to the renderer.");
 
 static std::vector<std::pair<const std::string, Engine::Reference<Renderer>(*)()>> RendererTypes;
 

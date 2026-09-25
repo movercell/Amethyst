@@ -4,11 +4,11 @@
 
 // To avoid initialization order fiasco when creating a console command in the engine itself.
 static inline auto& GetCommandMap() {
-    static std::map<std::string, ConsoleCommand*> commands;
+    static std::map<std::string_view, ConsoleCommand*> commands;
     return commands;
 }
 
-void Engine::Internal::RegisterConsoleCommand(std::string Name, ConsoleCommand* Command) {
+void Engine::Internal::RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command) {
     GetCommandMap().emplace(Name, Command);
 }
 
@@ -92,3 +92,17 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
         }
     }
 }
+
+// Default engine console commands.
+ConsoleCommand helpCommand("help", ConsoleCommandLambda {
+    if (Do.size() != 2) {
+        Engine::Print("Usage: help [command]");
+        return;
+    }
+
+    try {
+        Engine::Print(std::string(GetCommandMap().at(Do[1])->GetHelpString()));
+    } catch( std::out_of_range e ) {
+        Engine::Print(Do[1] + " is not a valid console command!");
+    }
+}, "Returns the help string of a command.");

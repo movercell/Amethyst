@@ -85,7 +85,7 @@ void MainMenu_t::Do(MainMenuType CurrentMenuType) {
     ImGui::SetNextWindowSize(ImVec2(-1.0f, -1.0f));
     ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
 
-	ImGui::PushFont(MainMenuButtonFont, MainMenuButtonHeight * MainMenu.ButtonFontSizeRatio);
+	ImGui::PushFont(MainMenuButtonFont, MainMenuButtonHeight * MainMenu.ButtonFontSizeRatio); // TODO: use a style?
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.2f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, MainMenu.ButtonSelectedBackgroundAlpha));
