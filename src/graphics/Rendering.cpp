@@ -1,5 +1,10 @@
 #include "engine/graphics/Renderer.h"
 #include <vector>
+#include "engine/Console.h"
+
+ConsoleCommand r_commandCommand("r_command", ConsoleCommandLambda {
+    InWorld->GetRWorld()->GetRenderer()->RendererCommand(Do);
+});
 
 static std::vector<std::pair<const std::string, Engine::Reference<Renderer>(*)()>> RendererTypes;
 

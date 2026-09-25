@@ -109,6 +109,12 @@ ImFontAtlas* STDGLRenderer::GetFontAtlas() {
     return BaseImGuiContext->IO.Fonts;
 }
 
+void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
+    if (Do[1] == "recompileshaders") {
+        ShaderSystem.Recompile();
+    }
+}
+
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(rendererData);
 
@@ -226,7 +232,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     }
 
     // Cull instances.
-    glUseProgram(ModelInstancePreprocessShader);
+    glUseProgram(*ModelInstancePreprocessShader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
         iarray->Model->BindInfo();
@@ -237,7 +243,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // Replicate the instance counts across all LOD meshes.
-    glUseProgram(ModelInstanceReplicatorShader);
+    glUseProgram(*ModelInstanceReplicatorShader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Model->BindInfo();
         glDispatchCompute(1, 1, 1);

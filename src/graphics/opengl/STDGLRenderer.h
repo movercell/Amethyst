@@ -25,8 +25,8 @@ protected:
 
     std::array<GLsync, 2> DoubleBufferFences = { nullptr, nullptr };
 
-    GLuint ModelInstancePreprocessShader;
-    GLuint ModelInstanceReplicatorShader;
+    GLuint* ModelInstancePreprocessShader;
+    GLuint* ModelInstanceReplicatorShader;
     
     uint64_t FrameCounter = 0;
 
@@ -57,6 +57,6 @@ public:
     Engine::Reference<Window> MakeWindow(int x, int y, std::string name);
     ImFont* LoadFont(const std::string& path, ImFontConfig* config);
     void UnloadFont(ImFont* Font);
-
     ImFontAtlas* GetFontAtlas();
+    void RendererCommand(std::vector<std::string> Do);
 };

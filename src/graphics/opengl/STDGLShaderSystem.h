@@ -35,8 +35,8 @@ private:
 public:
     void Init() { Init_All(false); };
 
-    inline GLuint GetComputeShader(std::string name) {
-        return ComputeShaders.at(name);
+    inline GLuint* GetComputeShader(std::string name) {
+        return &ComputeShaders.at(name);
     } 
     // The first element of the pair is the normal version of the shader program, while the second element is the depth-only version.
     inline ShaderProgram* GetShaderProgram(const std::string& Name) {

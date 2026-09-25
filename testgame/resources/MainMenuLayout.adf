@@ -29,6 +29,11 @@
             "exclusivity" "0"
         }
         {
+            "text" "Recompile shaders"
+            "concommand" "r_command recompileshaders"
+            "exclusivity" "0"
+        }
+        {
             "text" "New game"
             "concommand" "menu_newgame"
             "exclusivity" "0"

@@ -41,6 +41,8 @@ public:
     virtual void UnloadFont(ImFont* Font) = 0;
     //! Gets the font atlas.
     virtual ImFontAtlas* GetFontAtlas() = 0;
+    //! Executes a renderer command.
+    virtual void RendererCommand(std::vector<std::string> Do) = 0;
 
 #ifdef AMETHYSTENGINESRC
     static void AddRenderer(const std::string classname, Engine::Reference<Renderer> (*makefunc)() );
