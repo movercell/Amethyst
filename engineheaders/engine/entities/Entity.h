@@ -217,6 +217,7 @@ namespace Engine {
         };
     }
 
+    //! Manual registration of an entity class to the engine, prefer using the quick macro.
     template<typename Entity>
     void RegisterEntityClass() {
         static_assert(std::is_base_of_v<BaseEntity, Entity>, "An entity class must be an extension of BaseEntity!");
@@ -234,7 +235,21 @@ namespace Engine {
     }
 
     void ENGINEEXPORT RegisterDefaultEngineEntityTypes();
+
+    namespace Internal {
+        template<typename Entity>
+        struct RegisterEntityClassObject {
+            RegisterEntityClassObject() {
+                Engine::RegisterEntityClass<Entity>();
+            }
+        };
+    }
 }
+
+#define RegisterEntityClass(Entity) \
+    namespace Engine { namespace Internal { \
+        inline RegisterEntityClassObject<Entity> Entity ## Registration; \
+    }}
 
 #ifdef __INTELLISENSE__ 
 #define EntityClassname(classname) 

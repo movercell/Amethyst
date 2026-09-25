@@ -27,11 +27,6 @@ GameState CurrentGameState = GameState::Normal;
 
 void gameinit() {
 	Engine::RegisterDefaultEngineEntityTypes();
-	
-	Engine::RegisterEntityClass<Entity_Player>();
-	Engine::RegisterEntityClass<Entity_PlayerStart>();
-	Engine::RegisterEntityClass<Entity_Player_MainMenu>();
-	Engine::RegisterEntityClass<Entity_PlayerStart_MainMenu>();
 
 	renderer = Renderer::Make("STDGLRenderer");
 	rworld = renderer->MakeRWorld();
