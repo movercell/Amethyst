@@ -124,6 +124,9 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	if (IsLoading)
 		return; // No need to draw the rest of the UI while the game is loading as it'll look very broken.
 
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
 	// Main/pause menu
 	MainMenuType CurrentMenuType = GetCurrentMenuType();
 	MainMenu.Do(CurrentMenuType);
@@ -145,9 +148,29 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 	if (CurrentMenuType == MainMenuType::None) return;
 
 	auto PlayerEntityHandler = (*world)[0];
-	Entity_Player* PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
+	Entity_Player* PlayerEntity;
+	Engine::Reference<Camera> camera;
+	if (CurrentMenuType == MainMenuType::InGame) {
+		PlayerEntity = reinterpret_cast<Entity_Player*>(PlayerEntityHandler->GetEntityPtr());
+		camera = PlayerEntity->PlayerCamera;
+	} else if (CurrentMenuType == MainMenuType::Main) {
+		camera = reinterpret_cast<Entity_Player_MainMenu*>(PlayerEntityHandler->GetEntityPtr())->PlayerCamera;
+	}
 
-	Engine::Reference<Camera> camera = PlayerEntity->PlayerCamera;
+	// Draw the camera output.
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::Begin("main", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar |
+				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
+                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
+                 ImGuiWindowFlags_NoBackground);
+		ImVec2 CameraSize = ImGui::GetContentRegionAvail();
+		ImGui::Image(camera->GetTexture(), CameraSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+	ImGui::PopStyleVar(3);
 
 	// Always calculate the mouse offset because the controls logic CAN get skipped.
 	static vec2 lastmouse = vec2(0, 0);
@@ -159,6 +182,12 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 	mouseoffset.x *= 7.5f * deltaTime;
 	mouseoffset.y *= 7.5f * deltaTime;
+
+	if (ImGui::IsKeyPressed(ImGuiKey_F4)) {
+		Engine::QueueShutdown();
+	}
+	// No camera controls and no rest of the UI in main menu.
+	if (CurrentMenuType == MainMenuType::Main) return;
 
 	// Camera controls.
 	float velocity = 100.0f * deltaTime;
@@ -196,29 +225,8 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		while (PlayerEntity->yaw < -360.0f) PlayerEntity->yaw += 360.0f;
 	}
 
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-
 	ImGui::DockSpaceOverViewport(0, viewport, ImGuiDockNodeFlags_PassthruCentralNode);
 
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-
-	//Draws the camera output
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::Begin("main", NULL, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar |
-				 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
-                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration |
-                 ImGuiWindowFlags_NoBackground);
-		ImVec2 CameraSize = ImGui::GetContentRegionAvail();
-		ImGui::Image(camera->GetTexture(), CameraSize, ImVec2(0, 1), ImVec2(1, 0));
-	ImGui::End();
-	ImGui::PopStyleVar(3);
-
-	if (ImGui::IsKeyPressed(ImGuiKey_F4)) {
-		Engine::QueueShutdown();
-	}
 	ImGui::Begin("Hello from ui function");
 		ImGui::Text("Delta		 : %f", deltaTime);
 		ImGui::Text("Player pitch: %f", PlayerEntity->pitch);
