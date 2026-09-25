@@ -16,7 +16,7 @@ static MainMenuType GetCurrentMenuType() {
     return MainMenuType::None;
 }
 
-ConsoleCommand menu_pauseCommand("menu_pause", ConsoleCommandLambda {
+ConsoleCommand menu_pauseCommand("menu_pause", []ConsoleCommandLambda {
 	if (GetCurrentMenuType() == MainMenuType::InGame) {
 		if (CurrentGameState == GameState::Normal) {
 			CurrentGameState = GameState::Paused;
@@ -25,7 +25,7 @@ ConsoleCommand menu_pauseCommand("menu_pause", ConsoleCommandLambda {
 		}
 	}
 });
-ConsoleCommand menu_quitCommand("menu_quit", ConsoleCommandLambda {
+ConsoleCommand menu_quitCommand("menu_quit", []ConsoleCommandLambda {
 	Engine::QueueShutdown();
 });
 

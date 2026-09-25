@@ -7,9 +7,17 @@ static inline auto& GetCommandMap() {
     static std::map<std::string_view, ConsoleCommand*> commands;
     return commands;
 }
+static inline auto& GetConsoleVariablePreservationLambdasVector() {
+    static std::vector<std::function<std::string()>> preservationlambdas;
+    return preservationlambdas;
+}
 
 void Engine::Internal::RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command) {
     GetCommandMap().emplace(Name, Command);
+}
+
+void Engine::Internal::RegisterConsoleVariablePreservation(std::function<std::string()> Function) {
+    GetConsoleVariablePreservationLambdasVector().emplace_back(Function);
 }
 
 #define PUSH_PARAM \
@@ -94,7 +102,7 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
 }
 
 // Default engine console commands.
-ConsoleCommand helpCommand("help", ConsoleCommandLambda {
+ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
     if (Do.size() != 2) {
         Engine::Print("Usage: help [command]");
         return;

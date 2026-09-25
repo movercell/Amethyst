@@ -2,21 +2,14 @@
 #include "imgui.h"
 #include "engine/Console.h"
 
-bool DemoWindowOpen = false;
-bool ConsoleWindowOpen = false;
-
-ConsoleCommand ui_showdemoCommand("ui_showdemo", ConsoleCommandLambda {
-    DemoWindowOpen = !DemoWindowOpen;
-});
-ConsoleCommand ui_showconsoleCommand("ui_showconsole", ConsoleCommandLambda {
-    ConsoleWindowOpen = !ConsoleWindowOpen;
-});
+ConsoleVariable<bool> DemoWindowOpen = {"ui_showdemo", false, false, "Shows the Dear ImGUI demo window."};
+ConsoleVariable<bool> ConsoleWindowOpen = {"ui_showdemo", false, false, "Shows the console."};
 
 void Engine::DrawEngineUI() {
     DrawConsole();
 
     if (DemoWindowOpen) {
-        ImGui::ShowDemoWindow(&DemoWindowOpen);
+        ImGui::ShowDemoWindow(&DemoWindowOpen.GetValue());
     }
 }
 
