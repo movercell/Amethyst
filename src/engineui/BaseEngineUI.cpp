@@ -29,6 +29,7 @@ void Engine::DrawConsole() {
         return;
     }
 
+    // Text area.
     float ReservedSpace = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
     if (ImGui::BeginChild("TextArea", ImVec2(0, -ReservedSpace), ImGuiChildFlags_NavFlattened, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
 
@@ -36,15 +37,23 @@ void Engine::DrawConsole() {
     }
     ImGui::EndChild();
 
+
+    // Input area.
+
+
     ImGui::AlignTextToFramePadding();
 
     ImGui::Text("In:");
     ImGui::SameLine();
     static int In = std::numeric_limits<int>::max();
-    static std::string InPreview = "";
-    if (In >= WorldMap.size()) { // In case the world stops to exist and now we are out of bounds on the map.(Also used for first value.)
+    if (In >= WorldMap.size()) { // In case the world stops to exist and now we are out of bounds on the map.
         In = 0;
-        InPreview = WorldMap.begin()->second->GetName();
+    }
+    std::string InPreview;
+    {
+        auto InVal = WorldMap.begin();
+        for (int i = 0; i < In; i++) ++InVal;
+        InPreview = InVal->second->GetName();
     }
     ImGui::SetNextItemWidth(60.0f);
     if (ImGui::BeginCombo("##AmethystConsoleInputIn", InPreview.c_str())) {
