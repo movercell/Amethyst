@@ -71,7 +71,7 @@ public:
             }
         } else {
             if (Do.size() == 1) {
-                Engine::Print("The current value of " + std::string(Internalcommand.GetName()) + " is: " + std::to_string(Value));
+                Engine::Print("Current value of " + std::string(Internalcommand.GetName()) + " is: " + std::to_string(Value));
             } else if (Do.size() == 2) {
                 std::from_chars(Do[1].data(), Do[1].data() + Do[1].size(), Value);
                 Value = std::clamp(Value, Min, Max);

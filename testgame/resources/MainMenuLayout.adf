@@ -29,8 +29,8 @@
             "exclusivity" "0"
         }
         {
-            "text" "Recompile shaders"
-            "concommand" "r_command recompileshaders"
+            "text" "Console"
+            "concommand" "ui_showconsole"
             "exclusivity" "0"
         }
         {

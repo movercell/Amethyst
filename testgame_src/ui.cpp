@@ -1,7 +1,6 @@
 #include "ui.h"
 #include "main.h"
 #include "engine/Console.h"
-#include "imgui_stdlib.h"
 
 MainMenu_t MainMenu;
 
@@ -245,12 +244,6 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		if (ImGui::Button("Quickload(F6)") || ImGui::IsKeyPressed(ImGuiKey_F6, false)) {
 			CurrentLoadingPopupText = "Loading...";
 			QueuedLoad = ADFEntry::FromFile("saves/quick.adf");
-		}
-
-		static std::string CurrentCommand;
-		ImGui::InputText("Console command", &CurrentCommand);
-		if (ImGui::Button("Execute command")) {
-			Engine::ExecuteConsoleCommand(world.get(), 0, CurrentCommand);
 		}
 
 	ImGui::End();

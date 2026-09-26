@@ -90,5 +90,7 @@ public:
     void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<EntityHandler*> parent = std::nullopt);
     ADFEntry EntityStorageToADF(EntityStorage* Storage);
 
+    const std::string& GetName() { return Name; }
+
     ~World();
 };

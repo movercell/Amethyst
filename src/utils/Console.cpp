@@ -4,36 +4,39 @@
 
 // To avoid initialization order fiasco when creating a console command in the engine itself.
 // (Yes, those leaks are intentional.(Because at least one object that needs one of these would be created prior to them and make a std::at_exit screw up if they were actual static objects.))
-static inline auto& GetCommandMap() {
+auto& GetCommandMap() {
     static auto& commands = *(new std::map<std::string_view, ConsoleCommand*>);
     return commands;
 }
-static inline auto& GetConsoleVariablePreservationLambdasVector() {
+auto& GetConsoleVariablePreservationLambdasVector() {
     static auto& preservationlambdas = *(new std::vector<std::function<std::string()>>);
     return preservationlambdas;
 }
-static inline auto& GetWorldMap() {
-    static auto& worlds = *(new std::map<std::string, World*>);
+auto& GetWorldMap() {
+    static auto& worlds = *(new std::map<std::string_view, World*>);
     return worlds;
 }
 
 
 void Engine::Internal::RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command) {
+    if (GetWorldMap().contains(Name)) {
+        Engine::Error("Attempted to create a console command of the same name as another!");
+    }
+    
     GetCommandMap().emplace(Name, Command);
 }
 void Engine::Internal::RegisterConsoleVariablePreservation(std::function<std::string()> Function) {
     GetConsoleVariablePreservationLambdasVector().emplace_back(Function);
 }
 void Engine::Internal::RegisterWorldForConsole(std::string_view Name, World* world) {
+    if (GetWorldMap().contains(Name)) {
+        Engine::Error("Attempted to create a world of the same name as another!");
+    }
+
     GetWorldMap().emplace(Name, world);
 }
 void Engine::Internal::UnregisterWorldForConsole(std::string_view Name) {
-    auto& map = GetWorldMap();
-
-    auto it = map.find(std::string(Name));
-
-    if (it != map.end())
-        map.erase(it);
+    GetWorldMap().erase(Name);
 }
 
 
