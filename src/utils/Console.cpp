@@ -3,42 +3,52 @@
 
 
 // To avoid initialization order fiasco when creating a console command in the engine itself.
+// (Yes, those leaks are intentional.(Because at least one object that needs one of these would be created prior to them and make a std::at_exit screw up if they were actual static objects.))
 static inline auto& GetCommandMap() {
-    static std::map<std::string_view, ConsoleCommand*> commands;
+    static auto& commands = *(new std::map<std::string_view, ConsoleCommand*>);
     return commands;
 }
 static inline auto& GetConsoleVariablePreservationLambdasVector() {
-    static std::vector<std::function<std::string()>> preservationlambdas;
+    static auto& preservationlambdas = *(new std::vector<std::function<std::string()>>);
     return preservationlambdas;
 }
+static inline auto& GetWorldMap() {
+    static auto& worlds = *(new std::map<std::string, World*>);
+    return worlds;
+}
+
 
 void Engine::Internal::RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command) {
     GetCommandMap().emplace(Name, Command);
 }
-
 void Engine::Internal::RegisterConsoleVariablePreservation(std::function<std::string()> Function) {
     GetConsoleVariablePreservationLambdasVector().emplace_back(Function);
 }
+void Engine::Internal::RegisterWorldForConsole(std::string_view Name, World* world) {
+    GetWorldMap().emplace(Name, world);
+}
+void Engine::Internal::UnregisterWorldForConsole(std::string_view Name) {
+    auto& map = GetWorldMap();
+
+    auto it = map.find(std::string(Name));
+
+    if (it != map.end())
+        map.erase(it);
+}
+
+
 
 #define PUSH_PARAM \
                 if (CurrentContent.size() > 0) { \
-                    params.emplace_back(CurrentContent.begin(), CurrentContent.end()); \
+                    Params.emplace_back(CurrentContent.begin(), CurrentContent.end()); \
                     CurrentContent.clear(); \
                 }
 
-void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::string Do) {
-    if (InWorld == nullptr) {
-        Engine::Warning("Ran command in a world passed in as nullptr!");
-        return;
-    }
-    if (!(*InWorld)[AsEntityFromSlot]) {
-        Engine::Warning("Ran command as an invalid entity!");
-        return;
-    }
-
+static auto CommandParseDo(std::string Do) {
+    std::vector<std::vector<std::string>> Commands;
     int i = 0;
     while (i < Do.length()) {
-        std::vector<std::string> params;
+        std::vector<std::string> Params;
         std::inplace_vector<char, 1024> CurrentContent;
 
         while (i < Do.length()) {
@@ -93,10 +103,29 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
         }
         PUSH_PARAM;
 
+        Commands.emplace_back(std::move(Params));
+    }
+
+    return Commands;
+}
+
+void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::string Do) {
+    if (InWorld == nullptr) {
+        Engine::Warning("Ran command in a world passed in as nullptr!");
+        return;
+    }
+    if (!(*InWorld)[AsEntityFromSlot]) {
+        Engine::Warning("Ran command as an invalid entity!");
+        return;
+    }
+
+    auto Commands = CommandParseDo(Do);
+
+    for (auto& Params : Commands) {
         try {
-            GetCommandMap().at(params[0])->operator()(InWorld, AsEntityFromSlot, params);
+            GetCommandMap().at(Params[0])->operator()(InWorld, AsEntityFromSlot, Params);
         } catch( std::out_of_range e ) {
-            Engine::Print(std::string("Unknown console command: " + params[0]));
+            Engine::Print(std::string("Unknown console command: " + Params[0]));
         }
     }
 }

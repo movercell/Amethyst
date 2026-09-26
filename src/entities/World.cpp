@@ -4,6 +4,7 @@
 
 #include "engine/entities/Entity.h"
 #include "engine/entities/World.h"
+#include "engine/Console.h"
 
 inline constexpr int SAVEFILE_VERSION = 0;
 inline constexpr int WORLD_DEFAULT_SLOT_AMOUNT = 4096;
@@ -133,19 +134,25 @@ World::World(std::string name) {
 
     // Need to preserve the preserved slots.
     PreseserveSlots(WORLD_PRESERVED_SLOT_AMOUNT);
+
+    // Add to console.
+    Engine::Internal::RegisterWorldForConsole(Name, this);
 }
 
 Engine::Reference<World> World::Make(std::string name, Engine::Reference<RWorld> Renderworld) {
-    auto result = new Engine::UnmanagedResource<World>(World(name));
+    auto result = new Engine::UnmanagedResource<World>(name);
     result->resource.RenderWorld = Renderworld;
     return result;
 }
 Engine::Reference<World> World::Make(std::string name, Engine::Reference<Renderer> Renderer) {
-    auto result = new Engine::UnmanagedResource<World>(World(name));
+    auto result = new Engine::UnmanagedResource<World>(name);
     result->resource.RenderWorld = Renderer->MakeRWorld();
     return result;
 }
 
+World::~World() {
+    Engine::Internal::UnregisterWorldForConsole(Name);
+}
 
 
 void Engine::Internal::RegisterEntityCreationLambda(std::string_view classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda) {

@@ -77,8 +77,6 @@ void STDGLWindow::Update() {
     glfwWindowHint(GLFW_NO_ERROR, GLFW_TRUE);
 #endif
     if (Fullscreen) {
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
         glfwWindowHint(GLFW_RED_BITS, videomode->redBits);
         glfwWindowHint(GLFW_GREEN_BITS, videomode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, videomode->blueBits);
@@ -89,6 +87,7 @@ void STDGLWindow::Update() {
         monitor = primarymonitor;
     }
     data = glfwCreateWindow(Width, Height, Name.c_str(), monitor, reinterpret_cast<GLFWwindow*>(rendererData));
+    glfwMakeContextCurrent(data);
     glfwSwapInterval(1); // TODO: add a vsync setting
 
     if (Fullscreen) {

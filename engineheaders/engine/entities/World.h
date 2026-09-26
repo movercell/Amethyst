@@ -70,6 +70,7 @@ class ENGINEEXPORT World : public EntityStorage {
     Engine::Reference<RWorld> RenderWorld;
     std::string MapName = "";
 
+    friend struct Engine::UnmanagedResource<World>;
     World(std::string name);
 public:
     ADFEntry Save();
@@ -88,4 +89,6 @@ public:
 
     void EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, std::optional<EntityHandler*> parent = std::nullopt);
     ADFEntry EntityStorageToADF(EntityStorage* Storage);
+
+    ~World();
 };

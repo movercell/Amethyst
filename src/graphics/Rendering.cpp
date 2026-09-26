@@ -3,6 +3,10 @@
 #include "engine/Console.h"
 
 ConsoleCommand r_commandCommand("r_command", []ConsoleCommandLambda {
+    if (Do.size() == 1) {
+        Engine::Print("Usage: r_command [Command to pass to the renderer]\n\nHint: Try `r_command help`.(Note: May not work but it's worth a try.)");
+        return;
+    }
     InWorld->GetRWorld()->GetRenderer()->RendererCommand(Do);
 }, "Passes the command to the renderer.");
 

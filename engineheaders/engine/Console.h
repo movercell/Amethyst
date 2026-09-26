@@ -12,6 +12,8 @@ namespace Engine {
     namespace Internal {
         void ENGINEEXPORT RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command);
         void ENGINEEXPORT RegisterConsoleVariablePreservation(std::function<std::string()> Function);
+        void RegisterWorldForConsole(std::string_view Name, World* world);
+        void UnregisterWorldForConsole(std::string_view Name);
     }
 }
 
