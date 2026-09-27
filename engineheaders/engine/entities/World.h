@@ -70,6 +70,8 @@ class ENGINEEXPORT World : public EntityStorage {
     Engine::Reference<RWorld> RenderWorld;
     std::string MapName = "";
 
+    std::map<std::string_view, World*>::iterator IteratorInMapForConsole;
+
     friend struct Engine::UnmanagedResource<World>;
     World(std::string name);
 public:

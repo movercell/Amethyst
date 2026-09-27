@@ -2,6 +2,4 @@
 
 namespace Engine {
     void DrawEngineUI();
-
-    void DrawConsole();
 }

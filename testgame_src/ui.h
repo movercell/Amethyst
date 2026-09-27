@@ -29,6 +29,8 @@ struct MainMenuButton {
 struct MainMenu_t {
     std::vector<MainMenuButton> Buttons;
 
+    vec4  ActiveColor = vec4(153, 102, 204, 255) / 255;
+    vec4  NotActiveColor = vec4(53, 2, 104, 255) / 255;
     float XOffsetRatio = 0.05f;
     float YOffsetRatio = 0.4f;
     float WidthRatio = 0.35f;
@@ -40,12 +42,10 @@ struct MainMenu_t {
     float ButtonSelectedBackgroundAlpha = 0.2f;
     float ButtonTextOffsetRatio = 0.04f;
     float ButtonFontSizeRatio = 0.6f;
-    vec4  ButtonActiveColor = vec4(153, 102, 204, 255) / 255;
-    vec4  ButtonNotActiveColor = vec4(53, 2, 104, 255) / 255;
     float ButtonActivatedTextColorAppearanceSpeed = 14.0f;
 
-    std::string MainMenuButtonFontPath;
-    std::string MainMenuButtonFontBoldPath;
+    std::string ButtonFontPath;
+    std::string ButtonFontBoldPath;
     
     void Do(MainMenuType CurrentMenuType);
 };

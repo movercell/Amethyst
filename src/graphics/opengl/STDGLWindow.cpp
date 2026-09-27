@@ -8,7 +8,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
-#include "engineui/BaseEngineUI.h"
+#include "ui/BaseEngineUI.h"
 
 void STDGLWindow::SetEatCursor(bool state) {
     ShouldEatCursor = state;

@@ -136,7 +136,7 @@ World::World(std::string name) {
     PreseserveSlots(WORLD_PRESERVED_SLOT_AMOUNT);
 
     // Add to console.
-    Engine::Internal::RegisterWorldForConsole(Name, this);
+    IteratorInMapForConsole = Engine::Internal::RegisterWorldForConsole(Name, this);
 }
 
 Engine::Reference<World> World::Make(std::string name, Engine::Reference<RWorld> Renderworld) {
@@ -151,7 +151,7 @@ Engine::Reference<World> World::Make(std::string name, Engine::Reference<Rendere
 }
 
 World::~World() {
-    Engine::Internal::UnregisterWorldForConsole(Name);
+    Engine::Internal::UnregisterWorldForConsole(IteratorInMapForConsole);
 }
 
 

@@ -57,7 +57,7 @@ void STDGLRenderer::Init() {
     ImGui::SetCurrentContext(BaseImGuiContext);
     ImGui_ImplGlfw_InitForOpenGL(data, false);
     ImGui_ImplOpenGL3_Init();
-    GetFontAtlas()->AddFontDefaultBitmap();
+    GetFontAtlas()->AddFontDefaultVector();
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);

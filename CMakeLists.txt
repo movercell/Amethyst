@@ -69,7 +69,7 @@ add_executable(amethyst
 	src/Init.cpp
 	src/filesystem/Filesystem.cpp
 	src/filesystem/ADFParser.cpp
-	src/engineui/BaseEngineUI.cpp
+	src/ui/BaseEngineUI.cpp
 	src/entities/World.cpp
 	src/entities/BasicEntities.cpp
 	src/entities/MiscEntities.cpp

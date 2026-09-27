@@ -1,18 +1,20 @@
 #include "engine/Console.h"
 #include "engine/StringUtils.h"
+#include "imgui.h"
+#include "imgui_stdlib.h"
 
 
 // To avoid initialization order fiasco when creating a console command in the engine itself.
 // (Yes, those leaks are intentional.(Because at least one object that needs one of these would be created prior to them and make a std::at_exit screw up if they were actual static objects.))
-auto& GetCommandMap() {
+static inline auto& GetCommandMap() {
     static auto& commands = *(new std::map<std::string_view, ConsoleCommand*>);
     return commands;
 }
-auto& GetConsoleVariablePreservationLambdasVector() {
+static inline auto& GetConsoleVariablePreservationLambdasVector() {
     static auto& preservationlambdas = *(new std::vector<std::function<std::string()>>);
     return preservationlambdas;
 }
-auto& GetWorldMap() {
+static inline auto& GetWorldMap() {
     static auto& worlds = *(new std::map<std::string_view, World*>);
     return worlds;
 }
@@ -28,15 +30,15 @@ void Engine::Internal::RegisterConsoleCommand(std::string_view Name, ConsoleComm
 void Engine::Internal::RegisterConsoleVariablePreservation(std::function<std::string()> Function) {
     GetConsoleVariablePreservationLambdasVector().emplace_back(Function);
 }
-void Engine::Internal::RegisterWorldForConsole(std::string_view Name, World* world) {
+std::map<std::string_view, World*>::iterator Engine::Internal::RegisterWorldForConsole(std::string_view Name, World* world) {
     if (GetWorldMap().contains(Name)) {
         Engine::Error("Attempted to create a world of the same name as another!");
     }
 
-    GetWorldMap().emplace(Name, world);
+    return GetWorldMap().emplace(Name, world).first;
 }
-void Engine::Internal::UnregisterWorldForConsole(std::string_view Name) {
-    GetWorldMap().erase(Name);
+void Engine::Internal::UnregisterWorldForConsole(std::map<std::string_view, World*>::iterator Iterator) {
+    GetWorldMap().erase(Iterator);
 }
 
 
@@ -146,3 +148,103 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
         Engine::Print(Do[1] + " is not a valid console command!");
     }
 }, "Returns the help string of a command.");
+
+
+ConsoleVariable<bool> ConsoleWindowOpen = {"engine_ui_showconsole", false, false, "Shows the console."};
+
+inline constexpr float RunButtonSize = 30.0f;
+inline constexpr float InInputSize = 80.0f;
+inline constexpr float AsInputSize = 30.0f;
+
+void Engine::Internal::DrawConsole() {
+    if (!ConsoleWindowOpen) return;
+    
+    if (!ImGui::Begin("Amethyst engine console", &ConsoleWindowOpen.GetValue())) {
+        ImGui::End();
+        return;
+    }
+
+    // Text area.
+    float ReservedSpace = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+    if (ImGui::BeginChild("TextArea", ImVec2(0, -ReservedSpace), ImGuiChildFlags_NavFlattened, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+
+
+    }
+    ImGui::EndChild();
+
+
+    // Input area.
+
+
+    ImGui::AlignTextToFramePadding();
+
+    auto& WorldMap = GetWorldMap();
+    if (WorldMap.size() == 0) {
+        ImGui::Text("No worlds present!");
+
+        ImGui::End();
+        return;
+    }
+
+    static int InInput = 0;
+    ImGui::Text("In:");
+    ImGui::SameLine();
+    if (InInput >= WorldMap.size()) { // In case the world stops to exist and now we are out of bounds on the map.
+        InInput = 0;
+    }
+    std::string InPreview;
+    {
+        auto InVal = WorldMap.begin();
+        for (int i = 0; i < InInput; i++) ++InVal;
+        InPreview = InVal->second->GetName();
+    }
+    ImGui::SetNextItemWidth(InInputSize);
+    if (ImGui::BeginCombo("##AmethystConsoleInputIn", InPreview.c_str())) {
+        int i = 0;
+        for (const auto& world : WorldMap) {
+            const std::string& Name = world.second->GetName();
+            if (ImGui::Selectable(Name.c_str(), InInput == i)) {
+                InInput = i;
+                InPreview = Name;
+            }
+            i++;
+        }
+
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+
+
+    static std::string AsInput = "0";
+    ImGui::Text("As:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(AsInputSize);
+    ImGui::InputText("##AmethystConsoleInputAs", &AsInput, ImGuiInputTextFlags_EnterReturnsTrue);
+    ImGui::SameLine();
+
+    bool ShouldDoCommand = false;
+
+    static std::string Do = "";
+    ImGui::Text("Do:");
+    ImGui::SameLine();
+    const float DoWidth = ImGui::GetContentRegionAvail().x - RunButtonSize - ImGui::GetStyle().ItemSpacing.x;
+    ImGui::SetNextItemWidth(DoWidth);
+    ShouldDoCommand = ImGui::InputText("##AmethystConsoleInputDo", &Do, ImGuiInputTextFlags_EnterReturnsTrue);
+    ImGui::SameLine();
+    if (ShouldDoCommand) ImGui::SetKeyboardFocusHere(-1); // To retain keyboard focus.
+
+    if (ImGui::Button("Go!", ImVec2(RunButtonSize, 0.0f))) ShouldDoCommand = true;
+
+    if (ShouldDoCommand) {
+        auto In = WorldMap.begin();
+        for (int i = 0; i < InInput; i++) ++In;
+        
+        int As;
+        std::from_chars(AsInput.data(), AsInput.data() + AsInput.size(), As);
+
+        Engine::ExecuteConsoleCommand(In->second, As, Do);
+        Do.clear();
+    }
+
+    ImGui::End();
+}

@@ -4,8 +4,8 @@
 
 MainMenu_t MainMenu;
 
-ImFont* MainMenuButtonFont;
-ImFont* MainMenuButtonBoldFont;
+ImFont* ButtonFont;
+ImFont* ButtonBoldFont;
 
 ConsoleVariable<float> player_speedVariable = {"player_speed", 100.0f, false, "Player camera speed", 0.0f, 1024.0f};
 
@@ -35,12 +35,12 @@ void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType)
     if (exclusivity != MainMenuType::None && exclusivity != CurrentMenuType)
         return;
 
-	vec4 TextColor = (vec4(1.0f, 1.0f, 1.0f) * (1.0f - activatedamount)) + (MainMenu.ButtonActiveColor * (activatedamount));
+	vec4 TextColor = (vec4(1.0f, 1.0f, 1.0f) * (1.0f - activatedamount)) + (MainMenu.ActiveColor * (activatedamount));
 	TextColor.w = 1.0f;
 
 	ImGui::PushStyleColor(ImGuiCol_Text, std::bit_cast<ImVec4>(TextColor));
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(Width * MainMenu.ButtonStylishBarWidthRatio * selectedamount + Width * MainMenu.ButtonTextOffsetRatio, ImGui::GetStyle().FramePadding.y));
-	if (isHovered) ImGui::PushFont(MainMenuButtonBoldFont, Height * MainMenu.ButtonFontSizeRatio);
+	if (isHovered) ImGui::PushFont(ButtonBoldFont, Height * MainMenu.ButtonFontSizeRatio);
 
 	Height += Height * MainMenu.ButtonSelectedSizeIncrease * selectedamount;
 	bool isPressed = ImGui::Button(text.c_str(), ImVec2(Width, Height));
@@ -60,7 +60,7 @@ void MainMenuButton::Do(float Width, float Height, MainMenuType CurrentMenuType)
 	ImVec2 size = ImGui::GetItemRectSize();
 	size.x *= MainMenu.ButtonStylishBarWidthRatio;
 	ImVec2 max = ImVec2(min.x + (size.x * selectedamount), min.y + size.y);
-	vec4 StylishBarColor = MainMenu.ButtonActiveColor * selectedamount + MainMenu.ButtonNotActiveColor * (1.0 - selectedamount);
+	vec4 StylishBarColor = MainMenu.ActiveColor * selectedamount + MainMenu.NotActiveColor * (1.0 - selectedamount);
 	DrawList->AddRectFilled(min, max, std::bit_cast<ImColor>(StylishBarColor));
 
     if (isPressed) {
@@ -87,7 +87,7 @@ void MainMenu_t::Do(MainMenuType CurrentMenuType) {
     ImGui::SetNextWindowSize(ImVec2(-1.0f, -1.0f));
     ImGui::Begin("Main menu buttons", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
 
-	ImGui::PushFont(MainMenuButtonFont, MainMenuButtonHeight * MainMenu.ButtonFontSizeRatio); // TODO: use a style?
+	ImGui::PushFont(ButtonFont, MainMenuButtonHeight * MainMenu.ButtonFontSizeRatio); // TODO: use a style?
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.2f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, MainMenu.ButtonSelectedBackgroundAlpha));
@@ -251,12 +251,12 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 
 void UIInit() {
-    ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/MainMenuLayout.adf")["MainMenuLayout"];
+    ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/menulayout.adf")["MenuLayout"];
     MainMenuLayout.Deserialize(MainMenu);
 
 	ImFontConfig fontconfig;
 	fontconfig.OversampleH = 1;
 	fontconfig.OversampleV = 1;
-	MainMenuButtonFont = renderer->LoadFont(MainMenu.MainMenuButtonFontPath, &fontconfig);
-	MainMenuButtonBoldFont = renderer->LoadFont(MainMenu.MainMenuButtonFontBoldPath, &fontconfig);
+	ButtonFont = renderer->LoadFont(MainMenu.ButtonFontPath, &fontconfig);
+	ButtonBoldFont = renderer->LoadFont(MainMenu.ButtonFontBoldPath, &fontconfig);
 }

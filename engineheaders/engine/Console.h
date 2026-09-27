@@ -12,8 +12,9 @@ namespace Engine {
     namespace Internal {
         void ENGINEEXPORT RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command);
         void ENGINEEXPORT RegisterConsoleVariablePreservation(std::function<std::string()> Function);
-        void RegisterWorldForConsole(std::string_view Name, World* world);
-        void UnregisterWorldForConsole(std::string_view Name);
+        std::map<std::string_view, World*>::iterator RegisterWorldForConsole(std::string_view Name, World* world);
+        void UnregisterWorldForConsole(std::map<std::string_view, World*>::iterator Iterator);
+        void DrawConsole();
     }
 }
 
@@ -27,7 +28,7 @@ class ConsoleCommand {
     std::function<void(World*, int, std::vector<std::string>)> Command;
 
 public:
-    ConsoleCommand(std::string_view Named, decltype(Command) Function, std::string_view HelpString = "") : Name(Named), Command(std::move(Function)), Help(HelpString) {
+    ConsoleCommand(std::string_view Named, decltype(Command) Function, std::string_view HelpString = "This command does not have a help string.") : Name(Named), Command(std::move(Function)), Help(HelpString) {
         Engine::Internal::RegisterConsoleCommand(Name, this);
     }
     
@@ -59,7 +60,7 @@ class ConsoleVariable {
     bool Preserved;
 
 public:
-    ConsoleVariable(std::string_view Named, T DefaultValue, bool Preservation = false, std::string_view HelpString = "", T MinValue = std::numeric_limits<T>::min(), T MaxValue = std::numeric_limits<T>::max())
+    ConsoleVariable(std::string_view Named, T DefaultValue, bool Preservation = false, std::string_view HelpString = "This variable does not have a help string", T MinValue = std::numeric_limits<T>::min(), T MaxValue = std::numeric_limits<T>::max())
     : Internalcommand(Named, [this]ConsoleCommandLambda {
         if constexpr (^^T == ^^bool) {
             if (Do.size() == 1) {

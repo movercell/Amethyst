@@ -1,4 +1,6 @@
-"MainMenuLayout" {
+"MenuLayout" {
+    "ActiveColor" { "x" "0.6" "y" "0.4" "z" "0.8" "w" "1.0"}
+    "NotActiveColor" { "x" "0.4" "y" "0.2" "z" "0.6" "w" "1.0"}
     "XOffsetRatio" "0.05"
     "YOffsetRatio" "0.4"
     "WidthRatio" "0.4"
@@ -10,12 +12,10 @@
     "ButtonSelectedBackgroundAlpha" "0.2"
     "ButtonTextOffsetRatio" "0.04"
     "ButtonFontSizeRatio" "0.6"
-    "ButtonActiveColor" { "x" "0.6" "y" "0.4" "z" "0.8" "w" "1.0"}
-    "ButtonNotActiveColor" { "x" "0.4" "y" "0.2" "z" "0.6" "w" "1.0"}
     "ButtonActivatedTextColorAppearanceSpeed" "14.0"
 
-    "MainMenuButtonFontPath" "resources/fonts/arimo-latin-400-normal.ttf"
-    "MainMenuButtonFontBoldPath" "resources/fonts/arimo-latin-700-normal.ttf"
+    "ButtonFontPath" "resources/fonts/arimo-latin-400-normal.ttf"
+    "ButtonFontBoldPath" "resources/fonts/arimo-latin-700-normal.ttf"
 
     "Buttons" [
         {
@@ -25,12 +25,12 @@
         }
         {
             "text" "Dear ImGUI demo window"
-            "concommand" "ui_showdemo"
+            "concommand" "engine_ui_showdemo"
             "exclusivity" "0"
         }
         {
             "text" "Console"
-            "concommand" "ui_showconsole"
+            "concommand" "engine_ui_showconsole"
             "exclusivity" "0"
         }
         {
