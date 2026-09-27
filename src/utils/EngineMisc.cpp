@@ -3,10 +3,8 @@
 #include <cstdlib>
 
 void Engine::Warning(const std::string& text) {
+    Engine::Print("::WARNING::WARNING::WARNING::WARNING::WARNING::WARNING::\n\n" + text + "\n\n::WARNING::WARNING::WARNING::WARNING::WARNING::WARNING::");
     std::cout << "This process issued the following warning:\n\n" << text << std::endl;
-}
-void Engine::Print(const std::string& text) {
-    std::cout << text << std::endl;
 }
 
 void Engine::Error(const std::string& text) {

@@ -1,6 +1,7 @@
 #include "engine/Console.h"
 #include "engine/StringUtils.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
 
@@ -150,31 +151,104 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
 }, "Returns the help string of a command.");
 
 
+
+
+// Console UI.
+
+
 ConsoleVariable<bool> ConsoleWindowOpen = {"engine_ui_showconsole", false, false, "Shows the console."};
 
 inline constexpr float RunButtonSize = 30.0f;
 inline constexpr float InInputSize = 80.0f;
 inline constexpr float AsInputSize = 30.0f;
 
+inline constexpr int ConsoleTextBufferSize = 8192;
+
+
+// Fill the two buffers with spaces.
+static constinit auto ConsoleTextBuffer = []() constexpr {
+    std::array<char, ConsoleTextBufferSize> out;
+    for (char& character : out) character = '\n';
+    return out;
+}();
+static constinit auto ConsoleDrawTextBuffer = []() constexpr {
+    std::array<char, ConsoleTextBufferSize + 1> out;
+    for (char& character : out) character = '\n';
+    out[ConsoleTextBufferSize] = '\0'; // This one needs a null terminator.
+    return out;
+}();
+
+static bool dirty = false;
+static int cursor = 0;
+static bool shouldscrolltobottom = true;
+
+static inline void PrintSingleCharacter(char Character) {
+    if (cursor == ConsoleTextBufferSize) cursor = 0;
+
+    *(ConsoleTextBuffer.begin() + cursor) = Character;
+    cursor++;
+} 
+
+void Engine::Print(const std::string& text) {
+    PrintSingleCharacter('\n');
+
+    if (cursor + text.size() + 1 < ConsoleTextBufferSize) {
+        std::copy(text.begin(), text.end(), ConsoleTextBuffer.begin() + cursor);
+        cursor += text.size();
+    } else {
+        for (char Character : text) PrintSingleCharacter(Character);
+    }
+
+    dirty = true;
+}
+
+static inline void UpdateDrawTextBuffer() {
+    if (cursor == 0) {
+        std::copy(ConsoleTextBuffer.begin(), ConsoleTextBuffer.end(), ConsoleDrawTextBuffer.begin());
+        dirty = false;
+        return;
+    }
+
+    // Before the cursor.
+    std::copy(ConsoleTextBuffer.begin(), ConsoleTextBuffer.begin() + cursor, ConsoleDrawTextBuffer.end() - cursor - 1);
+    // After the cursor.
+    std::copy(ConsoleTextBuffer.begin() + cursor, ConsoleTextBuffer.end(), ConsoleDrawTextBuffer.begin());
+    dirty = false;
+}
+
 void Engine::Internal::DrawConsole() {
     if (!ConsoleWindowOpen) return;
     
-    if (!ImGui::Begin("Amethyst engine console", &ConsoleWindowOpen.GetValue())) {
+    if (!ImGui::Begin("Amethyst Engine Console", &ConsoleWindowOpen.GetValue())) {
         ImGui::End();
         return;
     }
 
     // Text area.
-    float ReservedSpace = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-    if (ImGui::BeginChild("TextArea", ImVec2(0, -ReservedSpace), ImGuiChildFlags_NavFlattened, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+    float ReservedHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+    if (ImGui::BeginChild("TextArea", ImVec2(0, -ReservedHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 
+        if (dirty) UpdateDrawTextBuffer();
 
+        float AreaWidth = ImGui::GetContentRegionAvail().x;
+        ImVec2 TextSize = ImGui::CalcTextSize(&ConsoleDrawTextBuffer.at(0), nullptr, false, AreaWidth);
+        float AreaHeight = TextSize.y + (ImGui::GetStyle().FramePadding.y * 2.0f);
+
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_EnterReturnsTrue;
+        ImGui::InputTextMultiline("##AmethystConsoleOutput", &ConsoleDrawTextBuffer.at(0), ConsoleDrawTextBuffer.size(), ImVec2(AreaWidth, AreaHeight), flags);
+
+        ImGui::PopStyleColor(2);
+
+        if (shouldscrolltobottom) {
+            ImGui::SetScrollHereY(1.0f);
+            shouldscrolltobottom = false;
+        }
     }
     ImGui::EndChild();
 
-
     // Input area.
-
 
     ImGui::AlignTextToFramePadding();
 
@@ -230,6 +304,7 @@ void Engine::Internal::DrawConsole() {
     const float DoWidth = ImGui::GetContentRegionAvail().x - RunButtonSize - ImGui::GetStyle().ItemSpacing.x;
     ImGui::SetNextItemWidth(DoWidth);
     ShouldDoCommand = ImGui::InputText("##AmethystConsoleInputDo", &Do, ImGuiInputTextFlags_EnterReturnsTrue);
+    if (ShouldDoCommand) ImGui::SetKeyboardFocusHere(-1);
     ImGui::SameLine();
     if (ShouldDoCommand) ImGui::SetKeyboardFocusHere(-1); // To retain keyboard focus.
 
@@ -242,8 +317,10 @@ void Engine::Internal::DrawConsole() {
         int As;
         std::from_chars(AsInput.data(), AsInput.data() + AsInput.size(), As);
 
+        Engine::Print("] " + Do);
         Engine::ExecuteConsoleCommand(In->second, As, Do);
         Do.clear();
+        shouldscrolltobottom = true;
     }
 
     ImGui::End();
