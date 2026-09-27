@@ -8,7 +8,7 @@ ConsoleCommand r_commandCommand("r_command", []ConsoleCommandLambda {
         return;
     }
     InWorld->GetRWorld()->GetRenderer()->RendererCommand(Do);
-}, "Passes the command to the renderer.");
+}, "Passes the command to the Renderer that is responsible for the current World's RWorld.");
 
 static std::vector<std::pair<const std::string, Engine::Reference<Renderer>(*)()>> RendererTypes;
 

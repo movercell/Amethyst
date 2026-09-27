@@ -1,4 +1,5 @@
 #include "engine/master.h"
+#include "engine/Console.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -11,3 +12,7 @@ void Engine::Error(const std::string& text) {
     std::cout << "This process encountered an unrecoverable error!\n\n" << text << std::endl;
     std::abort();
 }
+
+ConsoleCommand exitCommand = {"exit", []ConsoleCommandLambda {
+    Engine::QueueShutdown();
+}, "Terminates the engine when ran"};

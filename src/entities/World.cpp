@@ -206,3 +206,19 @@ void EntityStorage::Clear() {
         Handler = Engine::Reference<EntityHandler>();
     }
 }
+
+
+ConsoleCommand engine_saveCommand = {"engine_save", []ConsoleCommandLambda {
+    if (Do.size() != 2) {
+        Engine::Print("Usage: engine_save [path to savefile]");
+        return;
+    }
+    InWorld->Save().ToFile(Do[1]);
+}, "Saves the world into a Savefile. Engine variety in case the game breaks the regular `save` command."};
+ConsoleCommand engine_loadCommand = {"engine_load", []ConsoleCommandLambda {
+    if (Do.size() != 2) {
+        Engine::Print("Usage: engine_load [path to savefile]");
+        return;
+    }
+    InWorld->Load(ADFEntry::FromFile(Do[1]));
+}, "Loads the world from a Savefile. Engine variety in case the game breaks the regular `load` command."};

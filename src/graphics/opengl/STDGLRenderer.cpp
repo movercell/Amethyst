@@ -110,9 +110,15 @@ ImFontAtlas* STDGLRenderer::GetFontAtlas() {
 }
 
 void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
+    if (Do[1] == "help") {
+        Engine::Print("`recompileshaders`+`help` and that's it right now.");
+        return;
+    }
     if (Do[1] == "recompileshaders") {
         ShaderSystem.Recompile();
+        return;
     }
+    Engine::Print("STDGLRenderer: Unrecognized command " + Do[1]);
 }
 
 void STDGLRenderer::Draw() {
