@@ -192,7 +192,7 @@ static inline void PrintSingleCharacter(char Character) {
 void Engine::Print(const std::string& text) {
     PrintSingleCharacter('\n');
 
-    if (cursor + text.size() + 1 < ConsoleTextBufferSize) {
+    if (cursor + text.size() < ConsoleTextBufferSize) {
         std::copy(text.begin(), text.end(), ConsoleTextBuffer.begin() + cursor);
         cursor += text.size();
     } else {
