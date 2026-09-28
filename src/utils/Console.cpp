@@ -1,3 +1,4 @@
+#include <mutex>
 #include "engine/Console.h"
 #include "engine/StringUtils.h"
 #include "imgui.h"
@@ -126,11 +127,14 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
     }
 
     auto Commands = CommandParseDo(Do);
+    auto& CommandMap = GetCommandMap();
 
     for (auto& Params : Commands) {
-        try {
-            GetCommandMap().at(Params[0])->operator()(InWorld, AsEntityFromSlot, Params);
-        } catch( std::out_of_range e ) {
+        auto Command = CommandMap.find(Params[0]);
+
+        if (Command != CommandMap.end()) {
+            Command->second->operator()(InWorld, AsEntityFromSlot, Params);
+        } else {
             Engine::Print(std::string("Unknown console command: " + Params[0]));
         }
     }
@@ -164,6 +168,7 @@ inline constexpr float AsInputSize = 30.0f;
 
 inline constexpr int ConsoleTextBufferSize = 8192;
 
+std::mutex ConsoleTextBufferMutex;
 
 // Fill the two buffers with spaces.
 static constinit auto ConsoleTextBuffer = []() constexpr {
@@ -190,6 +195,8 @@ static inline void PrintSingleCharacter(char Character) {
 } 
 
 void Engine::Print(const std::string& text) {
+    std::unique_lock<std::mutex> lock(ConsoleTextBufferMutex);
+
     PrintSingleCharacter('\n');
 
     if (cursor + text.size() < ConsoleTextBufferSize) {
@@ -230,6 +237,7 @@ void Engine::Internal::DrawConsole() {
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 
+        std::unique_lock<std::mutex> lock(ConsoleTextBufferMutex);
         if (dirty) UpdateDrawTextBuffer();
 
         float AreaWidth = ImGui::GetContentRegionAvail().x;

@@ -29,9 +29,13 @@ extern "C" {
 } 
 
 namespace Engine {
-    void ENGINEEXPORT Warning(const std::string& text);
+    //! Prints the passed text into the console.(Thread safe.)
     void ENGINEEXPORT Print(const std::string& text);
+    //! Gives a message box with the passed text and also prints the text to console.
+    void ENGINEEXPORT Warning(const std::string& text);
+    //! Gives a message box with the passed text and terminates the engine.
     [[noreturn]] void ENGINEEXPORT Error(const std::string& text);
+    //! Queues the engine for termination at the end of the frame.
     void ENGINEEXPORT QueueShutdown();
 }
 

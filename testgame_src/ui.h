@@ -26,7 +26,7 @@ struct MainMenuButton {
     void Do(float Width, float Height, MainMenuType CurrentMenuType);
 };
 
-struct MainMenu_t {
+struct ADFSerialize MainMenu_t {
     std::vector<MainMenuButton> Buttons;
 
     vec4  ActiveColor = vec4(153, 102, 204, 255) / 255;

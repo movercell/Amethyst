@@ -21,7 +21,6 @@ RegisterEntityClass(Entity_PlayerStart)
 
 
 struct EntityClassname("player_mainmenu") Entity_Player_MainMenu : public BaseEntity {
-    ADFSerialize int stub = 0;
     Engine::Reference<Camera> PlayerCamera;
 
     void Initialize();
@@ -29,8 +28,7 @@ struct EntityClassname("player_mainmenu") Entity_Player_MainMenu : public BaseEn
 RegisterEntityClass(Entity_Player_MainMenu)
 
 
-struct EntityClassname("info_player_start_mainmenu") Entity_PlayerStart_MainMenu : public Entity_Player {
+struct EntityClassname("info_player_start_mainmenu") Entity_PlayerStart_MainMenu : public BaseEntity {
     void Initialize();
-    void Update() {};
 };
 RegisterEntityClass(Entity_PlayerStart_MainMenu)

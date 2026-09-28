@@ -213,12 +213,14 @@ ConsoleCommand engine_saveCommand = {"engine_save", []ConsoleCommandLambda {
         Engine::Print("Usage: engine_save [path to savefile]");
         return;
     }
-    InWorld->Save().ToFile(Do[1]);
+    InWorld->Save().ToFile(std::format("saves/{}.adf", Do[1]), true);
 }, "Saves the world into a Savefile. Engine variety in case the game breaks the regular `save` command."};
 ConsoleCommand engine_loadCommand = {"engine_load", []ConsoleCommandLambda {
     if (Do.size() != 2) {
         Engine::Print("Usage: engine_load [path to savefile]");
         return;
     }
-    InWorld->Load(ADFEntry::FromFile(Do[1]));
+    auto savefile = ADFEntry::FromFile(std::format("saves/{}.adf", Do[1]));
+    if (savefile.HasChild("Savefile"))
+        InWorld->Load(savefile);
 }, "Loads the world from a Savefile. Engine variety in case the game breaks the regular `load` command."};

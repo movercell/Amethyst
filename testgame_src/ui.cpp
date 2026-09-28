@@ -127,6 +127,10 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 		return; // No need to draw the rest of the UI while the game is loading as it'll look very broken.
 
 
+	if (ImGui::IsKeyPressed(ImGuiKey_GraveAccent)) {
+		Engine::ExecuteConsoleCommand(world.get(), 0, "engine_ui_showconsole");
+	}
+
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
 	// Main/pause menu
@@ -251,8 +255,11 @@ std::function<void(Renderer*, Window*)> mainuifunction = [](Renderer* renderer, 
 
 
 void UIInit() {
-    ADFEntry MainMenuLayout = ADFEntry::FromFile("resources/menulayout.adf")["MenuLayout"];
-    MainMenuLayout.Deserialize(MainMenu);
+    ADFEntry MenuLayoutFile = ADFEntry::FromFile("resources/menulayout.adf");
+	if (!MenuLayoutFile.HasChild("MenuLayout"))
+		Engine::Error("Bad menulayout.adf!");
+	ADFEntry MenuLayout = MenuLayoutFile["MenuLayout"];
+    MenuLayout.Deserialize(MainMenu);
 
 	ImFontConfig fontconfig;
 	fontconfig.OversampleH = 1;
