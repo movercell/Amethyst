@@ -91,6 +91,8 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::Alloc(uint16_t sizex, uint16_t sizey
                                                     i = -1; \
                                                     continue;
 void Geometry::Alloc2D::RawFree(Geometry::Alloc2D::Block block) { // Handles coalescence for any blocks that are next to the one being freed.
+    if (FreeCallback) FreeCallback(block);
+
     for (int i = 0; i < FreeBlocks.size(); i++) {
         if (FreeBlocks[i].SizeX == block.SizeX) {
             if ((FreeBlocks[i].PosY + FreeBlocks[i].SizeY) == block.PosY) {
@@ -121,8 +123,6 @@ void Geometry::Alloc2D::RawFree(Geometry::Alloc2D::Block block) { // Handles coa
         }
     }
     FreeBlocks.push_back(block);
-    
-    if (FreeCallback) FreeCallback(block);
 }
 void Geometry::Alloc2D::Free(Geometry::Alloc2D::Block block) {
     block.SizeX += PadX * 2;

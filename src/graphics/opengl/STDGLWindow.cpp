@@ -1,12 +1,14 @@
 #include <glad/glad.h>
 #include "STDGLWindow.h"
 #include "GLFW/glfw3.h"
+#include "engine/filesystem/Filesystem.h"
 #include "engine/graphics/Renderer.h"
 #include "GLMisc.h"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#include "ui/BaseEngineUI.h"
 
 void STDGLWindow::SetEatCursor(bool state) {
     ShouldEatCursor = state;
@@ -32,12 +34,24 @@ bool STDGLWindow::IsWindowInFocus() {
 
 void STDGLWindow::SetName(std::string name) {
     Name = name;
-    Update();
+    NeedsUpdate = true;
 }
 void STDGLWindow::SetResolution(int x, int y) {
     Width = x;
     Height = y;
-    Update();
+    NeedsUpdate = true;
+}
+void STDGLWindow::SetFullscreen(bool state) {
+    if (Fullscreen == state) return;
+    Fullscreen = state;
+    NeedsUpdate = true;
+}
+
+int STDGLWindow::GetWidth() {
+   return Width;
+}
+int STDGLWindow::GetHeight() {
+   return Height;
 }
 
 void STDGLWindow::Update() {
@@ -51,6 +65,10 @@ void STDGLWindow::Update() {
 		glfwDestroyWindow(data);
     }
 
+    GLFWmonitor* primarymonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* videomode = glfwGetVideoMode(primarymonitor);
+    GLFWmonitor* monitor = nullptr;
+
     glfwDefaultWindowHints();
 
 	glfwWindowHint(GLFW_SAMPLES, 16);
@@ -58,15 +76,31 @@ void STDGLWindow::Update() {
     // TODO: Should add a setting to make it override NO_ERROR even in release
     glfwWindowHint(GLFW_NO_ERROR, GLFW_TRUE);
 #endif
-
-    data = glfwCreateWindow(Width, Height, Name.c_str(), nullptr, reinterpret_cast<GLFWwindow*>(rendererData));
+    if (Fullscreen) {
+        glfwWindowHint(GLFW_RED_BITS, videomode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, videomode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, videomode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, videomode->refreshRate);
+        glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+        Width = videomode->width;
+        Height = videomode->height;
+        monitor = primarymonitor;
+    }
+    data = glfwCreateWindow(Width, Height, Name.c_str(), monitor, reinterpret_cast<GLFWwindow*>(rendererData));
+    glfwMakeContextCurrent(data);
     glfwSwapInterval(1); // TODO: add a vsync setting
+
+    if (Fullscreen) {
+        int xpos, ypos;
+        glfwGetMonitorPos(primarymonitor, &xpos, &ypos);
+        glfwSetWindowPos(data, xpos, ypos);
+    }
 
     ProcessCursorEating();
 
     {
 	    IMGUI_CHECKVERSION();
-	    UIData = ImGui::CreateContext();
+	    UIData = ImGui::CreateContext(rendererRef->GetFontAtlas());
         ImGui::SetCurrentContext(UIData);
 	    ImGuiIO& io = ImGui::GetIO();
 	    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -99,10 +133,14 @@ STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* Rende
     Width = ResX;
     Height = ResY;
     Name = name;
-    Update();
 }
 
 void STDGLWindow::Draw() {
+    if (NeedsUpdate) {
+        Update();
+        NeedsUpdate = false;
+    }
+
     glfwMakeContextCurrent(data);
     glViewport(0, 0, Width, Height);
     
@@ -116,6 +154,7 @@ void STDGLWindow::Draw() {
     } else {
         Engine::Error("A window was drawn without a UI function!");
     }
+    Engine::DrawEngineUI();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -30,7 +30,7 @@ void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs, bool isRecompile
             std::cout << infoLog << std::endl;
             Engine::Warning("Compute shader compilation error! Log printed to std::cout");
             glDeleteShader(computeShader);
-            continue;
+            computeShader = 0;
         }
 
         GLuint computeProgram = glCreateProgram();
@@ -44,10 +44,13 @@ void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs, bool isRecompile
             std::cout << infoLog << std::endl;
             Engine::Warning("Compute shader program linking error! Log printed to std::cout");
             glDeleteProgram(computeProgram);
-            continue;
+            computeProgram = 0;
         }
 
         if (isRecompile) {
+            if (computeProgram == 0)
+                return; // No need to replace a working program with null
+
             try {
                 glDeleteProgram(ComputeShaders.at(shader.first));
                 ComputeShaders.at(shader.first) = computeProgram;
@@ -58,8 +61,6 @@ void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs, bool isRecompile
         } else {
             ComputeShaders.emplace(shader.first, computeProgram);
         }
-        ComputeShaders.emplace(shader.first, computeProgram);
-
     }
 }
 
@@ -90,6 +91,9 @@ void STDGLShaderSystem::CompileShaders(const ADFEntry& ShaderDefs, const std::st
         }
 
         if (isRecompile) {
+            if (Shader == 0)
+                return; // No need to replace a working shader with null
+
             try {
                 glDeleteShader(OutTo.at(shader.first));
                 OutTo.at(shader.first) = Shader;
@@ -144,6 +148,9 @@ void STDGLShaderSystem::CompilePrograms(const ADFEntry& ShaderDefs, bool isRecom
 
         ShaderProgram ShaderProgramObject = ShaderProgram(Program, DepthProgram, MaterialShouldBeBoundAtDepth);
         if (isRecompile) {
+            if (Program == 0 || DepthProgram == 0)
+                return; // No need to replace a working program with null
+
             try {
                 ShaderPrograms.at(program.first).Destroy();
                 ShaderPrograms.at(program.first) = ShaderProgramObject;

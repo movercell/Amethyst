@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 
+class Renderer;
+
 /*!
 * \brief A world for rendering purposes.
 *
@@ -24,6 +26,8 @@ public:
     virtual Engine::Reference<Light> MakeSpotLight(vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far) = 0;
     //! Gets a camera.(used for getting the camera's render result in window UI functions)
     virtual Camera* GetCamera(const std::string& name) = 0;
+    //! Gets the renderer this rworld came from.
+    virtual Engine::Reference<Renderer> GetRenderer() = 0;
     //! Adds a model instance to the scene.
     virtual std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb") = 0;
     void ShouldSkipRendering(bool state) { SkipRendering = state; }

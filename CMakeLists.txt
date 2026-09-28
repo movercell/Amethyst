@@ -52,8 +52,9 @@ endif()
 # The main engine source code.
 add_executable(amethyst
 	src/main.cpp
-	src/GameDLLHandler.cpp
 	src/utils/EngineMisc.cpp
+	src/utils/GameDLLHandler.cpp
+	src/utils/Console.cpp
 	src/graphics/Rendering.cpp
 	src/graphics/opengl/STDGLRenderer.cpp
 	src/graphics/opengl/STDGLCamera.cpp
@@ -68,17 +69,19 @@ add_executable(amethyst
 	src/Init.cpp
 	src/filesystem/Filesystem.cpp
 	src/filesystem/ADFParser.cpp
+	src/ui/BaseEngineUI.cpp
 	src/entities/World.cpp
 	src/entities/BasicEntities.cpp
 	src/entities/MiscEntities.cpp
 )
 
+target_include_directories(amethyst PRIVATE "src/")
 set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
 
 # Link the libraries.
 target_link_libraries(amethyst PRIVATE glad)
 target_link_libraries(amethyst PRIVATE glfw)
-target_link_libraries(amethyst PRIVATE imgui)
+target_link_libraries(amethyst PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,imgui>)
 target_link_libraries(amethyst PRIVATE assimp)
 
 
@@ -106,6 +109,8 @@ endif()
 # testgame
 add_library(testgame SHARED
 	testgame_src/main.cpp
+	testgame_src/ui.cpp
+	testgame_src/miscconcommands.cpp
 	testgame_src/entities/player.cpp
 )
 target_include_directories(testgame PRIVATE engineheaders)

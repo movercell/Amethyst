@@ -26,6 +26,9 @@ Camera* STDGLRWorld::GetCamera(const std::string& name) {
     }
     return nullptr;
 }
+Engine::Reference<Renderer> STDGLRWorld::GetRenderer() {
+    return renderer;
+}
 
 std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string& path) {
     try {

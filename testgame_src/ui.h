@@ -1,0 +1,53 @@
+#pragma once
+
+#include <functional>
+#include "imgui.h"
+#include "engine/graphics/Renderer.h"
+#include "engine/filesystem/ADF.h"
+
+extern std::function<void(Renderer*, Window*)> mainuifunction;
+
+enum MainMenuType {
+    None = 0,
+    Main = 1,
+    InGame = 2
+};
+
+struct MainMenuButton {
+    ADFSerialize std::string text;
+    ADFSerialize std::string concommand;
+    ADFSerialize int exclusivity = MainMenuType::None;
+
+    bool isHovered = false;
+    bool isActive = false;
+    float selectedamount = 0.0f;
+    float activatedamount = 0.0f;
+
+    void Do(float Width, float Height, MainMenuType CurrentMenuType);
+};
+
+struct ADFSerialize MainMenu_t {
+    std::vector<MainMenuButton> Buttons;
+
+    vec4  ActiveColor = vec4(153, 102, 204, 255) / 255;
+    vec4  NotActiveColor = vec4(53, 2, 104, 255) / 255;
+    float XOffsetRatio = 0.05f;
+    float YOffsetRatio = 0.4f;
+    float WidthRatio = 0.35f;
+    float ButtonHeightRatio = 0.15f;
+    float ButtonHeightCapRatio = 0.7f;
+    float ButtonStylishBarWidthRatio = 0.05f;
+    float ButtonStylishBarHoveredAppearanceSpeed = 5.0f;
+    float ButtonSelectedSizeIncrease = 0.2f;
+    float ButtonSelectedBackgroundAlpha = 0.2f;
+    float ButtonTextOffsetRatio = 0.04f;
+    float ButtonFontSizeRatio = 0.6f;
+    float ButtonActivatedTextColorAppearanceSpeed = 14.0f;
+
+    std::string ButtonFontPath;
+    std::string ButtonFontBoldPath;
+    
+    void Do(MainMenuType CurrentMenuType);
+};
+
+void UIInit();

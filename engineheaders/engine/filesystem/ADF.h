@@ -250,7 +250,7 @@ public:
     vec4 GetVec4() const {
         const auto& map = GetMap();
 
-        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("2")) {
+        if (map.contains("x") && map.contains("y") && map.contains("z") && map.contains("w")) {
             return vec4(std::stof(map.at("x").GetString()), std::stof(map.at("y").GetString()), std::stof(map.at("z").GetString()), std::stof(map.at("w").GetString()));
         }
 
@@ -366,13 +366,11 @@ public:
             
             static constexpr auto Members = std::define_static_array(std::meta::nonstatic_data_members_of(TClean, std::meta::access_context::unchecked()));
 
-            // Check if none of the members have the ADFSerialize annotation, then implicitly store everything.
-            constexpr bool ImplicitStoreAll = std::none_of(Members.begin(), Members.end(), [](std::meta::info Member) -> bool {
-                return std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0;
-            });
+            // Check if the structure itself has the ADFSerialize annotation, then store everything if it does.
+            constexpr bool StoreAll = (std::meta::annotations_of_with_type(TClean, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0);
 
             template for (constexpr auto Member : Members) {
-                if constexpr (ImplicitStoreAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
+                if constexpr (StoreAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
                     retmap.emplace(std::meta::identifier_of(Member), Serialize(Object.[:Member:]));
                 }
             }
@@ -493,13 +491,11 @@ public:
             
             static constexpr auto Members = std::define_static_array(std::meta::nonstatic_data_members_of(TClean, std::meta::access_context::unchecked()));
 
-            // Check if none of the members have the ADFSerialize annotation, then implicitly store everything.
-            constexpr bool ImplicitLoadAll = std::none_of(Members.begin(), Members.end(), [](std::meta::info Member) -> bool {
-                return std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0;
-            });
+            // Check if the structure itself has the ADFSerialize annotation, then load everything if it does.
+            constexpr bool LoadAll = (std::meta::annotations_of_with_type(TClean, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0);
 
             template for (constexpr auto Member : Members) {
-                if constexpr (ImplicitLoadAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
+                if constexpr (LoadAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
                     try {
                         map.at(std::string(std::meta::identifier_of(Member))).Deserialize(Object.[:Member:]);
                     } catch (const std::out_of_range& e) {}

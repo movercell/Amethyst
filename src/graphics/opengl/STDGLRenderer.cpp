@@ -12,6 +12,9 @@
 #include "STDGLRWorld.h"
 #include "GLMisc.h"
 #include "STDGLWindow.h"
+#include "imgui_internal.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
 
 Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
@@ -49,6 +52,13 @@ void STDGLRenderer::Init() {
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
 
+    IMGUI_CHECKVERSION();
+    BaseImGuiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(BaseImGuiContext);
+    ImGui_ImplGlfw_InitForOpenGL(data, false);
+    ImGui_ImplOpenGL3_Init();
+    GetFontAtlas()->AddFontDefaultVector();
+
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLMisc::GLDebugMessageCallback, nullptr);
 
@@ -59,6 +69,12 @@ void STDGLRenderer::Init() {
 }
 
 STDGLRenderer::~STDGLRenderer() {
+
+    ImGui::SetCurrentContext(BaseImGuiContext);
+    ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
     glfwDestroyWindow(rendererData);
 }
 
@@ -69,6 +85,41 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
     return Engine::Reference(res);
 }
 
+ImFont* STDGLRenderer::LoadFont(const std::string& path, ImFontConfig* config) {
+    auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
+    if (!fontfile) {
+        Engine::Warning("Failed to load font: " + path);
+        return GetFontAtlas()->AddFontDefaultBitmap();
+    }
+    
+    char* buffer;
+    // Reserve the needed space.
+    fontfile.seekg(0, std::ios::end);
+    int fontfilesize = fontfile.tellg();
+    buffer = new char[fontfilesize];
+    fontfile.seekg(0, std::ios::beg);
+    fontfile.read(buffer, fontfilesize);
+
+    return GetFontAtlas()->AddFontFromMemoryTTF(buffer, fontfilesize, 0.0f, config);
+}
+void STDGLRenderer::UnloadFont(ImFont* Font) {
+    GetFontAtlas()->RemoveFont(Font);
+}
+ImFontAtlas* STDGLRenderer::GetFontAtlas() {
+    return BaseImGuiContext->IO.Fonts;
+}
+
+void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
+    if (Do[1] == "help") {
+        Engine::Print("`recompileshaders`+`help` and that's it right now.");
+        return;
+    }
+    if (Do[1] == "recompileshaders") {
+        ShaderSystem.Recompile();
+        return;
+    }
+    Engine::Print("STDGLRenderer: Unrecognized command " + Do[1]);
+}
 
 void STDGLRenderer::Draw() {
     glfwMakeContextCurrent(rendererData);
@@ -167,6 +218,7 @@ void STDGLRenderer::Draw() {
     FrameCounter++;
 
     // Draw windows.
+    ImFontAtlasUpdateNewFrame(GetFontAtlas(), FrameCounter, true);
     for (auto& window : WindowVector) {
         window->resource.Draw();
     }
@@ -186,7 +238,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     }
 
     // Cull instances.
-    glUseProgram(ModelInstancePreprocessShader);
+    glUseProgram(*ModelInstancePreprocessShader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
         iarray->Model->BindInfo();
@@ -197,7 +249,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // Replicate the instance counts across all LOD meshes.
-    glUseProgram(ModelInstanceReplicatorShader);
+    glUseProgram(*ModelInstanceReplicatorShader);
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Model->BindInfo();
         glDispatchCompute(1, 1, 1);

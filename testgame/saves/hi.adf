@@ -80,7 +80,7 @@
 					"z" "5"
 				}
 				"spawnflags" "0"
-				"targetname" "not quoted"
+				"targetname" "quoted"
 			}
 			"tags" [
 				"WasInit"

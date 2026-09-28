@@ -87,6 +87,7 @@ void STDGLLight::CreateBuffers() {
 }
 
 void STDGLLight::UpdateData() {
+    // TODO: clean this up
     STDGLLightData Data;
     Data.ViewProjection = Info.ViewProjection;
     Data.Type = Type;

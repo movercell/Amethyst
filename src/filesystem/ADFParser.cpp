@@ -1,5 +1,6 @@
 #include "engine/filesystem/Filesystem.h"
 #include "engine/filesystem/ADF.h"
+#include "engine/StringUtils.h"
 #include <cctype>
 
 void ADFEntry::Tokenizer::ReadToken() {
@@ -17,7 +18,7 @@ void ADFEntry::Tokenizer::ReadToken() {
 
         currchar = buffer->sbumpc(); // Has to be like this as to not include the starting quotation mark.
         while (!(currchar == '\"' || currchar == eof)) {
-            if (currchar == '\\') currchar = buffer->sbumpc(); // For escaping special characters.
+            if (currchar == '\\') currchar = Engine::CharacterEscapeResult(buffer->sbumpc()); // For escaping special characters.
 
             CurrentContent.push_back(currchar);
             currchar = buffer->sbumpc();
@@ -81,7 +82,7 @@ void ADFEntry::Tokenizer::ReadToken() {
         CurrentContent.clear();
 
         do {
-            if (currchar == '\\') currchar = buffer->sbumpc(); // For escaping special characters.
+            if (currchar == '\\') currchar = Engine::CharacterEscapeResult(buffer->sbumpc()); // For escaping special characters.
 
             CurrentContent.push_back(currchar);
             currchar = buffer->sbumpc();

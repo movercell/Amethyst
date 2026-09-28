@@ -14,6 +14,7 @@ struct STDGLRWorld : public RWorld {
     Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, float FOV = CAMERA_DEFAULT_FOV, float Near = CAMERA_DEFAULT_NEAR, float Far = CAMERA_DEFAULT_FAR);
     Engine::Reference<Light> MakeSpotLight(vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far);
     virtual Camera* GetCamera(const std::string& name);
+    Engine::Reference<Renderer> GetRenderer();
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 
     ~STDGLRWorld();

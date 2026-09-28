@@ -10,6 +10,9 @@
 #include <memory>
 
 
+struct ImFont;
+struct ImFontConfig;
+struct ImFontAtlas;
 
 /*!
 *  \brief The standard renderer interface, every renderer must conform to it.
@@ -32,6 +35,14 @@ public:
     virtual void Draw() = 0;
     //! Makes a renderer with the passed in classname.(E.g. "STDGLRenderer")
     static Engine::Reference<Renderer> Make(std::string classname);
+    //! Loads a font.
+    virtual ImFont* LoadFont(const std::string& path, ImFontConfig* config = nullptr) = 0;
+    //! Unloads a font.
+    virtual void UnloadFont(ImFont* Font) = 0;
+    //! Gets the font atlas.
+    virtual ImFontAtlas* GetFontAtlas() = 0;
+    //! Executes a renderer command.
+    virtual void RendererCommand(std::vector<std::string> Do) = 0;
 
 #ifdef AMETHYSTENGINESRC
     static void AddRenderer(const std::string classname, Engine::Reference<Renderer> (*makefunc)() );
