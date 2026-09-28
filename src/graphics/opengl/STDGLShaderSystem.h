@@ -40,9 +40,11 @@ public:
     } 
     // The first element of the pair is the normal version of the shader program, while the second element is the depth-only version.
     inline ShaderProgram* GetShaderProgram(const std::string& Name) {
-        try {
-            return &ShaderPrograms.at(Name);
-        } catch(std::out_of_range e) {
+        auto ShaderProgram = ShaderPrograms.find(Name);
+
+        if (ShaderProgram != ShaderPrograms.end()) {
+            return &(ShaderProgram->second);
+        } else {
             return nullptr;
         }
     };

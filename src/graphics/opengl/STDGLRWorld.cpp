@@ -31,9 +31,10 @@ Engine::Reference<Renderer> STDGLRWorld::GetRenderer() {
 }
 
 std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string& path) {
-    try {
-        return InstanceArrays.at(path)->resource.MakeModelInstance();
-    } catch(...) {
+    auto InstanceArray = InstanceArrays.find(path);
+    if (InstanceArray != InstanceArrays.end()) {
+        return InstanceArray->second->resource.MakeModelInstance();
+    } else {
         glfwMakeContextCurrent(context);
         auto array = new Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>(this, context, modelsystem->GetModel(path));
         array->resource.selfResource = array;

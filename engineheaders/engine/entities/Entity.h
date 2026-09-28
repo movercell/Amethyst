@@ -97,12 +97,13 @@ public:
     std::optional<ADFEntry> GetProperty(const std::string& Name) {
         Entity.OnSave();
         auto tmp = ADFEntry::Serialize(Entity);
+        auto& tmpmap = tmp.GetMap();
 
-        try {
-            return tmp.GetMap().at(Name);
-        } catch (const std::out_of_range& e) {
-            return std::nullopt;
-        }
+        auto it = tmpmap.find(Name);
+        if (it != tmpmap.end()) {
+            return it->second;
+        } 
+        return std::nullopt;
     }
 
     ADFEntry ToADF() {

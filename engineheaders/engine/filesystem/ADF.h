@@ -496,9 +496,10 @@ public:
 
             template for (constexpr auto Member : Members) {
                 if constexpr (LoadAll || (std::meta::annotations_of_with_type(Member, ^^decltype(Engine::Internal::ADFSerializeAnnotation)).size() > 0)) {
-                    try {
-                        map.at(std::string(std::meta::identifier_of(Member))).Deserialize(Object.[:Member:]);
-                    } catch (const std::out_of_range& e) {}
+                    auto Entry = map.find(std::string(std::meta::identifier_of(Member)));
+                    if (Entry != map.end()) {
+                        Entry->second.Deserialize(Object.[:Member:]);
+                    }
                 }
             }
 

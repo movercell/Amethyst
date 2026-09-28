@@ -13,6 +13,6 @@ void Engine::Error(const std::string& text) {
     std::abort();
 }
 
-ConsoleCommand exitCommand = {"exit", []ConsoleCommandLambda {
+ConsoleCommand exitCommand("exit", []ConsoleCommandLambda {
     Engine::QueueShutdown();
-}, "Terminates the engine when ran"};
+}, "Terminates the engine when ran");

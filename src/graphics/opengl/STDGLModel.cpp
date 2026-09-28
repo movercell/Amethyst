@@ -177,9 +177,11 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
 
 
 Engine::Reference<STDGLModel> STDGLModelSystem::GetModel(std::string path) {
-    try {
-        return Engine::Reference(Models.at(path));
-    } catch(...) {
+    auto Model = Models.find(path);
+    
+    if (Model != Models.end()) {
+        return Engine::Reference(Model->second);
+    } else {
         auto ModelResource = new Engine::ManagedResource<STDGLModelSystem, STDGLModel>(this, path);
         Models.emplace(path, ModelResource);
         return Engine::Reference(ModelResource);

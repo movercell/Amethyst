@@ -7,7 +7,7 @@ MainMenu_t MainMenu;
 ImFont* ButtonFont;
 ImFont* ButtonBoldFont;
 
-ConsoleVariable<float> player_speedVariable = {"player_speed", 100.0f, false, "Player camera speed", 0.0f, 1024.0f};
+ConsoleVariable<float> player_speedVariable("player_speed", 100.0f, false, "Player camera speed", 0.0f, 1024.0f);
 
 static MainMenuType GetCurrentMenuType() {
     auto PlayerEntityHandler = (*world)[0];
@@ -258,7 +258,7 @@ void UIInit() {
     ADFEntry MenuLayoutFile = ADFEntry::FromFile("resources/menulayout.adf");
 	if (!MenuLayoutFile.HasChild("MenuLayout"))
 		Engine::Error("Bad menulayout.adf!");
-	ADFEntry MenuLayout = MenuLayoutFile["MenuLayout"];
+	ADFEntry& MenuLayout = MenuLayoutFile["MenuLayout"];
     MenuLayout.Deserialize(MainMenu);
 
 	ImFontConfig fontconfig;

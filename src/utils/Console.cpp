@@ -135,7 +135,7 @@ void Engine::ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::st
         if (Command != CommandMap.end()) {
             Command->second->operator()(InWorld, AsEntityFromSlot, Params);
         } else {
-            Engine::Print(std::string("Unknown console command: " + Params[0]));
+            Engine::Print(std::format("Unknown console command: {}", Params[0]));
         }
     }
 }
@@ -147,10 +147,12 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
         return;
     }
 
-    try {
-        Engine::Print(std::string(GetCommandMap().at(Do[1])->GetHelpString()));
-    } catch( std::out_of_range e ) {
-        Engine::Print(Do[1] + " is not a valid console command!");
+    auto& CommandMap = GetCommandMap();
+    auto Command = CommandMap.find(Do[1]);
+    if (Command != CommandMap.end()) {
+         Engine::Print(std::string(Command->second->GetHelpString()));
+    } else {
+        Engine::Print(std::format("{} is not a valid console command!", Do[1]));
     }
 }, "Returns the help string of a command.");
 
@@ -160,7 +162,7 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
 // Console UI.
 
 
-ConsoleVariable<bool> ConsoleWindowOpen = {"engine_ui_showconsole", false, false, "Shows the console."};
+ConsoleVariable<bool> ConsoleWindowOpen("engine_ui_showconsole", false, false, "Shows the console.");
 
 inline constexpr float RunButtonSize = 30.0f;
 inline constexpr float InInputSize = 80.0f;
@@ -231,30 +233,25 @@ void Engine::Internal::DrawConsole() {
         return;
     }
 
-    // Text area.
-    float ReservedHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-    if (ImGui::BeginChild("TextArea", ImVec2(0, -ReservedHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-
+    {
         std::unique_lock<std::mutex> lock(ConsoleTextBufferMutex);
         if (dirty) UpdateDrawTextBuffer();
 
-        float AreaWidth = ImGui::GetContentRegionAvail().x;
-        ImVec2 TextSize = ImGui::CalcTextSize(&ConsoleDrawTextBuffer.at(0), nullptr, false, AreaWidth);
-        float AreaHeight = TextSize.y + (ImGui::GetStyle().FramePadding.y * 2.0f);
+        float ReservedHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_EnterReturnsTrue;
-        ImGui::InputTextMultiline("##AmethystConsoleOutput", &ConsoleDrawTextBuffer.at(0), ConsoleDrawTextBuffer.size(), ImVec2(AreaWidth, AreaHeight), flags);
+        ImGui::InputTextMultiline("##AmethystConsoleOutput", &ConsoleDrawTextBuffer.at(0), ConsoleDrawTextBuffer.size(), ImVec2(ImGui::GetContentRegionAvail().x, -ReservedHeight), flags);
 
-        ImGui::PopStyleColor(2);
 
         if (shouldscrolltobottom) {
-            ImGui::SetScrollHereY(1.0f);
+            if (ImGui::BeginChild("##AmethystConsoleOutput")) {
+                ImGui::SetScrollHereY(1.0f);
+            }
+            ImGui::EndChild();
+
             shouldscrolltobottom = false;
         }
     }
-    ImGui::EndChild();
 
     // Input area.
 

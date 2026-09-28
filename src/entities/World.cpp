@@ -42,9 +42,10 @@ void World::EntityStorageFromADF(const ADFEntry& Saved, EntityStorage* Storage, 
 
         Engine::Reference<EntityHandler> Handler;
         
-        try {
-            Handler = EntityCreationLambdas.at(SavedEntity.second["classname"].GetString())(this, parent);
-        } catch(const std::out_of_range& e) {
+        auto Lambda = EntityCreationLambdas.find(SavedEntity.second["classname"].GetString());
+        if (Lambda != EntityCreationLambdas.end()) {
+            Handler = Lambda->second(this, parent);
+        } else {
             continue;
         }
 
@@ -101,9 +102,10 @@ Engine::Reference<EntityHandler> World::MakeEntity(std::string classname, std::o
 
     Engine::Reference<EntityHandler> Handler;
 
-    try {
-        Handler = EntityCreationLambdas.at(classname)(this, parent);
-    } catch(const std::out_of_range& e) {
+    auto Lambda = EntityCreationLambdas.find(classname);
+    if (Lambda != EntityCreationLambdas.end()) {
+        Handler = Lambda->second(this, parent);
+    } else {
         return nullptr;
     }
 
@@ -208,14 +210,14 @@ void EntityStorage::Clear() {
 }
 
 
-ConsoleCommand engine_saveCommand = {"engine_save", []ConsoleCommandLambda {
+ConsoleCommand engine_saveCommand("engine_save", []ConsoleCommandLambda {
     if (Do.size() != 2) {
         Engine::Print("Usage: engine_save [path to savefile]");
         return;
     }
     InWorld->Save().ToFile(std::format("saves/{}.adf", Do[1]), true);
-}, "Saves the world into a Savefile. Engine variety in case the game breaks the regular `save` command."};
-ConsoleCommand engine_loadCommand = {"engine_load", []ConsoleCommandLambda {
+}, "Saves the world into a Savefile. Engine variety in case the game breaks the regular `save` command.");
+ConsoleCommand engine_loadCommand("engine_load", []ConsoleCommandLambda {
     if (Do.size() != 2) {
         Engine::Print("Usage: engine_load [path to savefile]");
         return;
@@ -223,4 +225,4 @@ ConsoleCommand engine_loadCommand = {"engine_load", []ConsoleCommandLambda {
     auto savefile = ADFEntry::FromFile(std::format("saves/{}.adf", Do[1]));
     if (savefile.HasChild("Savefile"))
         InWorld->Load(savefile);
-}, "Loads the world from a Savefile. Engine variety in case the game breaks the regular `load` command."};
+}, "Loads the world from a Savefile. Engine variety in case the game breaks the regular `load` command.");
