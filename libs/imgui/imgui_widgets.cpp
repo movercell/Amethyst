@@ -4116,7 +4116,7 @@ static int STB_TEXTEDIT_MOVELINESTART_IMPL(ImGuiInputTextState* obj, ImStb::STB_
             const char* p_eol = ImFontCalcWordWrapPositionEx(g.Font, g.FontSize, p, text_end, obj->WrapWidth, ImDrawTextFlags_WrapKeepBlanks);
             if (p == p_cursor) // If we are already on a visible beginning-of-line, return real beginning-of-line (would be same as regular handler below)
                 return (int)(p_bol - obj->TextSrc);
-            if (p_eol == p_cursor && obj->TextA[cursor] != '\n' && obj->LastMoveDirectionLR == ImGuiDir_Left)
+            if (p_eol == p_cursor && obj->TextSrc[cursor] != '\n' && obj->LastMoveDirectionLR == ImGuiDir_Left)
                 return (int)(p_bol - obj->TextSrc);
             if (p_eol >= p_cursor)
                 return (int)(p - obj->TextSrc);

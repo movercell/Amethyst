@@ -239,9 +239,10 @@ void Engine::Internal::DrawConsole() {
 
         float ReservedHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_EnterReturnsTrue;
+        ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, true);
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_EnterReturnsTrue; 
         ImGui::InputTextMultiline("##AmethystConsoleOutput", &ConsoleDrawTextBuffer.at(0), ConsoleDrawTextBuffer.size(), ImVec2(ImGui::GetContentRegionAvail().x, -ReservedHeight), flags);
-
+        ImGui::PopItemFlag();
 
         if (shouldscrolltobottom) {
             if (ImGui::BeginChild("##AmethystConsoleOutput")) {
