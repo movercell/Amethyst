@@ -31,7 +31,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/glfw)
 
-add_library(glad STATIC src/one-off_libs/glad.c)
+add_library(glad STATIC libs/glad.c)
 target_include_directories(glad PRIVATE include)
 
 file(GLOB_RECURSE imgui_sources      libs/imgui/*.cpp)

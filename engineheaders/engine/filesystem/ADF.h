@@ -14,11 +14,36 @@
 #include <meta>
 #include <type_traits>
 
-//! Tag for specified ADF serialization.
+//! ADF serialization utils.
 namespace Engine {
+    //@cond INTERNAL_DOCS
     namespace Internal {
         constexpr struct {} ADFSerializeAnnotation;
+
+        template <bool IsTemplate, auto TClean>
+        consteval bool IsVector() {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::vector);
+                return res;
+            } else { return false; }
+        }
+        template <bool IsTemplate, auto TClean>
+        consteval bool IsArray() {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::array);
+                return res;
+            } else { return false; }
+        }
+        template <bool IsTemplate, auto TClean>
+        consteval bool IsMap() {
+            if constexpr (IsTemplate) {
+                constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
+                                     (std::meta::template_of(TClean) == std::meta::dealias(^^std::unordered_map));
+                return res;
+            } else { return false; }
+        }
     }
+    //@endcond
 }
 
 /*!
@@ -283,25 +308,9 @@ public:
 
         constexpr auto TClean = std::meta::dealias(^^T);
         constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
-        constexpr bool IsVector = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::vector);
-                return res;
-            } else { return false; }
-        }();
-        constexpr bool IsArray = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::array);
-                return res;
-            } else { return false; }
-        }();
-        constexpr bool IsMap = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
-                                     (std::meta::template_of(TClean) == std::meta::dealias(^^std::unordered_map));
-                return res;
-            } else { return false; }
-        }();
+        constexpr bool IsVector = Engine::Internal::IsVector<IsTemplate, TClean>();
+        constexpr bool IsArray = Engine::Internal::IsArray<IsTemplate, TClean>();
+        constexpr bool IsMap = Engine::Internal::IsMap<IsTemplate, TClean>();
 
         if constexpr (TClean == ^^ADFEntry) {
             // The object is already an ADFEntry.
@@ -399,25 +408,9 @@ public:
 
         constexpr auto TClean = std::meta::dealias(^^T);
         constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
-        constexpr bool IsVector = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::vector);
-                return res;
-            } else { return false; }
-        }();
-        constexpr bool IsArray = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::array);
-                return res;
-            } else { return false; }
-        }();
-        constexpr bool IsMap = [IsTemplate, TClean]() -> bool {
-            if constexpr (IsTemplate) {
-                constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
-                                     (std::meta::template_of(TClean) == std::meta::dealias(^^std::unordered_map));
-                return res;
-            } else { return false; }
-        }();
+        constexpr bool IsVector = Engine::Internal::IsVector<IsTemplate, TClean>();
+        constexpr bool IsArray = Engine::Internal::IsArray<IsTemplate, TClean>();
+        constexpr bool IsMap = Engine::Internal::IsMap<IsTemplate, TClean>();
 
         if constexpr (TClean == ^^ADFEntry) {
             // The object is already an ADFEntry.

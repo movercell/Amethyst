@@ -11,6 +11,6 @@ std::ofstream Filesystem::GetFileOutputStream(const std::string& name, const std
         return std::ofstream(name, flags);
 }
 
-std::filesystem::path ENGINEEXPORT GetGameDirectoryPath() {
+std::filesystem::path ENGINEEXPORT Filesystem::GetGameDirectoryPath() {
         return "./";
 }

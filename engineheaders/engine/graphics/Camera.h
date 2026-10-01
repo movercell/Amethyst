@@ -12,7 +12,7 @@ inline constexpr float CAMERA_DEFAULT_NEAR        =  1.0f;
 inline constexpr float CAMERA_DEFAULT_FAR         =  32768.0f;
 
 namespace Engine {
-    //@internal
+    //@cond INTERNAL_DOCS
     namespace Internal {
         struct BaseCameraOrLight {
             vec3 GetPosition() {
@@ -37,6 +37,7 @@ namespace Engine {
             vec2 Resolution;
         };
     }
+    //@endcond
 }
 /*!
 * \brief A camera interface.

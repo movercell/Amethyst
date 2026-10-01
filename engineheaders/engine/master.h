@@ -79,6 +79,7 @@ struct alignas(sizeof(float) * 4) vec3 {
 
     constexpr float length() const { return std::sqrt(x*x + y*y + z*z); }
     constexpr vec3 norm() const { float Length = length(); if (Length == 0.0f) return vec3(); return vec3(x / Length, y / Length, z / Length); }
+    constexpr float BecomeNormalized() { float Length = length(); if (Length != 0.0f) *this = vec3(x / Length, y / Length, z / Length); return Length; }
     
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     constexpr vec3 (const glm::vec3& other) : x(other.x), y(other.y), z(other.z) {}
@@ -125,6 +126,7 @@ struct alignas(sizeof(float) * 2) vec2 {
 
     constexpr float length() const { return std::sqrt(x*x + y*y); }
     constexpr vec2 norm() const { float Length = length(); if (Length == 0.0f) return vec2();  return vec2(x / Length, y / Length); }
+    constexpr float BecomeNormalized() { float Length = length(); if (Length != 0.0f) *this = vec2(x / Length, y / Length); return Length; }
 
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     constexpr vec2 (const glm::vec2& other) : x(other.x), y(other.y) {}
@@ -172,9 +174,10 @@ struct alignas(sizeof(float) * 4) vec4 {
     constexpr float dot(const vec4& other) const { return x * other.x + y * other.y + z * other.z + w * other.w; }
 
     constexpr float length() const { return std::sqrt(x*x + y*y + z*z + w*w); }
-    constexpr vec4 norm() const { float Length = length(); if (Length == 0.0f) return vec4();  return vec4(x / Length, y / Length, z / Length, 2 / Length); }
+    constexpr vec4 norm() const { float Length = length(); if (Length == 0.0f) return vec4();  return vec4(x / Length, y / Length, z / Length, w / Length); }
+    constexpr float BecomeNormalized() { float Length = length(); if (Length != 0.0f) *this = vec4(x / Length, y / Length, z / Length, w / Length); return Length; }
 
-    constexpr vec3 ToVec3() { return vec3(x, y, z); }
+    constexpr explicit operator vec3() { return vec3(x, y, z); }
 #if defined(AMETHYSTENGINESRC) && defined(GLMPresent)
     constexpr vec4 (const glm::vec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
     constexpr glm::vec4 toglm() const { return glm::vec4(x, y, z, w); }

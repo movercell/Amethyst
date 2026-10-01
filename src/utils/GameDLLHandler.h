@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <libloaderapi.h>
+#else
+#include <dlfcn.h>
+#endif
+
 class GameDLL {
     using gameinit_signature = void(*)();
     using gameloop_signature = void(*)();
@@ -7,7 +14,7 @@ class GameDLL {
     gameloop_signature gameloop_proxy;
 
 #ifdef _WIN32
-    // TODO: Make a windows version.
+    HMODULE dllhandle;
 #else
     void* dllhandle;
 #endif

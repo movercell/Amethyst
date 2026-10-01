@@ -110,15 +110,15 @@ ImFontAtlas* STDGLRenderer::GetFontAtlas() {
 }
 
 void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
-    if (Do[1] == "help") {
+    if (Do[0] == "help") {
         Engine::Print("`recompileshaders`+`help` and that's it right now.");
         return;
     }
-    if (Do[1] == "recompileshaders") {
+    if (Do[0] == "recompileshaders") {
         ShaderSystem.Recompile();
         return;
     }
-    Engine::Print("STDGLRenderer: Unrecognized command " + Do[1]);
+    Engine::Print("STDGLRenderer: Unrecognized command " + Do[0]);
 }
 
 void STDGLRenderer::Draw() {
@@ -148,7 +148,7 @@ void STDGLRenderer::Draw() {
             InstanceArrayRefs.emplace_back(iarray);
 
         
-        std::vector<Shapes::Frustum> AllCameraFrustums;
+        static std::vector<Shapes::Frustum> AllCameraFrustums;
         AllCameraFrustums.reserve(rworld->CameraVec.size());
         // First, update all the cameras to get accurate frustums.
         for (auto camera : rworld->CameraVec) {

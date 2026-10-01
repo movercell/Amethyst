@@ -56,6 +56,7 @@ struct EntityHandler {
 
 struct BaseEntity;
 
+//@cond INTERNAL_DOCS
 namespace Engine { namespace Internal {
 
 template<typename T>
@@ -167,21 +168,33 @@ public:
 };
 
 } /*namespace Internal*/ } /*namespace Engine*/
+//@endcond
 
 
 
+//! Base entity code.
 struct BaseEntity {
+    //! Points to the World the entity is in.
     World* world;
+    //! Points to the handler of the entity.
     EntityHandler* handler;
 
+    //! Name, used for the IO system.(TODO)
     ADFSerialize std::string targetname;
+    //! Position of the entity.
     ADFSerialize vec3 position;
+    //! Scale of the entity.(Can be weird when used alongside this entity having children.)
     ADFSerialize vec3 scale = vec3(1.0f, 1.0f, 1.0f);
 
+    //! Rotation of the entity.
     ADFSerialize quat rotation;
+    //! Miscellaneous flags that can be set in the map editor.
     ADFSerialize uint64_t spawnflags = 0;
 
+    //! The current transformation matrix of the entity, constructed through BaseEntity::Update().
     mat4 TransformationMatrix;
+    //! Eye offset, used for stuff like relative to entity eyes console commands.
+    vec3 EyeOffset;
 
     virtual void Initialize() {}
     virtual void Update() {
@@ -209,6 +222,7 @@ struct BaseEntity {
 
 
 namespace Engine {
+    //@cond INTERNAL_DOCS
     namespace Internal {
         void ENGINEEXPORT RegisterEntityCreationLambda(std::string_view classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda);
 
@@ -217,6 +231,7 @@ namespace Engine {
             const char* classname;
         };
     }
+    //@endcond
 
     //! Manual registration of an entity class to the engine, prefer using the quick macro.
     template<typename Entity>
@@ -235,8 +250,10 @@ namespace Engine {
         });
     }
 
+    //! Registers the engine's entity types.
     void ENGINEEXPORT RegisterDefaultEngineEntityTypes();
 
+    //@cond INTERNAL_DOCS
     namespace Internal {
         template<typename Entity>
         struct RegisterEntityClassObject {
@@ -245,12 +262,13 @@ namespace Engine {
             }
         };
     }
+    //@endcond
 }
 
 #define RegisterEntityClass(Entity) \
-    namespace Engine { namespace Internal { namespace EntityRegistrations { \
+    namespace Engine { /*@cond INTERNAL_DOCS*/ namespace Internal { namespace EntityRegistrations { \
         inline RegisterEntityClassObject<Entity> Entity ## Registration; \
-    }}}
+    }} /*@endcond*/ }
 
 #ifdef __INTELLISENSE__ 
 #define EntityClassname(classname) 

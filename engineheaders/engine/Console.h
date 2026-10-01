@@ -9,6 +9,7 @@ namespace Engine {
 
     void ENGINEEXPORT ExecuteConsoleCommand(World* InWorld, int AsEntityFromSlot, std::string Do);
 
+    //@cond INTERNAL_DOCS
     namespace Internal {
         void ENGINEEXPORT RegisterConsoleCommand(std::string_view Name, ConsoleCommand* Command);
         void ENGINEEXPORT RegisterConsoleVariablePreservation(std::function<std::string()> Function);
@@ -16,6 +17,7 @@ namespace Engine {
         void UnregisterWorldForConsole(std::map<std::string_view, World*>::iterator Iterator);
         void DrawConsole();
     }
+    //@endcond
 }
 
 /*! \brief Console command, can be used in the console.

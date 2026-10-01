@@ -38,9 +38,9 @@ void STDGLLight::SetPosition(vec3 position) {
 void STDGLLight::SetRotation(quat rotation)  {
     mat4 RotationMatrix = quat(rotation).MakeRotationMatrix();
 
-    Front = RotationMatrix[0].ToVec3();
-    Left = RotationMatrix[1].ToVec3();
-    Up = RotationMatrix[2].ToVec3();
+    Front = (vec3)RotationMatrix[0];
+    Left = (vec3)RotationMatrix[1];
+    Up = (vec3)RotationMatrix[2];
 
     wasChanged = true;
 }

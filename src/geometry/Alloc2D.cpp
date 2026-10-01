@@ -1,6 +1,6 @@
 #include "engine/geometry/Alloc2D.h"
 
-#define REMOVE_BLOCK(BLOCK_ID)  std::swap(FreeBlocks[BLOCK_ID], FreeBlocks.back()); \
+#define REMOVE_BLOCK(BLOCK_ID)  FreeBlocks[BLOCK_ID] = FreeBlocks.back(); \
                                 FreeBlocks.pop_back();
 
 Geometry::Alloc2D::Block Geometry::Alloc2D::RawAlloc(uint16_t sizex, uint16_t sizey) {
@@ -61,7 +61,7 @@ Geometry::Alloc2D::Block Geometry::Alloc2D::RawAlloc(uint16_t sizex, uint16_t si
         return result;
     }
 
-    // Split.
+    // Split. (This coalesces the split off blocks as well.)
     RawFree({(uint16_t)(BestFitCopy.PosX + sizex), BestFitCopy.PosY, (uint16_t)(BestFitCopy.SizeX - sizex), sizey}); 
     RawFree({BestFitCopy.PosX, (uint16_t)(BestFitCopy.PosY + sizey), BestFitCopy.SizeX, (uint16_t)(BestFitCopy.SizeY - sizey)}); 
 
