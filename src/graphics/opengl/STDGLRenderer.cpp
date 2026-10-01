@@ -111,7 +111,11 @@ ImFontAtlas* STDGLRenderer::GetFontAtlas() {
 
 void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
     if (Do[0] == "help") {
-        Engine::Print("`recompileshaders`+`help` and that's it right now.");
+        Engine::Print("STDGLRenderer: Commands:\n help\n recompileshaders\n info");
+        return;
+    }
+    if (Do[0] == "info") {
+        Engine::Print("STDGLRenderer is a basic modern OpenGL renderer, and is currently Amethyst's primary.");
         return;
     }
     if (Do[0] == "recompileshaders") {
