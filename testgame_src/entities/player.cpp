@@ -4,7 +4,7 @@
 void Entity_Player::Initialize() {
     PlayerCamera = world->GetRWorld()->MakeCamera(vec2(window->GetWidth() * 2, window->GetHeight() * 2), "maincamera");
 }
-void Entity_Player::Update() {
+void Entity_Player::Draw() {
     PlayerCamera->SetPosition(position);
     PlayerCamera->SetAngles(vec3(pitch, yaw, 0.0f));
 }

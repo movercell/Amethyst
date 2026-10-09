@@ -97,6 +97,7 @@ static void GameStateHandler_Normal() {
 	}
 
 	world->Update();
+	world->Draw();
 
 	renderer->Draw();
 
@@ -117,6 +118,7 @@ static void GameStateHandler_Loading() {
 
 
 static void GameStateHandler_Paused() {
+	world->Draw();
 	renderer->Draw();
 }
 

@@ -4,10 +4,11 @@
 #include "engine/graphics/Window.h"
 #include <GLFW/glfw3.h>
 #include "imgui.h"
+#include "GLMisc.h"
 
 struct STDGLWindow : public Window {
     Engine::Reference<Renderer> rendererRef;
-    GLFWwindow* rendererData = nullptr;
+    GLContext* context = nullptr;
     ImGuiContext* UIData = nullptr;
     GLFWwindow* data = nullptr;
     bool ShouldEatCursor = false;
@@ -21,7 +22,7 @@ struct STDGLWindow : public Window {
     void Update();
 
     ~STDGLWindow();
-    STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name);
+    STDGLWindow(Engine::Reference<Renderer> Renderer, GLContext* Context, int ResX, int ResY, std::string name);
 
     void SetEatCursor(bool state);
     bool IsEatingCursor();

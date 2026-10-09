@@ -9,6 +9,7 @@
 #include <vector>
 #include "STDGLModel.h"
 #include "STDGLLight.h"
+#include "GLMisc.h"
 
 struct STDGLRWorld : public RWorld {
     Engine::Reference<Camera> MakeCamera(vec2 resolution, const std::string& name, float FOV = CAMERA_DEFAULT_FOV, float Near = CAMERA_DEFAULT_NEAR, float Far = CAMERA_DEFAULT_FAR);
@@ -18,8 +19,8 @@ struct STDGLRWorld : public RWorld {
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 
     ~STDGLRWorld();
-    STDGLRWorld(Engine::Reference<Renderer> Renderer, STDGLModelSystem* ModelSystem) {
-        context = glfwGetCurrentContext();
+    STDGLRWorld(Engine::Reference<Renderer> Renderer, GLContext* Context, STDGLModelSystem* ModelSystem) {
+        context = Context;
         renderer = Renderer;
         modelsystem = ModelSystem;
     }
@@ -29,7 +30,7 @@ struct STDGLRWorld : public RWorld {
     std::vector<Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>*> CameraVec;
     Engine::Reference<Renderer> renderer;
     Engine::Resource<RWorld>* selfResource;
-    GLFWwindow* context;
+    GLContext* context;
     STDGLModelSystem* modelsystem;
     STDGLLightSystem lightsystem;
 

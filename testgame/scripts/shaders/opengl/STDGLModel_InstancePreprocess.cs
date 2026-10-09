@@ -66,6 +66,6 @@ void main() {
 
     // Now, write the instance data.
     if (isActive) {
-        ModelInfo.InstanceIndices[LOD][BaseLODInstanceIndices[LOD] + subgroupBallotExclusiveBitCount(AllLODBallots[LOD])] = gl_GlobalInvocationID.x;
+        InstanceBuffer.InstanceIndices[LOD][BaseLODInstanceIndices[LOD] + subgroupBallotExclusiveBitCount(AllLODBallots[LOD])] = gl_GlobalInvocationID.x;
     }
 }

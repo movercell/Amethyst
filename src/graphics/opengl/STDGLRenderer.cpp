@@ -41,13 +41,14 @@ void STDGLRenderer::Init() {
 #endif
 
     GLFWwindow* data = glfwCreateWindow(1, 1, "The \"onosecond\" is the second after you make a terrible mistake. The second when you realise what you just did", nullptr, nullptr);
-    glfwMakeContextCurrent(data);
+    Context.Data = data;
+    GLMisc::SetContext(Context);
 
     glfwSwapInterval(1); // TODO: add a vsync setting
 
-    rendererData = data;
-
     ShaderSystem.Init();
+    MaterialSystem.Init(&ShaderSystem);
+    ModelSystem.Init(&MaterialSystem);
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
@@ -75,12 +76,12 @@ STDGLRenderer::~STDGLRenderer() {
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-    glfwDestroyWindow(rendererData);
+    glfwDestroyWindow(Context.Data);
 }
 
 
 Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string name) {
-    auto res = new Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>(this, selfResource, rendererData, x, y, name);
+    auto res = new Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>(this, selfResource, &Context, x, y, name);
     WindowVector.push_back(res);
     return Engine::Reference(res);
 }
@@ -126,13 +127,11 @@ void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
 }
 
 void STDGLRenderer::Draw() {
-    glfwMakeContextCurrent(rendererData);
+    GLMisc::SetContext(Context);
 
-    bool isFrameOdd = FrameCounter & 1;
-
-    if (DoubleBufferFences[isFrameOdd]) {
-        glClientWaitSync(DoubleBufferFences[isFrameOdd], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
-        glDeleteSync(DoubleBufferFences[isFrameOdd]);
+    if (DoubleBufferFences[Context.FrameID]) {
+        glClientWaitSync(DoubleBufferFences[Context.FrameID], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+        glDeleteSync(DoubleBufferFences[Context.FrameID]);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -148,10 +147,13 @@ void STDGLRenderer::Draw() {
         // Get references to all instance arrays.
         std::vector<Engine::Reference<STDGLModelInstanceArray>> InstanceArrayRefs;
         InstanceArrayRefs.reserve(rworld->InstanceArrays.size());
-        for (auto& [_, iarray] : rworld->InstanceArrays)
+        for (auto& [_, iarray] : rworld->InstanceArrays) {
             InstanceArrayRefs.emplace_back(iarray);
+            iarray->resource.Update();
+        }
 
         
+        // Static so that it does not call `operator new` every frame.
         static std::vector<Shapes::Frustum> AllCameraFrustums;
         AllCameraFrustums.reserve(rworld->CameraVec.size());
         // First, update all the cameras to get accurate frustums.
@@ -190,6 +192,8 @@ void STDGLRenderer::Draw() {
 
             GL_POP_DEBUG;
         }
+        // Because it's static.
+        AllCameraFrustums.clear();
 
         glEnable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
@@ -220,6 +224,7 @@ void STDGLRenderer::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     FrameCounter++;
+    Context.FrameID = FrameCounter & 1;
 
     // Draw windows.
     ImFontAtlasUpdateNewFrame(GetFontAtlas(), FrameCounter, true);
@@ -227,7 +232,7 @@ void STDGLRenderer::Draw() {
         window->resource.Draw();
     }
 
-    DoubleBufferFences[isFrameOdd] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    DoubleBufferFences[Context.FrameID] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     
 }
 
@@ -264,13 +269,6 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
 
 template<bool isDepth>
 void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
-    GLuint tmpshader;
-    if constexpr (isDepth)
-        tmpshader = ShaderSystem.GetShaderProgram("Engine_PBRGeneric")->DepthProgram;
-    else
-        tmpshader = ShaderSystem.GetShaderProgram("Engine_PBRGeneric")->Program;
-    glUseProgram(tmpshader);
-
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
         
@@ -287,8 +285,8 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
 
 
 Engine::Reference<RWorld> STDGLRenderer::MakeRWorld() {
-    glfwMakeContextCurrent(rendererData);
-    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, &ModelSystem);
+    GLMisc::SetContext(Context);
+    auto result = new Engine::ManagedInterfacedResource<STDGLRenderer, RWorld, STDGLRWorld>(this, selfResource, &Context, &ModelSystem);
     result->resource.selfResource = result;
     RWorldVec.push_back(result);
 

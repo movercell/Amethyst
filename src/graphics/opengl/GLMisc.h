@@ -11,8 +11,16 @@
     #define GL_POP_DEBUG
 #endif
 
+struct GLContext {
+    GLFWwindow* Data = nullptr;
+    bool FrameID = false;
+};
+
 namespace GLMisc {
     void EnsureGLLoaded();
+    void SetContext(GLFWwindow* context);
+    inline void SetContext(GLContext* context) { SetContext(context->Data); };
+    inline void SetContext(GLContext& context) { SetContext(context.Data); }
     void GLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
     void windowFocusCallback(GLFWwindow* window, int focused);

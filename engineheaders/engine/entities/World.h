@@ -26,6 +26,7 @@ public:
     int GetFreeIndex();
 
     void Update();
+    void Draw();
     void Clear();
     void PreseserveSlots(uint32_t count) {
         PreservedSlotAmount = count;

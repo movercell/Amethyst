@@ -12,6 +12,8 @@
 #include "engine/Resource.h"
 #include "GLFW/glfw3.h"
 #include "IndirectDrawBuffer.h"
+#include "STDGLMaterial.h"
+#include "GLMisc.h"
 #include <cstdint>
 #include <memory>
 #include <queue>
@@ -23,6 +25,20 @@ struct STDGLModel {
         glBindVertexArray(VAO);
         for (int LOD = 0; LOD < LODCount; LOD++) {
             for (int mesh = 0; mesh < LODs[LOD].MeshCount; mesh++) {
+                auto& Mesh = LODs[LOD].Meshes[mesh];
+
+                // Bind material.
+                if constexpr (isDepth) {
+                    if (Mesh.Material->Program->MaterialShouldBeBoundAtDepth) {
+                        Mesh.Material->Bind();
+                    }
+                    glUseProgram(Mesh.Material->Program->DepthProgram);
+                } else {
+                    Mesh.Material->Bind();
+                    glUseProgram(Mesh.Material->Program->Program);
+                }
+
+                // Draw the mesh.
                 glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 
                     (void*)((sizeof(DrawElementsIndirectCommand) * STDGLMODEL_MESH_MAX_COUNT * LOD)
                     + sizeof(DrawElementsIndirectCommand) * mesh));
@@ -37,7 +53,7 @@ struct STDGLModel {
     }
 
     struct Mesh {
-        unsigned int stub;
+        Engine::Reference<STDGLMaterial> Material;
 
         Mesh() {};
     };
@@ -49,13 +65,9 @@ struct STDGLModel {
         std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBuffers; 
         float Radius = 0.0f;
         std::array<float, STDGLMODEL_LOD_MAX_COUNT> LODDistances;
-        // This buffer also has the instance indices
-    };
-    struct ModelInfoMaxSizeBuffer : ModelInfo_t {
-        std::array<std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> ModelIndices;
     };
 
-    STDGLModel(std::string path = "error.adf");
+    STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem);
     ~STDGLModel();
 
     uint8_t LODCount;
@@ -65,37 +77,35 @@ struct STDGLModel {
 };
 
 struct STDGLModelInstanceArray {
-    struct InstanceArrayBuffer {
+    struct InstanceArray {
         std::array<mat4, STDGLMODEL_INSTANCE_MAX_COUNT> InstanceMatrices;
     };
+    struct InstanceArrayBuffer {
+        std::array<InstanceArray, 2> Instances;
+        std::array<std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> InstanceIndices;
+    };
 
-    GLFWwindow* rendererData;
+    GLContext* Context;
     std::queue<uint16_t> FreedIndices;
     Engine::Reference<STDGLModel> Model;
     Engine::Resource<STDGLModelInstanceArray>* selfResource;
-    InstanceArrayBuffer* InstanceBufferMapped;
+    InstanceArray* InstanceStagingBufferMapped;
+    GLuint InstanceStagingBuffer = 0;
     GLuint InstanceBuffer = 0;
     uint16_t NextIndex = 0;
-    bool wasModified = false;
-    bool ShouldUseOtherBuffer = false;
-    
 
-    STDGLModelInstanceArray(GLFWwindow* data, Engine::Reference<STDGLModel> model);
+    STDGLModelInstanceArray(GLContext* context, Engine::Reference<STDGLModel> model);
 
     ~STDGLModelInstanceArray();
         
     std::unique_ptr<ModelInstance> MakeModelInstance();
+    inline void Update() {
+        glFlushMappedNamedBufferRange(InstanceStagingBuffer, sizeof(InstanceArray) * Context->FrameID, NextIndex * sizeof(mat4));
+        glCopyNamedBufferSubData(InstanceStagingBuffer, InstanceBuffer, sizeof(InstanceArray) * Context->FrameID, 0, sizeof(InstanceArray));
+
+    }
     inline void Bind() {
-        if (wasModified) {
-            wasModified = false;
-            ShouldUseOtherBuffer = !ShouldUseOtherBuffer;
-            glFlushMappedNamedBufferRange(InstanceBuffer, 
-                sizeof(InstanceArrayBuffer) * ShouldUseOtherBuffer,
-                NextIndex * sizeof(mat4));
-        }
-        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, InstanceBuffer,
-                        sizeof(InstanceArrayBuffer) * ShouldUseOtherBuffer,
-                        sizeof(InstanceArrayBuffer));
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, InstanceBuffer);
     }
 
 };
@@ -113,7 +123,7 @@ struct STDGLModelInstance : public ModelInstance {
 
 class STDGLModelSystem {
     std::map<std::string, Engine::ManagedResource<STDGLModelSystem, STDGLModel>*> Models;
-
+    STDGLMaterialSystem* MaterialSystem = nullptr;
 
     template<typename Container, typename T>
     friend class Engine::ManagedResource;
@@ -127,6 +137,7 @@ class STDGLModelSystem {
         delete res;
     }
 public:
+    void Init(STDGLMaterialSystem* materialsystem) { MaterialSystem = materialsystem; }
     Engine::Reference<STDGLModel> GetModel(std::string path);
 
 };

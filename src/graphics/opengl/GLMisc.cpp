@@ -19,6 +19,14 @@ void GLMisc::EnsureGLLoaded() {
 	glfwMakeContextCurrent(NULL);
 	glfwDestroyWindow(temp);
 }
+void GLMisc::SetContext(GLFWwindow* context) {
+    static GLFWwindow* currentcontext = nullptr;
+
+    if (context != currentcontext) {
+        currentcontext = context;
+        glfwMakeContextCurrent(context);
+    }
+}
 void GLMisc::GLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
     if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
         return;

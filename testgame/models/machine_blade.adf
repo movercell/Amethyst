@@ -4,4 +4,7 @@ Model {
             Model "machine_blade.glb"
         }
     ]
+    Materials {
+        "Material.001" "models/blade.amt"
+    }
 }

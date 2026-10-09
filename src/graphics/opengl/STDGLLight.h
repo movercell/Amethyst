@@ -2,6 +2,7 @@
 
 #include "STDGLCamera.h"
 #include "STDGLModel.h"
+#include "GLMisc.h"
 #include "engine/graphics/Light.h"
 #include "engine/Resource.h"
 #include "engine/geometry/Alloc2D.h"
@@ -101,7 +102,7 @@ struct STDGLLightSystem {
     ~STDGLLightSystem();
 
     void _unmanage_resource(Engine::ManagedInterfacedResource<STDGLLightSystem, Light, STDGLLight>* res) {
-        glfwMakeContextCurrent(Context);
+        GLMisc::SetContext(Context);
 
         uint32_t ID = res->resource.ID;
         LightResources[ID] = nullptr;
@@ -115,10 +116,6 @@ struct STDGLLightSystem {
             std::queue<uint32_t> empty;
             FreedIndices.swap(empty);
             NextIndexToMake = 0;
-
-            auto* DefaultData = new STDGLLightData[STDGLLIGHT_MAX_COUNT];
-            glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
-            delete DefaultData;
         }
 
         delete res;

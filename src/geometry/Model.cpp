@@ -6,6 +6,8 @@
 #include <assimp/postprocess.h>
 #include <iostream>
 
+// C API ***ONLY***, because libassimp.6.dll is always compiled with mingw!
+
 const aiScene* MakeAssimpScene(std::string path) {
     auto modelfile = Filesystem::GetFileAsStream("models/" + path, std::ios::in | std::ios_base::binary);
     if (!modelfile) {
@@ -48,14 +50,15 @@ Geometry::Model::Model(std::string path) {
     
     Meshes.reserve(scene->mNumMeshes);
     for (int meshindex = 0; meshindex < scene->mNumMeshes; meshindex++) {
-        Mesh mesh(reinterpret_cast<void*>(scene->mMeshes[meshindex]));
+        Mesh mesh(reinterpret_cast<void*>(scene->mMeshes[meshindex]), reinterpret_cast<const void*>(scene));
         Meshes.push_back(std::move(mesh));
     }
     aiReleaseImport(scene);
 }
 
-Geometry::Mesh::Mesh(void* Meshdata) {
+Geometry::Mesh::Mesh(void* Meshdata, const void* Scenedata) {
     auto paimesh = reinterpret_cast<aiMesh*>(Meshdata);
+    auto paiscene = reinterpret_cast<const aiScene*>(Scenedata);
 
     Vertices.reserve(paimesh->mNumVertices);
     for (int vertexindex = 0; vertexindex < paimesh->mNumVertices; vertexindex++) {
@@ -74,4 +77,7 @@ Geometry::Mesh::Mesh(void* Meshdata) {
             Indices.push_back(paimesh->mFaces[faceindex].mIndices[indexindex]);
         }
     }
+    aiString aiMaterialName;
+    aiGetMaterialString(paiscene->mMaterials[paimesh->mMaterialIndex], AI_MATKEY_NAME, &aiMaterialName);
+    MaterialName = aiMaterialName.data;
 }

@@ -14,6 +14,7 @@ namespace EngineEntities {
 
         void Initialize();
         void Update();
+        void Draw();
     };
 
     struct EntityClassname("light_spot") LightSpot : public BaseEntity {
@@ -35,5 +36,6 @@ namespace EngineEntities {
 
         void Initialize();
         void Update();
+        void Draw();
     };
 }

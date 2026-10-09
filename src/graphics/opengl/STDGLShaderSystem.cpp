@@ -51,13 +51,8 @@ void STDGLShaderSystem::InitCompute(const ADFEntry& ShaderDefs, bool isRecompile
             if (computeProgram == 0)
                 return; // No need to replace a working program with null
 
-            try {
-                glDeleteProgram(ComputeShaders.at(shader.first));
-                ComputeShaders.at(shader.first) = computeProgram;
-            } catch(std::out_of_range e) {
-                Engine::Warning("Did you add a new compute shader entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
-                glDeleteProgram(computeProgram);
-            }
+            glDeleteProgram(ComputeShaders.at(shader.first));
+            ComputeShaders.at(shader.first) = computeProgram;
         } else {
             ComputeShaders.emplace(shader.first, computeProgram);
         }
@@ -94,13 +89,8 @@ void STDGLShaderSystem::CompileShaders(const ADFEntry& ShaderDefs, const std::st
             if (Shader == 0)
                 return; // No need to replace a working shader with null
 
-            try {
-                glDeleteShader(OutTo.at(shader.first));
-                OutTo.at(shader.first) = Shader;
-            } catch(std::out_of_range e) {
-                Engine::Warning("Did you add a new shader entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
-                glDeleteShader(Shader);
-            }
+            glDeleteShader(OutTo.at(shader.first));
+            OutTo.at(shader.first) = Shader;
         } else {
             OutTo.emplace(shader.first, Shader);
         }
@@ -146,21 +136,31 @@ void STDGLShaderSystem::CompilePrograms(const ADFEntry& ShaderDefs, bool isRecom
         bool MaterialShouldBeBoundAtDepth = false;
         if (programmap.contains("MaterialShouldBeBoundAtDepth")) MaterialShouldBeBoundAtDepth = programmap.at("MaterialShouldBeBoundAtDepth").GetString() == "1" ? true : false;
 
-        ShaderProgram ShaderProgramObject = ShaderProgram(Program, DepthProgram, MaterialShouldBeBoundAtDepth);
+
+        // Handle the material layout.
+        std140BufTemplate MaterialTemplate;
+        if (programmap.contains("MaterialLayout")) {
+            const ADFEntry& MaterialLayout = programmap.at("MaterialLayout");
+            for (const ADFEntry& member : MaterialLayout.GetArray()) {
+                std::optional<ADFEntry> defaultvalue;
+                if (member.HasChild("Default")) {
+                    defaultvalue = member["Default"];
+                }
+
+                MaterialTemplate.AddMember(member["Name"].GetString(), member["Type"].GetString(), defaultvalue);
+            }
+        }
+        MaterialTemplate.Shrink();
+
+        ShaderProgram ShaderProgramObject = ShaderProgram(Program, DepthProgram, std::move(MaterialTemplate), MaterialShouldBeBoundAtDepth);
         if (isRecompile) {
             if (Program == 0 || DepthProgram == 0)
                 return; // No need to replace a working program with null
 
-            try {
-                ShaderPrograms.at(program.first).Destroy();
-                ShaderPrograms.at(program.first) = ShaderProgramObject;
-            } catch(std::out_of_range e) {
-                Engine::Warning("Did you add a new program entry to glshaders.adf? That doesn't work while the engine is running, you silly!");
-                glDeleteProgram(Program);
-                glDeleteProgram(DepthProgram);
-            }
+            ShaderPrograms.at(program.first).Destroy();
+            ShaderPrograms.at(program.first) = std::move(ShaderProgramObject);
         } else {
-            ShaderPrograms.emplace(program.first, ShaderProgramObject);
+            ShaderPrograms.emplace(program.first, std::move(ShaderProgramObject));
         }
     }
 }
@@ -175,7 +175,7 @@ void STDGLShaderSystem::InitGraphic(const ADFEntry& ShaderDefs, bool isRecompile
 
 
 void STDGLShaderSystem::Init_All(bool isRecompile) {
-    auto glshadersadf = ADFEntry::FromFile("scripts/shaders/glshaders.adf")["Shaders"];
+    glshadersadf = ADFEntry::FromFile("scripts/shaders/glshaders.adf")["Shaders"];
 
     InitCompute(glshadersadf, isRecompile);
     InitGraphic(glshadersadf, isRecompile);

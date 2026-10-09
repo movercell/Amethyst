@@ -1,4 +1,5 @@
 #include "STDGLCamera.h"
+#include "GLMisc.h"
 #include "GLFW/glfw3.h"
 #include "glm/geometric.hpp"
 
@@ -97,7 +98,7 @@ STDGLCamera::STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, c
 }
 
 STDGLCamera::~STDGLCamera() {
-    glfwMakeContextCurrent(Context);
+    GLMisc::SetContext(Context);
 
     glDeleteFramebuffers(1, &Framebuffer);
     glDeleteTextures(3, AllTextureBuffers);

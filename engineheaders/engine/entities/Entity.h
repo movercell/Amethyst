@@ -23,6 +23,7 @@ struct EntityHandler {
     //! Used for initializing the entity after manually setting it up if you choose not to load it from ADF. 
     virtual void InitEntity() = 0;
     virtual void UpdateEntity() = 0;
+    virtual void DrawEntity() = 0;
 
     virtual std::string_view GetClassname() const = 0;
     virtual std::optional<EntityHandler*> GetParent() const = 0;
@@ -148,6 +149,7 @@ public:
         AddTag("WasInit");
     }
     void UpdateEntity() { Entity.Update(); }
+    void DrawEntity() { Entity.Draw(); }
 
     std::string_view GetClassname() const { return classname; }
     std::optional<EntityHandler*> GetParent() const { return parent; }
@@ -210,6 +212,7 @@ struct BaseEntity {
             TransformationMatrix *= parent.value()->GetTransformationMatrix();
         }
     }
+    virtual void Draw() {}
     virtual void OnSave() {}
 
     // Handler wrapper functions.

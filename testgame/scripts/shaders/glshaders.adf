@@ -11,6 +11,9 @@ Shaders {
         Generic {
             Source "generic.fs"
         }
+        Error {
+            Source "error.fs"
+        }
     }
     // These are fragment shaders that draw only depth.
     Depth {
@@ -32,13 +35,28 @@ Shaders {
             Shader_Fragment Generic
             Shader_Depth Generic
             MaterialShouldBeBoundAtDepth 0
-            MaterialLayout {
-                Variables {
-                    "Albedo" "texture"
-                    "Roughness_Metalness_EncodedNormal" "texture"
+            MaterialLayout [
+                {
+                    "Name" "red"
+                    "Type" "float"
                 }
-                DefaultValues {}
-            }
+                {
+                    "Name" "green"
+                    "Type" "float"
+                }
+                {
+                    "Name" "blue"
+                    "Type" "float"
+                    "Default" "0.0" // This is an optional field.
+                }
+            ]
+        }
+        Engine_Error {
+            Shader_Vertex Generic
+            Shader_Fragment Error
+            Shader_Depth Generic
+            MaterialShouldBeBoundAtDepth 0
+            MaterialLayout []
         }
     }
 }

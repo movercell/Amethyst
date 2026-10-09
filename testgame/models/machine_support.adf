@@ -4,4 +4,7 @@ Model {
             Model "machine_support.glb"
         }
     ]
+    Materials {
+        "Material.001" "regular.amt"
+    }
 }

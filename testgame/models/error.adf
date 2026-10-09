@@ -4,4 +4,7 @@ Model {
             Model "error.glb"
         }
     ]
+    Materials {
+        "" "models/errormdl.amt"
+    }
 }

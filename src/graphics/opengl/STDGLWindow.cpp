@@ -86,8 +86,8 @@ void STDGLWindow::Update() {
         Height = videomode->height;
         monitor = primarymonitor;
     }
-    data = glfwCreateWindow(Width, Height, Name.c_str(), monitor, reinterpret_cast<GLFWwindow*>(rendererData));
-    glfwMakeContextCurrent(data);
+    data = glfwCreateWindow(Width, Height, Name.c_str(), monitor, context->Data);
+    GLMisc::SetContext(data);
     glfwSwapInterval(1); // TODO: add a vsync setting
 
     if (Fullscreen) {
@@ -127,8 +127,8 @@ STDGLWindow::~STDGLWindow() {
     }
 };
 
-STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLFWwindow* RendererDataPtr, int ResX, int ResY, std::string name) {
-    rendererData = RendererDataPtr;
+STDGLWindow::STDGLWindow(Engine::Reference<Renderer> Renderer, GLContext* Context, int ResX, int ResY, std::string name) {
+    context = Context;
     rendererRef = Renderer;
     Width = ResX;
     Height = ResY;
@@ -141,7 +141,7 @@ void STDGLWindow::Draw() {
         NeedsUpdate = false;
     }
 
-    glfwMakeContextCurrent(data);
+    GLMisc::SetContext(data);
     glViewport(0, 0, Width, Height);
     
     ImGui::SetCurrentContext(UIData);

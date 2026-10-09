@@ -1,0 +1,8 @@
+"Material" {
+	"Program" "Engine_PBRGeneric"
+	"Parameters" {
+		"red" "0.6f"
+		"green" "0.4f"
+		"blue" "0.8f"
+	}
+}

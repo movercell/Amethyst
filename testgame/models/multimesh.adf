@@ -4,4 +4,9 @@ Model {
             Model "multimesh.glb"
         }
     ]
+    Materials {
+        "Material.001" "regular.amt"
+        "Material.002" "regular.amt"
+        "Material.003" "regular.amt"
+    }
 }

@@ -10,7 +10,8 @@ namespace EngineEntities {
 
     void DynamicProp::Update() {
         BaseEntity::Update();
-
+    }
+    void DynamicProp::Draw() {
         modelinstance->SetMatrix(TransformationMatrix);
     }
 
@@ -26,7 +27,9 @@ namespace EngineEntities {
 
     void LightSpot::Update() {
         BaseEntity::Update();
+    }
 
+    void LightSpot::Draw() {
         if (isconstantlyupdating) {
             light->SetPosition(position);
             light->SetRotation(rotation);

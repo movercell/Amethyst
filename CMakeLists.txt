@@ -62,8 +62,10 @@ add_executable(amethyst
 	src/graphics/opengl/STDGLModel.cpp
 	src/graphics/opengl/STDGLWindow.cpp
 	src/graphics/opengl/STDGLShaderSystem.cpp
+	src/graphics/opengl/STDGLMaterial.cpp
 	src/graphics/opengl/STDGLLight.cpp
 	src/graphics/opengl/GLMisc.cpp
+	src/graphics/opengl/GLSLTypes.cpp
 	src/geometry/Model.cpp
 	src/geometry/Alloc2D.cpp
 	src/Init.cpp

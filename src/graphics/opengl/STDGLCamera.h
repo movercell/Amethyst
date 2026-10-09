@@ -39,7 +39,6 @@ struct STDGLCamera : public Camera {
     Camerainfo_t Info;
 
     Engine::Reference<RWorld> RWorldRef;
-    // Constructor with vectors.
     STDGLCamera(Engine::Reference<RWorld> rworldref, vec2 resolution, const std::string& name, float fov = CAMERA_DEFAULT_FOV, float near = CAMERA_DEFAULT_NEAR, float far = CAMERA_DEFAULT_FAR);
 
     // Updates the internal data of the camera.

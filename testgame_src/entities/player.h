@@ -8,7 +8,7 @@ struct EntityClassname("player") Entity_Player : public BaseEntity {
     Engine::Reference<Camera> PlayerCamera;
 
     void Initialize();
-    void Update();
+    void Draw();
 };
 RegisterEntityClass(Entity_Player)
 

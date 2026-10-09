@@ -4,4 +4,7 @@ Model {
             Model "floor_plane.glb"
         }
     ]
+    Materials {
+        "" "regular.amt"
+    }
 }

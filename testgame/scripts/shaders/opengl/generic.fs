@@ -16,6 +16,11 @@ in VertexData {
     vec3 Normal;
     vec2 UV;
 };
+layout (std140, binding = 1) uniform _Material {
+    float red;
+    float green;
+    float blue;
+} Material;
 
 vec3 GenerateTemporaryTexture() {
     uint isOther = 0u;
@@ -38,15 +43,19 @@ vec3 GenerateTemporaryTexture() {
 void main()
 {
     vec3 Texture = GenerateTemporaryTexture();
-    vec3 Albedo = Texture * vec3(0.3f, 0.3f, 0.7f);
+    vec3 Albedo = Texture * vec3(Material.red, Material.green, Material.blue);
 
     vec3 IncomingLight;
+
+    float TexNormX = 0.0f; //  * 2.0 - 1.0
+    float TexNormY = 0.0f;
+    vec3 TexNormal = vec3(TexNormX, TexNormY, sqrt(1 - TexNormX * TexNormX - TexNormY * TexNormY));
 
     for (int light = 0; light < STDGLLIGHT_MAX_COUNT; light++) {
         STDGLLightData Light = LightBuffer.Lights[light];
 
         if (Light.Type == LIGHT_TYPE_SPOT)
-            IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), vec3(0.0f, 0.0f, 1.0f), Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
+            IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), TexNormal, Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
     }
     vec3 AmbientLight = vec3(0.03) * Albedo;
 
@@ -56,5 +65,5 @@ void main()
     Color = pow(Color, vec3(1.0/2.2));  
 
     FragColor = vec4(Color, 1.0f);
-    FragNormal = Octahedral_Map(normalize(Normal));
+    FragNormal = Octahedral_Map(normalize(Normal)); // TODO: This should be combined with the texture normal.
 }

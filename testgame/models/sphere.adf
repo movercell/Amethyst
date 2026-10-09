@@ -4,4 +4,5 @@ Model {
             Model "sphere.glb"
         }
     ]
+    Materials {}
 }

@@ -8,4 +8,8 @@ Model {
 	        Distance 20.0
         }
     ]
+    Materials {
+        "" "regular.amt"
+        "Material" "regular.amt"
+    }
 }

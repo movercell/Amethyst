@@ -203,6 +203,14 @@ void EntityStorage::Update() {
         }
     }
 }
+void EntityStorage::Draw() {
+    for (auto& Handler : (*this)) {
+        if (Handler) {
+            Handler->DrawEntity();
+            Handler->Children.Draw();
+        }
+    }
+}
 void EntityStorage::Clear() {
     for (auto& Handler : (*this)) {
         Handler = Engine::Reference<EntityHandler>();

@@ -175,16 +175,32 @@ public:
 
 
     ADFEntry& operator[](int i) {
-        return GetArray()[i];
+        try {
+            return GetArray().at(i);
+        } catch( std::out_of_range e ) {
+            ADFError("Index " + std::to_string(i) + " does not exist!");
+        }
     }
     ADFEntry& operator[](const std::string& name) {
-        return GetMap().at(name);
+        try {
+            return GetMap().at(name);
+        } catch( std::out_of_range e ) {
+            ADFError("No such key: \"" + name + "\"");
+        }
     }
     const ADFEntry& operator[](int i) const {
-        return GetArray()[i];
+        try {
+            return GetArray().at(i);
+        } catch( std::out_of_range e ) {
+            ADFError("Index " + std::to_string(i) + " does not exist!");
+        }
     }
     const ADFEntry& operator[](const std::string& name) const {
-        return GetMap().at(name);
+        try {
+            return GetMap().at(name);
+        } catch( std::out_of_range e ) {
+            ADFError("No such key: \"" + name + "\"");
+        }
     }
 
     bool HasChild(const std::string& name) const {

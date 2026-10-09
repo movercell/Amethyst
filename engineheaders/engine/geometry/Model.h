@@ -12,12 +12,13 @@ namespace Geometry {
     class ENGINEEXPORT Mesh {
     protected:
         friend class Model;
-        Mesh(void* Meshdata);
+        Mesh(void* Meshdata, const void* Scenedata);
     public:
         Mesh() = delete;
         std::vector<Shapes::Vertex> Vertices;
         std::vector<uint32_t> Indices;
         float Radius = 0.0f;
+        std::string MaterialName;
     };
 
     class ENGINEEXPORT Model {

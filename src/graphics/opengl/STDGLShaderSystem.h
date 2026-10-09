@@ -1,9 +1,10 @@
 #pragma once
 
 #include <glad/glad.h>
+#include "GLSLTypes.h"
 #include "engine/filesystem/Filesystem.h"
-#include <map>
 #include "engine/filesystem/ADF.h"
+#include <map>
 
 
 struct STDGLShaderSystem {
@@ -11,14 +12,19 @@ struct STDGLShaderSystem {
         bool MaterialShouldBeBoundAtDepth = false;
         GLuint Program = 0;
         GLuint DepthProgram = 0;
+        
+        std140BufTemplate& GetMaterialTemplate() { return MaterialTemplate; }
 
     protected:
-        ShaderProgram(GLuint program, GLuint depthprogram, bool materialshouldbeboundatdepth) { Program = program; DepthProgram = depthprogram; MaterialShouldBeBoundAtDepth = materialshouldbeboundatdepth; }
+        std140BufTemplate MaterialTemplate;
+        ShaderProgram(GLuint program, GLuint depthprogram, std140BufTemplate materialtemplate, bool materialshouldbeboundatdepth) { Program = program; DepthProgram = depthprogram; MaterialTemplate = std::move(materialtemplate); MaterialShouldBeBoundAtDepth = materialshouldbeboundatdepth; }
         void Destroy() { glDeleteProgram(Program); glDeleteProgram(DepthProgram); }
 
         friend struct STDGLShaderSystem;
     };
 private:
+    ADFEntry glshadersadf;
+
     std::map<std::string, GLuint> ComputeShaders;
 
     std::map<std::string, GLuint> VertexShaders;
@@ -45,7 +51,7 @@ public:
         if (ShaderProgram != ShaderPrograms.end()) {
             return &(ShaderProgram->second);
         } else {
-            return nullptr;
+            return GetShaderProgram("Engine_Error");
         }
     };
     // Recompiles all shaders and programs.

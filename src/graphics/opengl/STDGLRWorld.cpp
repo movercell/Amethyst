@@ -1,4 +1,5 @@
 #include "STDGLRWorld.h"
+#include "GLMisc.h"
 #include "GLFW/glfw3.h"
 #include "STDGLCamera.h"
 #include "engine/graphics/Camera.h"
@@ -7,14 +8,14 @@
 
 
 Engine::Reference<Camera> STDGLRWorld::MakeCamera(vec2 resolution, const std::string& name, float FOV, float Near, float Far) {
-    glfwMakeContextCurrent(context);
+    GLMisc::SetContext(context);
     auto result = new Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>(this, selfResource, resolution, name, FOV, Near, Far);
     CameraVec.push_back(result);
 
     return result;
 }
 Engine::Reference<Light> STDGLRWorld::MakeSpotLight(vec2 resolution, float inner_cutoff_angle, float outer_cutoff_angle, vec3 color, float near, float far) {
-    glfwMakeContextCurrent(context);
+    GLMisc::SetContext(context);
     return lightsystem.MakeLight(selfResource, STDGLLightType::Spot, resolution, inner_cutoff_angle, outer_cutoff_angle, color, near, far);
 }
 
@@ -35,7 +36,7 @@ std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string&
     if (InstanceArray != InstanceArrays.end()) {
         return InstanceArray->second->resource.MakeModelInstance();
     } else {
-        glfwMakeContextCurrent(context);
+        GLMisc::SetContext(context);
         auto array = new Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>(this, context, modelsystem->GetModel(path));
         array->resource.selfResource = array;
         InstanceArrays.emplace(path, array);

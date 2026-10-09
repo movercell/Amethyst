@@ -23,7 +23,7 @@ out VertexData {
 
 
 void main() {
-    mat4 InstanceMarix = InstanceBuffer.InstanceMatrices[ModelInfo.InstanceIndices[gl_BaseInstance][gl_InstanceID]];
+    mat4 InstanceMarix = InstanceBuffer.InstanceMatrices[InstanceBuffer.InstanceIndices[gl_BaseInstance][gl_InstanceID]];
     toFrag.Normal = transpose(inverse(mat3(InstanceMarix))) * Normal;
     toFrag.UV = UV;
     toFrag.Position = InstanceMarix * vec4(Position, 1.0f);

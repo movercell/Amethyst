@@ -1,4 +1,5 @@
 #include "STDGLLight.h"
+#include "GLMisc.h"
 #include <numbers>
 
 void STDGLLight::Update() {
@@ -128,7 +129,7 @@ STDGLLight::STDGLLight(STDGLLightSystem* owner, Engine::Reference<RWorld> rworld
 }
 
 STDGLLight::~STDGLLight() {
-    glfwMakeContextCurrent(Owner->Context);
+    GLMisc::SetContext(Owner->Context);
 
     glDeleteFramebuffers(1, &Framebuffer);
     glDeleteBuffers(1, &Infobuffer);
@@ -161,7 +162,7 @@ STDGLLightSystem::STDGLLightSystem() {
     glCreateBuffers(1, &LightDataBuffer);
 
     auto* DefaultData = new STDGLLightData[STDGLLIGHT_MAX_COUNT];
-    glNamedBufferData(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_STATIC_DRAW);
+    glNamedBufferStorage(LightDataBuffer, sizeof(STDGLLightData) * STDGLLIGHT_MAX_COUNT, DefaultData, GL_DYNAMIC_STORAGE_BIT);
     delete[] DefaultData;
 
     // In case of sparse textures being available.
@@ -184,12 +185,12 @@ STDGLLightSystem::STDGLLightSystem() {
 
         LightAreaAllocator.SetCallbacks(
             [this](Geometry::Alloc2D::Block block) -> void {
-                glfwMakeContextCurrent(Context);
+                GLMisc::SetContext(Context);
                 glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_TRUE);
                 glClearTexSubImage(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             },
             [this](Geometry::Alloc2D::Block block) -> void {
-                glfwMakeContextCurrent(Context);
+                GLMisc::SetContext(Context);
                 glTexturePageCommitmentEXT(LightDepthBuffer, 0, block.PosX, block.PosY, 0, block.SizeX, block.SizeY, 1, GL_FALSE);
             });
     } else {

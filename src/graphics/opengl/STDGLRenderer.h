@@ -8,18 +8,21 @@
 #include <cstdint>
 #include "STDGLModel.h"
 #include "STDGLWindow.h"
+#include "STDGLMaterial.h"
 #include "STDGLShaderSystem.h"
+#include "GLMisc.h"
 
 /*!
 *   \brief An OpenGL renderer.
 */
 class STDGLRenderer : public Renderer {
 protected:
-    GLFWwindow* rendererData = nullptr;
+    GLContext Context;
     std::vector<Engine::Resource<RWorld>*> RWorldVec;
     std::vector<Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>*> WindowVector;
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
+    STDGLMaterialSystem MaterialSystem;
 
     Engine::UnmanagedInterfacedResource<Renderer, STDGLRenderer>* selfResource; // Stored to be able to make the Engine::Reference objects for objects that it gives out.
 
