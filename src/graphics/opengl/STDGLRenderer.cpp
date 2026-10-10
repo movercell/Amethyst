@@ -129,11 +129,6 @@ void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
 void STDGLRenderer::Draw() {
     GLMisc::SetContext(Context);
 
-    if (DoubleBufferFences[Context.FrameID]) {
-        glClientWaitSync(DoubleBufferFences[Context.FrameID], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
-        glDeleteSync(DoubleBufferFences[Context.FrameID]);
-    }
-
     glEnable(GL_DEPTH_TEST);
 
     for (auto rworldres : RWorldVec) {
@@ -223,16 +218,21 @@ void STDGLRenderer::Draw() {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    FrameCounter++;
-    Context.FrameID = FrameCounter & 1;
-
     // Draw windows.
     ImFontAtlasUpdateNewFrame(GetFontAtlas(), FrameCounter, true);
     for (auto& window : WindowVector) {
         window->resource.Draw();
     }
 
+    // Handle fences and frame counter.
     DoubleBufferFences[Context.FrameID] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    FrameCounter++;
+    Context.FrameID = FrameCounter & 1;
+    // Wait immediately because this uses persistently-mapped buffers.
+    if (DoubleBufferFences[Context.FrameID]) {
+        glClientWaitSync(DoubleBufferFences[Context.FrameID], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+        glDeleteSync(DoubleBufferFences[Context.FrameID]);
+    }
     
 }
 
