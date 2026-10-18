@@ -87,7 +87,7 @@ Engine::Reference<Window> STDGLRenderer::MakeWindow(int x, int y, std::string na
 }
 
 ImFont* STDGLRenderer::LoadFont(const std::string& path, ImFontConfig* config) {
-    auto fontfile = Filesystem::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
+    auto fontfile = Engine::GetFileAsStream(path, std::ios::in | std::ios_base::binary);
     if (!fontfile) {
         Engine::Warning("Failed to load font: " + path);
         return GetFontAtlas()->AddFontDefaultBitmap();

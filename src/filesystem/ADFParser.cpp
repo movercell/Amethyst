@@ -1,5 +1,5 @@
-#include "engine/filesystem/Filesystem.h"
-#include "engine/filesystem/ADF.h"
+#include "engine/Filesystem.h"
+#include "engine/ADF.h"
 #include "engine/StringUtils.h"
 #include <cctype>
 
@@ -191,7 +191,7 @@ void ADFEntry::ADFError(const std::string& error) const {
 }
 
 ADFEntry ADFEntry::FromFile(const std::string& FilePath) {
-    auto Stream = Filesystem::GetFileAsStream(FilePath, std::ios::in | std::ios_base::binary);
+    auto Stream = Engine::GetFileAsStream(FilePath, std::ios::in | std::ios_base::binary);
 
     if (Stream.fail()) {
         Engine::Print("ADF file not found!(probably)(" + FilePath + (')'));
@@ -335,7 +335,7 @@ void ADFEntry::ToFile(const std::string& FilePath, bool isCompact) const {
     if (!IsMap()) {
         Engine::Error("Attempted to turn a non-Map-type ADF entry into a string, only a Map-type entry can be the root node of a tree!");
     }
-    auto out = Filesystem::GetFileOutputStream(FilePath, std::ios::binary);
+    auto out = Engine::GetFileOutputStream(FilePath, std::ios::binary);
 
     auto sentry = std::ofstream::sentry(out);
     if (!sentry) {

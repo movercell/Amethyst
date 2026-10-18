@@ -1,12 +1,12 @@
 #include "GameDLLHandler.h"
 #include "engine/master.h"
-#include "engine/filesystem/Filesystem.h"
+#include "engine/Filesystem.h"
 #include <string>
 
 #ifdef _WIN32
 
 GameDLL::GameDLL() {
-    dllhandle = ::LoadLibrary((Filesystem::GetGameDirectoryPath()/"libgame.dll").c_str());
+    dllhandle = ::LoadLibrary((Engine::GetGameDirectoryPath()/"libgame.dll").c_str());
 
     if (!dllhandle) {
         Engine::Error(std::string("Could not open game library: ") + ::GetLastError());
@@ -26,7 +26,7 @@ GameDLL::GameDLL() {
 #else
 
 GameDLL::GameDLL() {
-	dllhandle = ::dlopen((Filesystem::GetGameDirectoryPath()/"libgame.so").c_str(), RTLD_NOW);
+	dllhandle = ::dlopen((Engine::GetGameDirectoryPath()/"libgame.so").c_str(), RTLD_NOW);
     if (!dllhandle) {
         Engine::Error(std::string("Could not open game library: ") + ::dlerror());
     }

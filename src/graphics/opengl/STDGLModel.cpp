@@ -2,7 +2,7 @@
 #include "GLMisc.h"
 #include "engine/master.h"
 #include "STDGLModel.h"
-#include "engine/filesystem/ADF.h"
+#include "engine/ADF.h"
 
 STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     ModelInfo_t Info;

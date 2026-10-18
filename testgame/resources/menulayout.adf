@@ -24,16 +24,6 @@
             "exclusivity" "2"
         }
         {
-            "text" "Dear ImGUI demo window"
-            "concommand" "engine_ui_showdemo"
-            "exclusivity" "0"
-        }
-        {
-            "text" "Console"
-            "concommand" "engine_ui_showconsole"
-            "exclusivity" "0"
-        }
-        {
             "text" "New game"
             "concommand" "menu_newgame"
             "exclusivity" "0"

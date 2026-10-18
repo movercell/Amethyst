@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 #include <optional>
-#include <engine/filesystem/ADF.h>
+#include <engine/ADF.h>
 
 enum class GLSLType : int {
     integer = 0,

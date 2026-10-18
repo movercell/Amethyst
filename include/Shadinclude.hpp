@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-#include <engine/filesystem/Filesystem.h>
+#include <engine/Filesystem.h>
 
 //	===========
 //	Shadinclude
@@ -76,7 +76,7 @@ public:
 		static bool isRecursiveCall = false;
 
 		std::string fullSourceCode = "";
-		std::ifstream file = Filesystem::GetFileAsStream(path, std::ios::in);
+		std::ifstream file = Engine::GetFileAsStream(path, std::ios::in);
 
 		if (!file.is_open())
 		{

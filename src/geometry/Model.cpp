@@ -1,7 +1,7 @@
 #include "engine/geometry/Model.h"
 
 #include <assimp/scene.h>
-#include "engine/filesystem/Filesystem.h"
+#include "engine/Filesystem.h"
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>
 #include <iostream>
@@ -9,9 +9,9 @@
 // C API ***ONLY***, because libassimp.6.dll is always compiled with mingw!
 
 const aiScene* MakeAssimpScene(std::string path) {
-    auto modelfile = Filesystem::GetFileAsStream("models/" + path, std::ios::in | std::ios_base::binary);
+    auto modelfile = Engine::GetFileAsStream("models/" + path, std::ios::in | std::ios_base::binary);
     if (!modelfile) {
-        modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
+        modelfile = Engine::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
     }
 
     const aiScene* scene;
@@ -27,7 +27,7 @@ const aiScene* MakeAssimpScene(std::string path) {
     // Check for errors.
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         aiReleaseImport(scene);
-        modelfile = Filesystem::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
+        modelfile = Engine::GetFileAsStream("models/error.glb", std::ios::in | std::ios_base::binary);
 
         // Reserve the needed space.
         modelfile.seekg(0, std::ios::end);
