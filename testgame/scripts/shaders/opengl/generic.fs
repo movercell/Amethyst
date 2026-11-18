@@ -20,6 +20,7 @@ layout (std140, binding = 1) uniform _Material {
     float red;
     float green;
     float blue;
+    float gridexponent;
 } Material;
 
 vec3 GenerateTemporaryTexture() {
@@ -37,7 +38,7 @@ vec3 GenerateTemporaryTexture() {
     if (Y >= 0.5f)
         isOther += 2u;
     vec3 ret = vec3(1.0f);
-    return isOther != 0u && isOther != 3u ? ret : ret * 0.9f;
+    return isOther != 0u && isOther != 3u ? ret : ret * Material.gridexponent;
 }
 
 void main()

@@ -1,6 +1,6 @@
 #pragma once
 
-#define STDGLMODEL_INSTANCE_MAX_COUNT 2048
+#define STDGLMODEL_INSTANCE_MAX_COUNT 512
 #define STDGLMODEL_LOD_MAX_COUNT 4
 #define STDGLMODEL_MESH_MAX_COUNT 8
 #define STDGLMODEL_INSTANCE_PREPROCESS_GROUP_SIZE 128
@@ -48,9 +48,6 @@ struct STDGLModel {
     inline void BindInfo() {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ModelInfo);
     }
-    inline void BindIndirectCommands() {
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, ModelInfo);
-    }
 
     struct Mesh {
         Engine::Reference<STDGLMaterial> Material;
@@ -62,7 +59,6 @@ struct STDGLModel {
         std::array<Mesh, STDGLMODEL_MESH_MAX_COUNT> Meshes;
     };
     struct ModelInfo_t {
-        std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBuffers; 
         float Radius = 0.0f;
         std::array<float, STDGLMODEL_LOD_MAX_COUNT> LODDistances;
     };
@@ -71,6 +67,7 @@ struct STDGLModel {
     ~STDGLModel();
 
     uint8_t LODCount;
+    std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBufferTemplates;
     std::array<LOD, STDGLMODEL_LOD_MAX_COUNT> LODs;
     GLuint VAO;
     GLuint VBO, EBO, ModelInfo;
@@ -81,6 +78,9 @@ struct STDGLModelInstanceArray {
         std::array<mat4, STDGLMODEL_INSTANCE_MAX_COUNT> InstanceMatrices;
     };
     struct InstanceArrayBuffer {
+        // Must be first!
+        std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBuffers;
+        
         std::array<InstanceArray, 2> Instances;
         std::array<std::array<GLuint, STDGLMODEL_INSTANCE_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> InstanceIndices;
     };
@@ -101,11 +101,16 @@ struct STDGLModelInstanceArray {
     std::unique_ptr<ModelInstance> MakeModelInstance();
     inline void Update() {
         glFlushMappedNamedBufferRange(InstanceStagingBuffer, sizeof(InstanceArray) * Context->FrameID, NextIndex * sizeof(mat4));
-        glCopyNamedBufferSubData(InstanceStagingBuffer, InstanceBuffer, sizeof(InstanceArray) * Context->FrameID, 0, sizeof(InstanceArray));
-
+        glCopyNamedBufferSubData(InstanceStagingBuffer, InstanceBuffer, sizeof(InstanceArray) * Context->FrameID, offsetof(InstanceArrayBuffer, Instances), sizeof(InstanceArray));
     }
     inline void Bind() {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, InstanceBuffer);
+    }
+    inline void BindIndirectCommands() {
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, InstanceBuffer);
+    }
+    inline void CopyDrawDataFromModel() {
+        glNamedBufferSubData(InstanceBuffer, 0, sizeof(InstanceArrayBuffer::IndirectBuffers), &Model->IndirectBufferTemplates);
     }
 
 };

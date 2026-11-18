@@ -49,6 +49,11 @@ Shaders {
                     "Type" "float"
                     "Default" "0.0" // This is an optional field.
                 }
+                {
+                    "Name" "gridexponent"
+                    "Type" "float"
+                    "Default" "0.9"
+                }
             ]
         }
         Engine_Error {

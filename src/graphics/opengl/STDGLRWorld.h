@@ -26,7 +26,7 @@ struct STDGLRWorld : public RWorld {
     }
 
 
-    std::map<std::string, Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>*> InstanceArrays;
+    std::multimap<std::string, Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>*> InstanceArrays;
     std::vector<Engine::ManagedInterfacedResource<STDGLRWorld, Camera, STDGLCamera>*> CameraVec;
     Engine::Reference<Renderer> renderer;
     Engine::Resource<RWorld>* selfResource;

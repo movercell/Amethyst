@@ -17,7 +17,8 @@ Engine::Reference<Renderer> renderer;
 Engine::Reference<RWorld> rworld;
 Engine::Reference<Window> window;
 std::array<std::unique_ptr<ModelInstance>, 4> models;
-std::vector<std::unique_ptr<ModelInstance>> extramodels;
+inline constexpr int EXTRA_MODEL_COUNT = 512;
+std::array<std::unique_ptr<ModelInstance>, EXTRA_MODEL_COUNT> extramodels;
 std::array<Engine::Reference<Camera>, 2> cameras;
 std::array<Engine::Reference<Light>, 2> lights;
 Engine::Reference<World> world;
@@ -62,9 +63,8 @@ void gameinit() {
 	lights[1]->SetIntensity(9999.0f);
 
 
-	extramodels.reserve(128);
-	for (int i = 0; i < 128; i++) {
-		extramodels.push_back(rworld->MakeModelInstance("backpack.adf"));
+	for (int i = 0; i < EXTRA_MODEL_COUNT; i++) {
+		extramodels[i] = (rworld->MakeModelInstance("backpack.adf"));
 	}
 
 	std::cout << "Hello, world!(From game dll!)" << std::endl;

@@ -93,10 +93,10 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
         for (int meshindex = 0; meshindex < LODs[LOD].MeshCount; meshindex++) {
             const auto& mesh = LODModels[LOD].Meshes[meshindex];
 
-            Info.IndirectBuffers[LOD][meshindex].count        = (unsigned int)mesh.Indices.size();
-            Info.IndirectBuffers[LOD][meshindex].firstIndex   = mesh_base_index;
-            Info.IndirectBuffers[LOD][meshindex].baseVertex   = mesh_base_vertex;
-            Info.IndirectBuffers[LOD][meshindex].baseInstance = LOD;
+            IndirectBufferTemplates[LOD][meshindex].count        = (unsigned int)mesh.Indices.size();
+            IndirectBufferTemplates[LOD][meshindex].firstIndex   = mesh_base_index;
+            IndirectBufferTemplates[LOD][meshindex].baseVertex   = mesh_base_vertex;
+            IndirectBufferTemplates[LOD][meshindex].baseInstance = LOD;
 
             // Concatenate the vectors
             std::copy(mesh.Vertices.cbegin(), mesh.Vertices.cend(), std::back_inserter(vertices));
@@ -162,8 +162,9 @@ STDGLModelInstanceArray::STDGLModelInstanceArray(GLContext* context, Engine::Ref
     glNamedBufferStorage(InstanceStagingBuffer, sizeof(InstanceArray[2]), NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
     InstanceStagingBufferMapped = (InstanceArray*)glMapNamedBufferRange(InstanceStagingBuffer, 0, sizeof(InstanceArray[2]), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
     glCreateBuffers(1, &InstanceBuffer);
-    glNamedBufferStorage(InstanceBuffer, sizeof(InstanceArrayBuffer), NULL, 0);
-
+    glNamedBufferStorage(InstanceBuffer, sizeof(InstanceArrayBuffer), NULL, GL_DYNAMIC_STORAGE_BIT);
+    CopyDrawDataFromModel();
+    
     for (int i = 0; i < 2; i++) {
         for (auto& instance : InstanceStagingBufferMapped[i].InstanceMatrices) {
             instance[0, 0] = NAN;
@@ -180,6 +181,11 @@ STDGLModelInstanceArray::~STDGLModelInstanceArray() {
 }
 
 std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
+    // Because there can be multiple of them one needs to check whether the current one has enough space;
+    if (FreedIndices.empty() && NextIndex == STDGLMODEL_INSTANCE_MAX_COUNT) {
+        return nullptr;
+    }
+    
     uint16_t index;
     if (FreedIndices.empty()) {
         index = NextIndex;
@@ -188,8 +194,6 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
         index = FreedIndices.front();
         FreedIndices.pop();
     }
-    if (index >= STDGLMODEL_INSTANCE_MAX_COUNT)
-        Engine::Error("Attempted to create more than STDGLMODEL_INSTANCE_MAX_COUNT instances of the same model!");
     return std::make_unique<STDGLModelInstance>(index, selfResource);
 }
 

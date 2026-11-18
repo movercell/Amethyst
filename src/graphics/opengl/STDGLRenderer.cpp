@@ -242,7 +242,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
         auto* model = iarray->Model.get();
 
         for (int i = 0; i < model->LODCount; i++) {
-            glClearNamedBufferSubData(model->ModelInfo, GL_R32UI, i * STDGLMODEL_MESH_MAX_COUNT * sizeof(DrawElementsIndirectCommand) + offsetof(DrawElementsIndirectCommand, instanceCount), sizeof(GLuint), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+            glClearNamedBufferSubData(iarray->InstanceBuffer, GL_R32UI, i * STDGLMODEL_MESH_MAX_COUNT * sizeof(DrawElementsIndirectCommand) + offsetof(DrawElementsIndirectCommand, instanceCount), sizeof(GLuint), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
         }
     }
 
@@ -260,7 +260,7 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     // Replicate the instance counts across all LOD meshes.
     glUseProgram(*ModelInstanceReplicatorShader);
     for (auto& iarray : InstanceArrayRefs) {
-        iarray->Model->BindInfo();
+        iarray->Bind();
         glDispatchCompute(1, 1, 1);
     }
 
@@ -273,8 +273,8 @@ void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstance
         iarray->Bind();
         
         auto& Model = iarray->Model;
-        Model->BindInfo();
-        Model->BindIndirectCommands();
+        //Model->BindInfo();
+        iarray->BindIndirectCommands();
 
         Model->Draw<isDepth>();
     }

@@ -57,7 +57,7 @@ void main() {
     uint BaseLODInstanceIndices[STDGLMODEL_LOD_MAX_COUNT];
     if (subgroupElect()) {
         for (int i = 0; i < STDGLMODEL_LOD_MAX_COUNT; i++) {
-            BaseLODInstanceIndices[i] = atomicAdd(ModelInfo.IndirectBuffers[i][0].instanceCount, subgroupBallotBitCount(AllLODBallots[i]));
+            BaseLODInstanceIndices[i] = atomicAdd(InstanceBuffer.IndirectBuffers[i][0].instanceCount, subgroupBallotBitCount(AllLODBallots[i]));
         }
     }
     for (int i = 0; i < STDGLMODEL_LOD_MAX_COUNT; i++) {
