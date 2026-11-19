@@ -35,6 +35,13 @@ namespace Engine {
             } else { return false; }
         }
         template <bool IsTemplate, auto TClean>
+        consteval bool IsOptional() {
+            if constexpr (IsTemplate) {
+                constexpr bool res = std::meta::template_of(TClean) == std::meta::dealias(^^std::optional);
+                return res;
+            } else { return false; }
+        }
+        template <bool IsTemplate, auto TClean>
         consteval bool IsMap() {
             if constexpr (IsTemplate) {
                 constexpr bool res = (std::meta::template_of(TClean) == std::meta::dealias(^^std::map)) || 
@@ -94,7 +101,7 @@ class ADFEntry {
     };
 
     
-    std::variant<std::map<std::string, ADFEntry>, std::string, std::vector<ADFEntry>> data;
+    std::variant<std::map<std::string, ADFEntry>, std::string, std::vector<ADFEntry>, nullptr_t> data;
     // This is used for showing which file an error came from
     Engine::Reference<std::string> Filename;
 
@@ -124,6 +131,8 @@ public:
     static ADFEntry Map(std::map<std::string, ADFEntry> Content = std::map<std::string, ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
     //! Used for manual creation of array-type entries.
     static ADFEntry Array(std::vector<ADFEntry> Content = std::vector<ADFEntry>()) { ADFEntry ret; ret.data = Content; return ret; }
+    //! Used for manual creation of null entries.
+    static ADFEntry Null() { ADFEntry ret; ret.data = nullptr; return ret; }
 
     bool IsString() const {
         return std::holds_alternative<std::string>(data);
@@ -133,6 +142,9 @@ public:
     }
     bool IsArray() const {
         return std::holds_alternative<std::vector<ADFEntry>>(data);
+    }
+    bool IsNull() const {
+        return std::holds_alternative<nullptr_t>(data);
     }
     std::string& GetString() {
         if (!IsString()) {
@@ -326,6 +338,7 @@ public:
         constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
         constexpr bool IsVector = Engine::Internal::IsVector<IsTemplate, TClean>();
         constexpr bool IsArray = Engine::Internal::IsArray<IsTemplate, TClean>();
+        constexpr bool IsOptional = Engine::Internal::IsOptional<IsTemplate, TClean>();
         constexpr bool IsMap = Engine::Internal::IsMap<IsTemplate, TClean>();
 
         if constexpr (TClean == ^^ADFEntry) {
@@ -372,6 +385,13 @@ public:
 
             return ret;
         
+        } else if constexpr (IsOptional) {
+            if (Object.has_value()) {
+                return Serialize(Object.value());
+            } else {
+                return Null();
+            }
+
         } else if constexpr (IsMap) {
             // The object is a std::map<std::string, T>.
             static_assert(std::meta::template_arguments_of(TClean)[0] == std::meta::dealias(^^std::string), "ADFEntry::Serialize: A serialized map must have it's key be std::string!");

@@ -263,6 +263,8 @@ void ADFEntry::ToStream(std::streambuf* buffer, int IndentationLevel) const {
         const auto& array = GetArray();
 
         for (const auto& element : array) {
+            if (element.IsNull()) continue;
+
             for (int i = 0; i < IndentationLevel; i++) {
                 buffer->sputc('\t');
             }
@@ -274,6 +276,8 @@ void ADFEntry::ToStream(std::streambuf* buffer, int IndentationLevel) const {
         const auto& map = GetMap();
 
         for (const auto& kvpair : map) {
+            if (kvpair.second.IsNull()) continue;
+            
             for (int i = 0; i < IndentationLevel; i++) {
                 buffer->sputc('\t');
             }
@@ -316,12 +320,16 @@ void ADFEntry::ToStreamCompact(std::streambuf* buffer) const {
         const auto& array = GetArray();
 
         for (const auto& element : array) {
+            if (element.IsNull()) continue;
+            
             element.ToStreamCompactObjectFormatHelper(buffer);
         }
     } else {
         const auto& map = GetMap();
 
         for (const auto& kvpair : map) {
+            if (kvpair.second.IsNull()) continue;
+
             ToStreamStringFormatHelper(buffer, kvpair.first);
             
             kvpair.second.ToStreamCompactObjectFormatHelper(buffer);
