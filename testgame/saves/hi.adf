@@ -343,6 +343,151 @@
 				"WasInit"
 			]
 		}
+		"000104" {
+			"children" {
+				"000000" {
+					"children" {}
+					"classname" "prop_dynamic"
+					"properties" {
+						"model" "cube.adf"
+						"position" {
+							"x" "-64"
+							"y" "0"
+							"z" "10"
+						}
+						"rotation" {
+							"w" "1"
+							"x" "0"
+							"y" "0"
+							"z" "0"
+						}
+						"scale" {
+							"x" "10"
+							"y" "10"
+							"z" "10"
+						}
+						"spawnflags" "0"
+						"targetname" ""
+					}
+					"tags" [
+						"WasInit"
+					]
+				}
+			}
+			"classname" "point_rotating"
+			"properties" {
+				"position" {
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"rotationamount" {
+					"x" "0"
+					"y" "32"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
+		"000105" {
+			"children" {}
+			"classname" "prop_dynamic"
+			"properties" {
+				"model" "error.adf"
+				"position" {
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
+		"000106" {
+			"children" {}
+			"classname" "prop_dynamic"
+			"properties" {
+				"model" "floor_plane.adf"
+				"position" {
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
+		"000107" {
+			"children" {}
+			"classname" "prop_dynamic"
+			"properties" {
+				"model" "multimesh.adf"
+				"position" {
+					"x" "-128"
+					"y" "0"
+					"z" "0"
+				}
+				"rotation" {
+					"w" "1"
+					"x" "0"
+					"y" "0"
+					"z" "0"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
 	}
 	"MapName" ""
 	"MapVersion" "thisvalueisnotyetused"

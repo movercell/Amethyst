@@ -89,14 +89,13 @@ float STDGLight_SampleShadowMap(STDGLLightData Light, vec3 point) {
     return Shadow;
 }
 
-vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 TextureNormal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
+vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 Normal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
     vec3 FromFragToLight = Light.LightPos - Position;
     float FromFragToLightDistance = length(FromFragToLight);
     if (FromFragToLightDistance > Light.Far) return vec3(0.0f);
 
     vec3 LightDir = normalize(FromFragToLight);
 
-    vec3 Normal = VertexNormal; // TODO: Transform the vertex normal by texture normal
     vec3 FromFragToCamera = Camera.Pos - Position;
     vec3 CameraDir = normalize(FromFragToCamera);
 

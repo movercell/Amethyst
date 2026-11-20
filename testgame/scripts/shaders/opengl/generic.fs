@@ -6,16 +6,17 @@
 
 #include "STDGLCamera.incl"
 #include "STDGLLight.incl"
+#include "ApplyTBNToTexture.incl"
 #include "OctahedralMapping.incl"
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec2 FragNormal;
-in VertexData {
+in _VertexData {
     vec4 Position;
     vec4 LocalPosition;
-    vec3 Normal;
+    mat3 TBN;
     vec2 UV;
-};
+} VertexData;
 layout (std140, binding = 1) uniform _Material {
     float red;
     float green;
@@ -25,8 +26,8 @@ layout (std140, binding = 1) uniform _Material {
 
 vec3 GenerateTemporaryTexture() {
     uint isOther = 0u;
-    float X = UV.x;
-    float Y = UV.y;
+    float X = VertexData.UV.x;
+    float Y = VertexData.UV.y;
 
     while (X > 1.0f) X -= 1.0f;
     while (Y > 1.0f) Y -= 1.0f;
@@ -48,16 +49,16 @@ void main()
 
     vec3 IncomingLight;
 
-    float TexNormX = 0.0f; //  * 2.0 - 1.0
-    float TexNormY = 0.0f;
-    vec3 TexNormal = vec3(TexNormX, TexNormY, sqrt(1 - TexNormX * TexNormX - TexNormY * TexNormY));
+    float TexNormX = 0.5f;
+    float TexNormY = 0.5f;
+    vec3 TexNormal = vec3(TexNormX, TexNormY, 1.0f);//sqrt(1 - TexNormX * TexNormX - TexNormY * TexNormY));
+    vec3 Normal = ApplyTBNToTexture(VertexData.TBN, TexNormal);
 
     for (int light = 0; light < STDGLLIGHT_MAX_COUNT; light++) {
         STDGLLightData Light = LightBuffer.Lights[light];
 
         if (Light.Type == LIGHT_TYPE_SPOT)
-            IncomingLight += STDGLight_ProcessSpotlight(Albedo, normalize(Normal), TexNormal, Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(Position.xyz), Light);
-    }
+            IncomingLight += STDGLight_ProcessSpotlight(Albedo, VertexData.TBN[2], Normal, Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(VertexData.Position.xyz), Light);    }
     vec3 AmbientLight = vec3(0.03) * Albedo;
 
     vec3 Color = AmbientLight + IncomingLight;
@@ -66,5 +67,5 @@ void main()
     Color = pow(Color, vec3(1.0/2.2));  
 
     FragColor = vec4(Color, 1.0f);
-    FragNormal = Octahedral_Map(normalize(Normal)); // TODO: This should be combined with the texture normal.
+    FragNormal = Octahedral_Map(Normal);
 }

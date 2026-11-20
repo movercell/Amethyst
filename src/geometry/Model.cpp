@@ -8,6 +8,8 @@
 
 // C API ***ONLY***, because libassimp.6.dll is always compiled with mingw!
 
+inline constexpr unsigned int AI_POSTPROCESS_FLAGS = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace;
+
 const aiScene* MakeAssimpScene(std::string path) {
     auto modelfile = Engine::GetFileAsStream("models/" + path, std::ios::in | std::ios_base::binary);
     if (!modelfile) {
@@ -22,7 +24,7 @@ const aiScene* MakeAssimpScene(std::string path) {
     modelfile.seekg(0, std::ios::beg);
     
     buffer.assign(std::istreambuf_iterator<char>{modelfile}, {});
-    scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
+    scene = aiImportFileFromMemory(buffer.data(), buffer.size(), AI_POSTPROCESS_FLAGS, path.c_str());
     
     // Check for errors.
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -35,7 +37,7 @@ const aiScene* MakeAssimpScene(std::string path) {
         modelfile.seekg(0, std::ios::beg);
 
         buffer.assign(std::istreambuf_iterator<char>{modelfile}, {});
-        scene = aiImportFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes, path.c_str());
+        scene = aiImportFileFromMemory(buffer.data(), buffer.size(), AI_POSTPROCESS_FLAGS, path.c_str());
 
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             Engine::Error(std::string("Error loading the error model: ") + aiGetErrorString());
@@ -62,13 +64,22 @@ Geometry::Mesh::Mesh(void* Meshdata, const void* Scenedata) {
 
     Vertices.reserve(paimesh->mNumVertices);
     for (int vertexindex = 0; vertexindex < paimesh->mNumVertices; vertexindex++) {
-        Shapes::Vertex vertex;
+        Shapes::GraphicsVertex vertex;
         const auto& aipos = paimesh->mVertices[vertexindex];
         vertex.Position = vec3(aipos.x, aipos.y, aipos.z);
         const auto& ainorm = paimesh->mNormals[vertexindex];
         vertex.Normal = vec3(ainorm.x, ainorm.y, ainorm.z);
         vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
+
+        const auto& aitang = paimesh->mTangents[vertexindex];
+        const auto& aibitang = paimesh->mBitangents[vertexindex];
+        vec3 Tangent = vec3(aitang.x, aitang.y, aitang.z);
+        vec3 Bitangent = vec3(aibitang.x, aibitang.y, aibitang.z);
+        float IsBitangentInverted = vertex.Normal.cross(Tangent).dot(Bitangent) > 0.0f ? 1.0f : -1.0f;
+        vertex.Tangent = vec4(Tangent, IsBitangentInverted); 
+
         Radius = std::max(Radius, vertex.Position.length());
+
         Vertices.push_back(vertex);
     }
     Indices.reserve(paimesh->mNumFaces * 3);

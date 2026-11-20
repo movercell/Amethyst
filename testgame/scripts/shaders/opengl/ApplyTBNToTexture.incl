@@ -1,0 +1,3 @@
+vec3 ApplyTBNToTexture(mat3 TBN, vec3 TextureNormal) {
+    return normalize(TBN * (TextureNormal * 2.0 - 1.0));
+}

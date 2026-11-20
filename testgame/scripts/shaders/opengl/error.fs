@@ -8,15 +8,15 @@
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec2 FragNormal;
-in VertexData {
+in _VertexData {
     vec4 Position;
     vec4 LocalPosition;
-    vec3 Normal;
+    mat3 TBN;
     vec2 UV;
-};
+} VertexData;
 
 void main()
 {
     FragColor = vec4(0.6f, 0.4f, 0.8f, 1.0f);
-    FragNormal = Octahedral_Map(normalize(Normal));
+    FragNormal = Octahedral_Map(VertexData.TBN[2]);
 }

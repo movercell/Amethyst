@@ -44,11 +44,6 @@ void gameinit() {
 	auto newsavefile = world->Save();
 	newsavefile.ToFile("saves/hi.adf");
 	newsavefile.ToFile("saves/hicompacted.adf", true);
-	
-	models[0] = rworld->MakeModelInstance("multimesh.adf");
-	models[1] = rworld->MakeModelInstance(".glb");
-	models[2] = rworld->MakeModelInstance("cube.adf");
-	models[3] = rworld->MakeModelInstance("floor_plane.adf");
 
 	lights[0] = rworld->MakeSpotLight(vec2(2048, 2048), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 512.0);
 	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
@@ -77,15 +72,6 @@ static void GameStateHandler_Normal() {
 	static float position = 0;
 	if (models[0])
 		models[0]->SetMatrix(mat4(1, 0, 0, -128));
-	models[1]->SetMatrix(mat4());
-	models[3]->SetMatrix(mat4());
-
-	models[2]->SetMatrix(quat(vec3(0, position, 0)).MakeRotationMatrix() * mat4(10, 0, 0, -64,
-																				0, 10, 0, 0,
-																				0, 0, 10, 10,
-																				0, 0, 0, 1));
-	position += 32.0f * deltaTime;
-	if (position > 360.0f) position -= 360.0f;
 
 	float x = 128.0f;
 	for (auto& model : extramodels) {

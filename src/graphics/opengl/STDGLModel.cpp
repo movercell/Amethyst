@@ -70,7 +70,7 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    std::vector<Shapes::Vertex> vertices;
+    std::vector<Shapes::GraphicsVertex> vertices;
     std::vector<GLuint> indices;
 
     {   // Reserve the space
@@ -110,22 +110,25 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     }
     
     // Upload to the GPU
-    glNamedBufferStorage(VBO, vertices.size() * sizeof(Shapes::Vertex), vertices.data(), 0);
+    glNamedBufferStorage(VBO, vertices.size() * sizeof(Shapes::GraphicsVertex), vertices.data(), 0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glNamedBufferStorage(EBO, indices.size() * sizeof(GLuint), indices.data(), 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     glNamedBufferStorage(ModelInfo, sizeof(ModelInfo_t), &Info, 0);
 
-    // vertex positions
-    glEnableVertexAttribArray(0);	
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)0);
-    // vertex normals
-    glEnableVertexAttribArray(1);	
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)offsetof(Shapes::Vertex, Normal));
-    // vertex texture coords
-    glEnableVertexAttribArray(2);	
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Shapes::Vertex), (void*)offsetof(Shapes::Vertex, TexCoords));
+    // Vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::GraphicsVertex), (void*)offsetof(Shapes::GraphicsVertex, Position));
+    // Vertex normals.
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Shapes::GraphicsVertex), (void*)offsetof(Shapes::GraphicsVertex, Normal));
+    // Vertex texture coordinates.
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Shapes::GraphicsVertex), (void*)offsetof(Shapes::GraphicsVertex, TexCoords));
+    // Vertex tangent space.
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Shapes::GraphicsVertex), (void*)offsetof(Shapes::GraphicsVertex, Tangent));
 }
 STDGLModel::~STDGLModel() {
     glDeleteVertexArrays(1, &VAO);

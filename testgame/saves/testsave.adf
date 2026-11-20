@@ -120,5 +120,49 @@
             "children" {}
             "tags" []
         }
+        "000104" {
+            "classname" "point_rotating"
+            "properties" {
+                "rotationamount" { x 0 y 32 z 0 }
+            }
+            "children" {
+                "000000" {
+                    "classname" "prop_dynamic"
+                    "properties" {
+                        "position" { x -64 y 0 z 10 }
+                        "scale" { x 10 y 10 z 10 }
+                        "model" "cube.adf"
+                    }
+                    "children" {}
+                    "tags" []
+                }
+            }
+            "tags" []
+        }
+        "000105" {
+            "classname" "prop_dynamic"
+            "properties" {
+                "model" "error.adf"
+            }
+            "children" {}
+            "tags" []
+        }
+        "000106" {
+            "classname" "prop_dynamic"
+            "properties" {
+                "model" "floor_plane.adf"
+            }
+            "children" {}
+            "tags" []
+        }
+        "000107" {
+            "classname" "prop_dynamic"
+            "properties" {
+                "position" { x -128 y 0 z 0 }
+                "model" "multimesh.adf"
+            }
+            "children" {}
+            "tags" []
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Geometry {
         Mesh(void* Meshdata, const void* Scenedata);
     public:
         Mesh() = delete;
-        std::vector<Shapes::Vertex> Vertices;
+        std::vector<Shapes::GraphicsVertex> Vertices;
         std::vector<uint32_t> Indices;
         float Radius = 0.0f;
         std::string MaterialName;

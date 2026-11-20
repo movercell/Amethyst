@@ -378,13 +378,12 @@ namespace Shapes {
         vec3 Start = vec3(0, 0, 0);
         vec3 End   = vec3(1, 1, 1);
     };
-    struct Vertex {
+    struct GraphicsVertex {
         vec3 Position;
         vec3 Normal;
+        // To get bitangent you will need to multiply the cross product of normal and tangent by the tangent's W.
+        vec4 Tangent;
         vec2 TexCoords;
-    };
-    struct Triangle {
-        std::array<Vertex, 3> Vertices;
     };
 }
 
