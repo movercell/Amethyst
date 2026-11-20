@@ -5,6 +5,6 @@ Model {
         }
     ]
     Materials {
-        "Material.001" "models/blade.amt"
+        "Material.001" "models/blade.amat"
     }
 }

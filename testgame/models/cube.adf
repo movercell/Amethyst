@@ -5,6 +5,6 @@ Model {
         }
     ]
     Materials {
-        "Material" "models/cube.amt"
+        "Material" "models/cube.amat"
     }
 }

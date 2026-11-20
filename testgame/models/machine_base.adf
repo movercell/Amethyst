@@ -5,6 +5,6 @@ Model {
         }
     ]
     Materials {
-        "Material.001" "regular.amt"
+        "Material.001" "regular.amat"
     }
 }

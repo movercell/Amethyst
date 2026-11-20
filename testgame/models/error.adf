@@ -5,6 +5,6 @@ Model {
         }
     ]
     Materials {
-        "" "models/errormdl.amt"
+        "" "models/errormdl.amat"
     }
 }

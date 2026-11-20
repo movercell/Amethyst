@@ -9,7 +9,7 @@ Model {
         }
     ]
     Materials {
-        "" "regular.amt"
-        "Material" "regular.amt"
+        "" "regular.amat"
+        "Material" "regular.amat"
     }
 }

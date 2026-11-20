@@ -5,6 +5,6 @@ Model {
         }
     ]
     Materials {
-        "" "models/floor_plane.amt"
+        "" "models/floor_plane.amat"
     }
 }

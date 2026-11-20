@@ -7,7 +7,7 @@ struct ADFSerialize MaterialEntry {
 
 void STDGLMaterialSystem::Init(STDGLShaderSystem* shadersystem) {
     ShaderSystem = shadersystem;
-    DefaultMaterial = Get("materials/error.amt");
+    DefaultMaterial = Get("materials/error.amat");
 }
 
 Engine::Reference<STDGLMaterial> STDGLMaterialSystem::Get(std::string name) {
@@ -24,7 +24,7 @@ Engine::Reference<STDGLMaterial> STDGLMaterialSystem::Get(std::string name) {
     {
         auto tmp = ADFEntry::FromFile(name);
         if (!tmp.HasChild("Material")) {
-            tmp = ADFEntry::FromFile("materials/error.amt");
+            tmp = ADFEntry::FromFile("materials/error.amat");
         }
         tmp["Material"].Deserialize(Params);
     }
