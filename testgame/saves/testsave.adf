@@ -7,7 +7,7 @@
             "properties" {
                 "targetname" "quoted"
                 "position" { x 128 y 0 z 128 }
-                "model" "multimesh.adf"
+                "model" "multimesh.amdl"
                 "rotation" { x 45 y 180 z 45 }
                 "scale" { x 1 y 3 z 5 }
             }
@@ -17,7 +17,7 @@
                     "properties" {
                         "targetname" "hia"
                         "position" { x -128 y 0 z 128 }
-                        "model" "backpack.adf"
+                        "model" "backpack.amdl"
                         "rotation" { x 45 y 180 z 45 }
                         "scale" { x 1 y 3 z 5 }
                     }
@@ -31,7 +31,7 @@
             "classname" "prop_dynamic"
             "properties" {
                 "position" { x 512 y 256 z 32 }
-                "model" "machine_support.adf"
+                "model" "machine_support.amdl"
             }
             "children" {
                 "000000" {
@@ -44,7 +44,7 @@
                             "classname" "prop_dynamic"
                             "properties" {
                                 "position" { x 0 y 0 z 0 }
-                                "model" "machine_base.adf"
+                                "model" "machine_base.amdl"
                             }
                             "children" {}
                             "tags" []
@@ -60,7 +60,7 @@
                                     "classname" "prop_dynamic"
                                     "properties" {
                                         "position" { x 0 y 0 z 0 }
-                                        "model" "machine_blade.adf"
+                                        "model" "machine_blade.amdl"
                                     }
                                     "children" {}
                                     "tags" []
@@ -79,7 +79,7 @@
                                     "classname" "prop_dynamic"
                                     "properties" {
                                         "position" { x 0 y 0 z 0 }
-                                        "model" "machine_blade.adf"
+                                        "model" "machine_blade.amdl"
                                     }
                                     "children" {}
                                     "tags" []
@@ -131,7 +131,7 @@
                     "properties" {
                         "position" { x -64 y 0 z 10 }
                         "scale" { x 10 y 10 z 10 }
-                        "model" "cube.adf"
+                        "model" "cube.amdl"
                     }
                     "children" {}
                     "tags" []
@@ -142,7 +142,7 @@
         "000105" {
             "classname" "prop_dynamic"
             "properties" {
-                "model" "error.adf"
+                "model" "error.amdl"
             }
             "children" {}
             "tags" []
@@ -150,7 +150,7 @@
         "000106" {
             "classname" "prop_dynamic"
             "properties" {
-                "model" "floor_plane.adf"
+                "model" "floor_plane.amdl"
             }
             "children" {}
             "tags" []
@@ -159,7 +159,7 @@
             "classname" "prop_dynamic"
             "properties" {
                 "position" { x -128 y 0 z 0 }
-                "model" "multimesh.adf"
+                "model" "multimesh.amdl"
             }
             "children" {}
             "tags" []

@@ -2,7 +2,7 @@
 
 #include "engine/entities/Entity.h"
 
-struct EntityClassname("player") Entity_Player : public BaseEntity {
+struct EntityClass("player") Entity_Player : public BaseEntity {
     ADFSerialize float pitch = 0.0f;
     ADFSerialize float yaw = 0.0f;
     Engine::Reference<Camera> PlayerCamera;
@@ -13,14 +13,14 @@ struct EntityClassname("player") Entity_Player : public BaseEntity {
 RegisterEntityClass(Entity_Player)
 
 
-struct EntityClassname("info_player_start") Entity_PlayerStart : public BaseEntity {
+struct EntityClass("info_player_start") Entity_PlayerStart : public BaseEntity {
     void Initialize();
 };
 RegisterEntityClass(Entity_PlayerStart)
 
 
 
-struct EntityClassname("player_mainmenu") Entity_Player_MainMenu : public BaseEntity {
+struct EntityClass("player_mainmenu") Entity_Player_MainMenu : public BaseEntity {
     Engine::Reference<Camera> PlayerCamera;
 
     void Initialize();
@@ -28,7 +28,7 @@ struct EntityClassname("player_mainmenu") Entity_Player_MainMenu : public BaseEn
 RegisterEntityClass(Entity_Player_MainMenu)
 
 
-struct EntityClassname("info_player_start_mainmenu") Entity_PlayerStart_MainMenu : public BaseEntity {
+struct EntityClass("info_player_start_mainmenu") Entity_PlayerStart_MainMenu : public BaseEntity {
     void Initialize();
 };
 RegisterEntityClass(Entity_PlayerStart_MainMenu)

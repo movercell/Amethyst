@@ -4,7 +4,7 @@ Model {
             Model "cube.glb"
         }
     ]
-    Materials {
+    MaterialReplacements {
         "Material" "models/cube.amat"
     }
 }

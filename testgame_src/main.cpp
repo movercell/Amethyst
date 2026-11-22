@@ -59,7 +59,7 @@ void gameinit() {
 
 
 	for (int i = 0; i < EXTRA_MODEL_COUNT; i++) {
-		extramodels[i] = (rworld->MakeModelInstance("backpack.adf"));
+		extramodels[i] = (rworld->MakeModelInstance("backpack.amdl"));
 	}
 
 	std::cout << "Hello, world!(From game dll!)" << std::endl;

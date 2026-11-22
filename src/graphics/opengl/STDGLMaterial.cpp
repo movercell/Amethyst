@@ -36,7 +36,7 @@ Engine::Reference<STDGLMaterial> STDGLMaterialSystem::Get(std::string name) {
         Template.BufferSetValue(buffer, Param.first, Param.second);
     }
     glCreateBuffers(1, &Material->resource.ubo);
-    glNamedBufferStorage(Material->resource.ubo, Template.GetBufferSize(), buffer.get(), 0);
+    glNamedBufferStorage(Material->resource.ubo, std::max(Template.GetBufferSize(), size_t(1)), buffer.get(), 0);
 
     Material->resource.IteratorInMaterialMap = Materials.emplace(std::move(name), Material).first;
 

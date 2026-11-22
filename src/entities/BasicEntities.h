@@ -6,9 +6,9 @@
 
 namespace EngineEntities {
 
-    struct EntityClassname("info_target") Target : public BaseEntity {};
+    struct EntityClass("info_target") Target : public BaseEntity {};
 
-    struct EntityClassname("prop_dynamic") DynamicProp : public BaseEntity {
+    struct EntityClass("prop_dynamic") DynamicProp : public BaseEntity {
         ADFSerialize std::string model;
         std::unique_ptr<ModelInstance> modelinstance;
 
@@ -17,7 +17,7 @@ namespace EngineEntities {
         void Draw();
     };
 
-    struct EntityClassname("light_spot") LightSpot : public BaseEntity {
+    struct EntityClass("light_spot") LightSpot : public BaseEntity {
         Engine::Reference<Light> light;
 
         ADFSerialize float near = 1.0f;

@@ -156,6 +156,10 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
     }
 }, "Returns the help string of a command.");
 
+ConsoleCommand exitCommand("exit", []ConsoleCommandLambda {
+    Engine::QueueShutdown();
+}, "Terminates the engine when ran");
+
 
 
 

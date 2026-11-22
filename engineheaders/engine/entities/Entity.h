@@ -230,7 +230,7 @@ namespace Engine {
         void ENGINEEXPORT RegisterEntityCreationLambda(std::string_view classname, std::function<Engine::Reference<EntityHandler>(World*, std::optional<EntityHandler*>)> Lambda);
 
         // Annotation for an entity class
-        struct EntityClassnameAnnotation {
+        struct EntityClassAnnotation {
             const char* classname;
         };
     }
@@ -240,11 +240,11 @@ namespace Engine {
     template<typename Entity>
     void RegisterEntityClass() {
         static_assert(std::is_base_of_v<BaseEntity, Entity>, "An entity class must be an extension of BaseEntity!");
-        constexpr auto EntityClassAnnotations = std::define_static_array(std::meta::annotations_of_with_type(^^Entity, ^^Engine::Internal::EntityClassnameAnnotation));
-        static_assert(EntityClassAnnotations.size() == 1, "An entity class must have exactly 1 EntityClassname annotation!");
+        constexpr auto EntityClassAnnotations = std::define_static_array(std::meta::annotations_of_with_type(^^Entity, ^^Engine::Internal::EntityClassAnnotation));
+        static_assert(EntityClassAnnotations.size() == 1, "An entity class must have exactly 1 EntityClass annotation!");
 
-        constexpr auto EntityClassnameAnnotation = std::meta::extract<Engine::Internal::EntityClassnameAnnotation>(EntityClassAnnotations[0]);
-        std::string_view classname = EntityClassnameAnnotation.classname;
+        constexpr auto EntityClassAnnotation = std::meta::extract<Engine::Internal::EntityClassAnnotation>(EntityClassAnnotations[0]);
+        std::string_view classname = EntityClassAnnotation.classname;
 
         Engine::Internal::EntityTemplateHandler<Entity>::RegisterType();
 
@@ -274,7 +274,7 @@ namespace Engine {
     }} /*@endcond*/ }
 
 #ifdef __INTELLISENSE__ 
-#define EntityClassname(classname) 
+#define EntityClass(classname) 
 #else
-#define EntityClassname(classname)  [[= Engine::Internal::EntityClassnameAnnotation{std::define_static_string(classname)} ]]
+#define EntityClass(classname)  [[= Engine::Internal::EntityClassAnnotation{std::define_static_string(classname)} ]]
 #endif

@@ -5,10 +5,78 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "(gdb) Launch(Amethyst)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/amethyst",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/testgame",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disable debuginfod downloads",
+                    "text": "set debuginfod enabled off",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Clear debuginfod URLs to prevent fallback looks",
+                    "text": "set debuginfod urls ",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch(amdl)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tool_src/amdl",
+            "args": ["-file", "${workspaceFolder}/testgame_resource_src/models/backpack.adf", "-out", "${workspaceFolder}/testgame/models/"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/testgame/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disable debuginfod downloads",
+                    "text": "set debuginfod enabled off",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Clear debuginfod URLs to prevent fallback looks",
+                    "text": "set debuginfod urls ",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch(atex)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tool_src/atex",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/testgame",

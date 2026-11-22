@@ -4,7 +4,7 @@ Model {
             Model "error.glb"
         }
     ]
-    Materials {
+    MaterialReplacements {
         "" "models/errormdl.amat"
     }
 }

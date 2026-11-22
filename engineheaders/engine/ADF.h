@@ -386,6 +386,7 @@ public:
             return ret;
         
         } else if constexpr (IsOptional) {
+            // The object is a std::optional<T>.
             if (Object.has_value()) {
                 return Serialize(Object.value());
             } else {
@@ -446,6 +447,7 @@ public:
         constexpr auto IsTemplate = std::meta::has_template_arguments(TClean);
         constexpr bool IsVector = Engine::Internal::IsVector<IsTemplate, TClean>();
         constexpr bool IsArray = Engine::Internal::IsArray<IsTemplate, TClean>();
+        constexpr bool IsOptional = Engine::Internal::IsOptional<IsTemplate, TClean>();
         constexpr bool IsMap = Engine::Internal::IsMap<IsTemplate, TClean>();
 
         if constexpr (TClean == ^^ADFEntry) {
@@ -497,6 +499,14 @@ public:
             for (int i = 0; i < sizetofill; i++) {
                 array[i].Deserialize(Object[i]); 
             }
+        
+        } else if constexpr (IsOptional) {
+            // The object is a std::optional<T>.
+            constexpr auto OptType = std::meta::template_arguments_of(TClean)[0];
+            using type = [:OptType:];
+            type Optional;
+            Deserialize(Optional);
+            Object = std::move(Optional);
 
         } else if constexpr (IsMap) {
             // The object is a std::map<std::string, T>.

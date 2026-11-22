@@ -4,7 +4,7 @@ Model {
             Model "machine_blade.glb"
         }
     ]
-    Materials {
+    MaterialReplacements {
         "Material.001" "models/blade.amat"
     }
 }

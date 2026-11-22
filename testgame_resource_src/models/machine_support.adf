@@ -1,10 +1,10 @@
 Model {
     LODs [
         {
-            Model "machine_base.glb"
+            Model "machine_support.glb"
         }
     ]
-    Materials {
+    MaterialReplacements {
         "Material.001" "regular.amat"
     }
 }

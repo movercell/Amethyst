@@ -8,7 +8,6 @@
 #include <glad/glad.h>
 #include "STDGLCamera.h"
 #include "engine/graphics/ModelInstance.h"
-#include "engine/geometry/Model.h"
 #include "engine/Resource.h"
 #include "GLFW/glfw3.h"
 #include "IndirectDrawBuffer.h"
@@ -69,8 +68,9 @@ struct STDGLModel {
     uint8_t LODCount;
     std::array<std::array<DrawElementsIndirectCommand, STDGLMODEL_MESH_MAX_COUNT>, STDGLMODEL_LOD_MAX_COUNT> IndirectBufferTemplates;
     std::array<LOD, STDGLMODEL_LOD_MAX_COUNT> LODs;
-    GLuint VAO;
-    GLuint VBO, EBO, ModelInfo;
+    GLuint VAO = 0;
+    GLuint VBO = 0, EBO = 0, ModelInfo = 0;
+    bool IsBad = false;
 };
 
 struct STDGLModelInstanceArray {

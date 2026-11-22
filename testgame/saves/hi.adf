@@ -35,7 +35,7 @@
 					"children" {}
 					"classname" "prop_dynamic"
 					"properties" {
-						"model" "backpack.adf"
+						"model" "backpack.amdl"
 						"position" {
 							"x" "-128"
 							"y" "0"
@@ -62,7 +62,7 @@
 			}
 			"classname" "prop_dynamic"
 			"properties" {
-				"model" "multimesh.adf"
+				"model" "multimesh.amdl"
 				"position" {
 					"x" "128"
 					"y" "0"
@@ -94,7 +94,7 @@
 							"children" {}
 							"classname" "prop_dynamic"
 							"properties" {
-								"model" "machine_base.adf"
+								"model" "machine_base.amdl"
 								"position" {
 									"x" "0"
 									"y" "0"
@@ -124,7 +124,7 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
-										"model" "machine_blade.adf"
+										"model" "machine_blade.amdl"
 										"position" {
 											"x" "0"
 											"y" "0"
@@ -185,7 +185,7 @@
 									"children" {}
 									"classname" "prop_dynamic"
 									"properties" {
-										"model" "machine_blade.adf"
+										"model" "machine_blade.amdl"
 										"position" {
 											"x" "0"
 											"y" "0"
@@ -274,7 +274,7 @@
 			}
 			"classname" "prop_dynamic"
 			"properties" {
-				"model" "machine_support.adf"
+				"model" "machine_support.amdl"
 				"position" {
 					"x" "512"
 					"y" "256"
@@ -349,7 +349,7 @@
 					"children" {}
 					"classname" "prop_dynamic"
 					"properties" {
-						"model" "cube.adf"
+						"model" "cube.amdl"
 						"position" {
 							"x" "-64"
 							"y" "0"
@@ -408,7 +408,7 @@
 			"children" {}
 			"classname" "prop_dynamic"
 			"properties" {
-				"model" "error.adf"
+				"model" "error.amdl"
 				"position" {
 					"x" "0"
 					"y" "0"
@@ -436,7 +436,7 @@
 			"children" {}
 			"classname" "prop_dynamic"
 			"properties" {
-				"model" "floor_plane.adf"
+				"model" "floor_plane.amdl"
 				"position" {
 					"x" "0"
 					"y" "0"
@@ -464,7 +464,7 @@
 			"children" {}
 			"classname" "prop_dynamic"
 			"properties" {
-				"model" "multimesh.adf"
+				"model" "multimesh.amdl"
 				"position" {
 					"x" "-128"
 					"y" "0"
