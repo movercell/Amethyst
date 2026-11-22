@@ -25,3 +25,4 @@ testgame/libgame.so
 testgame/libgame.dll
 testgame/bin/*
 testgame/saves/quick.adf
+testgame/models/**/*.*
