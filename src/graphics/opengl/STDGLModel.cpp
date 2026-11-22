@@ -49,6 +49,7 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
             DrawData.baseVertex = FileMesh.VertexOffset;
             DrawData.firstIndex = FileMesh.IndexOffset;
             DrawData.count = FileMesh.IndexCount;
+            DrawData.baseInstance = LODID;
         }
 
         LODID++;
