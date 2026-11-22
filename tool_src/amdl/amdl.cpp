@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
         for (const auto& index : mesh.Indices) CollisionIndexLump.push_back(index);
     }
 
-    // Finish the file
+    // Finish the file.
 
     Engine::BinaryFileConstructor<Geometry::Modelfile> fileconstructor;
     auto file = fileconstructor.GetHeader();

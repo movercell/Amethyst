@@ -23,8 +23,7 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
 
     auto& Modelfile = *std::get<Geometry::Modelfile*>(Engine::BinaryFileImporter<Geometry::Modelfile>::Import(std::as_writable_bytes(std::span(buffer)), path));
     
-    auto hi = Modelfile.LODs.Get();
-    LODCount = hi.size();
+    LODCount = Modelfile.LODs.Get().size();
     Info.Radius = Modelfile.Radius;
 
     // Need to set unused LODs as infinity in distance.

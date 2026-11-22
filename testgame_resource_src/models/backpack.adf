@@ -8,7 +8,7 @@ Model {
 	        Distance 20.0
         }
     ]
-    Materials {
+    MaterialReplacements {
         "" "regular.amat"
         "Material" "regular.amat"
     }
