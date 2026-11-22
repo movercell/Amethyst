@@ -5,11 +5,17 @@
 
 namespace Geometry {
     struct BinaryFile("AMDL", 0) Modelfile : Engine::BinaryFileBaseHeader {
+        struct UnalignedVec3 {
+            std::array<float, 3> data;
+
+            UnalignedVec3(vec3 from = vec3()) { data[0] = from.x; data[1] = from.y; data[2] = from.z;}
+            operator vec3() { return {data[0], data[1], data[2]}; }
+        };
         struct GraphicsVertex {
-            vec3 Position;
-            vec3 Normal;
             // To get bitangent you will need to multiply the cross product of normal and tangent by the tangent's W.
             vec4 Tangent;
+            UnalignedVec3 Position;
+            UnalignedVec3 Normal;
             vec2 TexCoords;
         };
 

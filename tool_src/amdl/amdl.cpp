@@ -83,19 +83,22 @@ protected:
         for (int vertexindex = 0; vertexindex < paimesh->mNumVertices; vertexindex++) {
             Geometry::Modelfile::GraphicsVertex vertex;
             const auto& aipos = paimesh->mVertices[vertexindex];
-            vertex.Position = vec3(aipos.x, aipos.y, aipos.z);
+            vec3 Position = vec3(aipos.x, aipos.y, aipos.z);
             const auto& ainorm = paimesh->mNormals[vertexindex];
-            vertex.Normal = vec3(ainorm.x, ainorm.y, ainorm.z);
-            vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
+            vec3 Normal = vec3(ainorm.x, ainorm.y, ainorm.z);
 
             const auto& aitang = paimesh->mTangents[vertexindex];
             const auto& aibitang = paimesh->mBitangents[vertexindex];
             vec3 Tangent = vec3(aitang.x, aitang.y, aitang.z);
             vec3 Bitangent = vec3(aibitang.x, aibitang.y, aibitang.z);
-            float IsBitangentInverted = vertex.Normal.cross(Tangent).dot(Bitangent) > 0.0f ? 1.0f : -1.0f;
-            vertex.Tangent = vec4(Tangent, IsBitangentInverted); 
+            float IsBitangentInverted = Normal.cross(Tangent).dot(Bitangent) > 0.0f ? 1.0f : -1.0f;
 
-            Radius = std::max(Radius, vertex.Position.length());
+            vertex.Position = Position;
+            vertex.Normal = Normal;
+            vertex.Tangent = vec4(Tangent, IsBitangentInverted); 
+            vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
+
+            Radius = std::max(Radius, Position.length());
 
             Vertices.push_back(vertex);
         }
@@ -235,7 +238,7 @@ int main(int argc, char* argv[]) {
         ImportedMesh& mesh = modelfile.Meshes[0];
         CollisionVertexLump.reserve(mesh.Vertices.size());
         CollisionIndexLump.reserve(mesh.Indices.size());
-        for (const auto& vertex : mesh.Vertices) CollisionVertexLump.push_back(vertex.Position);
+        for (const auto& vertex : mesh.Vertices) CollisionVertexLump.push_back(vec3(vertex.Position.data[0], vertex.Position.data[1], vertex.Position.data[2]));
         for (const auto& index : mesh.Indices) CollisionIndexLump.push_back(index);
     }
 
