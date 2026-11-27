@@ -158,7 +158,7 @@ ConsoleCommand helpCommand("help", []ConsoleCommandLambda {
 
 ConsoleCommand exitCommand("exit", []ConsoleCommandLambda {
     Engine::QueueShutdown();
-}, "Terminates the engine when ran");
+}, "Terminates the engine when ran.");
 
 
 
@@ -200,7 +200,7 @@ static inline void PrintSingleCharacter(char Character) {
     cursor++;
 } 
 
-void Engine::Print(const std::string& text) {
+void Engine::Print(const std::string_view text) {
     std::unique_lock<std::mutex> lock(ConsoleTextBufferMutex);
 
     PrintSingleCharacter('\n');

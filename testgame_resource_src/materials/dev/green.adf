@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "green.png"
+    "TextureFormat" "RGBA8888"
+}

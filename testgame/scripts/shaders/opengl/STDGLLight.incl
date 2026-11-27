@@ -100,11 +100,9 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 Normal, flo
     vec3 CameraDir = normalize(FromFragToCamera);
 
     // First, do the shadow calculation.
-    vec4 LightPos = Light.ViewProjection * vec4(Position + VertexNormal + VertexNormal, 1.0f);
+    vec4 LightPos = Light.ViewProjection * vec4(Position + VertexNormal * 1.5, 1.0f);
     vec3 projCoords = LightPos.xyz / LightPos.w;
     projCoords = vec3((projCoords * 0.5 + 0.5).xy, projCoords.z);
-
-    float NormalDotLightDir = max(dot(Normal, LightDir), 0.0f);
     
     float Shadow = STDGLight_SampleShadowMap(Light, projCoords);
     if (Shadow == 0.0f) return vec3(0.0f); // Allow for skipping if the entire subgroup is in shadow.
@@ -125,9 +123,11 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 Normal, flo
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - Metalness;	  
+
+    float NormalDotLightDir = max(dot(Normal, LightDir), 0.0f);
     
     vec3 numerator    = NDF * G * F;
-    float denominator = 4.0 * max(dot(Normal, CameraDir), 0.0) * max(dot(Normal, LightDir), 0.0) + 0.0001;
+    float denominator = 4.0 * max(dot(Normal, CameraDir), 0.0) * max(NormalDotLightDir, 0.0) + 0.0001;
     vec3 specular     = numerator / denominator;
 
     return (kD * Albedo / PI + specular) * radiance * NormalDotLightDir * Shadow;

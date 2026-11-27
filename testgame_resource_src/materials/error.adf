@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "error.png"
+    "TextureFormat" "DXT1"
+}

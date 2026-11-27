@@ -77,7 +77,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/tool_src/atex",
-            "args": [],
+            "args": ["-file", "${workspaceFolder}/testgame_resource_src/materials/models/brickwall.adf", "-out", "${workspaceFolder}/testgame/materials/models/"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/testgame",
             "environment": [],

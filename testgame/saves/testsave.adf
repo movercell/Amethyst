@@ -164,5 +164,23 @@
             "children" {}
             "tags" []
         }
+        "000108" {
+            "classname" "light_spot"
+            "properties" {
+                "position" { x 58.0f y 77.0f z 65.0f }
+                "rotation" { x 31.0f y -120.0f z 0.0f }
+                "resolution" { x 2048 y 2048 }
+                "far" 512
+                "constantfalloff" "0.0f"
+                "linearfalloff" "0.7"
+                "quadraticfalloff" "0.1"
+                "intensity" 69999
+                "color" { x 1 y 1 z 1 }
+                "innerfalloffangle" 55
+                "outerfalloffangle" 60
+            }
+            "children" {}
+            "tags" []
+        }
     }
 }

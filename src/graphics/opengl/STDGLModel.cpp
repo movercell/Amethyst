@@ -7,12 +7,12 @@
 #include "engine/geometry/ModelFile.h"
 #include <ranges>
 
-STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
+bool STDGLModel::Make(const std::string& path, STDGLMaterialSystem* MaterialSystem) {
     ModelInfo_t Info;
     auto Modelfilestream = Engine::GetFileAsStream("models/" + path, std::ios::binary);
     if (!Modelfilestream) {
-        IsBad = true;
-        return;
+        Engine::Warning("Model file not found: " + path);
+        return false;
     }
 
     std::vector<char> buffer;
@@ -21,14 +21,19 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     Modelfilestream.seekg(0, std::ios::beg);
     buffer.assign(std::istreambuf_iterator<char>{Modelfilestream}, {});
 
-    auto& Modelfile = *std::get<Geometry::Modelfile*>(Engine::BinaryFileImporter<Geometry::Modelfile>::Import(std::as_writable_bytes(std::span(buffer)), path));
+    auto& File = *std::get<Geometry::Modelfile*>(Engine::BinaryFileImporter<Geometry::Modelfile>::Import(std::as_writable_bytes(std::span(buffer)), path));
+
+    if (File.LODLump.IsInvalid() || File.MeshLump.IsInvalid() || File.VertexLump.IsInvalid() || File.IndexLump.IsInvalid()) {
+        Engine::Warning("Bad model file(for rendering): " + path);
+        return false;
+    }
     
-    LODCount = Modelfile.LODs.Get().size();
-    Info.Radius = Modelfile.Radius;
+    LODCount = File.LODLump.size();
+    Info.Radius = File.Radius;
 
     // Need to set unused LODs as infinity in distance.
     for (float& distance : Info.LODDistances) { distance = std::numeric_limits<float>::infinity(); }
-    for (int LODID = 0; const auto& FileLOD : Modelfile.LODs.Get()) {
+    for (int LODID = 0; const auto& FileLOD : File.LODLump) {
         if (!(LODID < STDGLMODEL_LOD_MAX_COUNT)) {
             Engine::Error("STDGLModel: Model " + path + "exceeded STDGLMODEL_LOD_MAX_COUNT!");
         }
@@ -42,14 +47,14 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
         }
         
         for (int MeshID = 0; MeshID < FileLOD.MeshCount; MeshID++) {
-            const auto& FileMesh = Modelfile.Meshes.Get().at(FileLOD.MeshOffset + MeshID);
-            CurrLOD.Meshes[MeshID].Material = MaterialSystem->Get(reinterpret_cast<char*>(&Modelfile.Strings.Get().at(FileMesh.MaterialNameOffset)));
+            const auto& FileMesh = File.MeshLump.at(FileLOD.MeshOffset + MeshID);
+            CurrLOD.Meshes[MeshID].Material = MaterialSystem->Get(reinterpret_cast<char*>(&File.StringLump.at(FileMesh.MaterialNameOffset)));
 
             auto& DrawData = IndirectBufferTemplates[LODID][MeshID];
-            DrawData.baseVertex = FileMesh.VertexOffset;
             DrawData.firstIndex = FileMesh.IndexOffset;
             DrawData.count = FileMesh.IndexCount;
             DrawData.baseInstance = LODID;
+            // instanceCount is set in the draw loop and baseVertex is not used because the amdl format has indices be global.
         }
 
         LODID++;
@@ -57,16 +62,16 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     
     // Upload to the GPU.
 
-    auto vertices = Modelfile.Vertices.Get();
-    auto indices = Modelfile.Indices.Get();
+    auto& vertices = File.VertexLump;
+    auto& indices = File.IndexLump;
 
     glCreateBuffers(3, &VBO);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    glNamedBufferStorage(VBO, vertices.size() * sizeof(Geometry::Modelfile::GraphicsVertex), vertices.data(), 0);
+    glNamedBufferStorage(VBO, vertices.size() * sizeof(Geometry::Modelfile::GraphicsVertex), vertices.begin(), 0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glNamedBufferStorage(EBO, indices.size() * sizeof(GLuint), indices.data(), 0);
+    glNamedBufferStorage(EBO, indices.size() * sizeof(GLuint), indices.begin(), 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     glNamedBufferStorage(ModelInfo, sizeof(ModelInfo_t), &Info, 0);
@@ -82,7 +87,17 @@ STDGLModel::STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Geometry::Modelfile::GraphicsVertex), (void*)offsetof(Geometry::Modelfile::GraphicsVertex, TexCoords));
     // Vertex tangent space.
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Geometry::Modelfile::GraphicsVertex), (void*)offsetof(Geometry::Modelfile::GraphicsVertex, Tangent));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Geometry::Modelfile::GraphicsVertex), (void*)offsetof(Geometry::Modelfile::GraphicsVertex, TangentSpace));
+
+    return true;
+}
+STDGLModel::STDGLModel(const std::string& path, STDGLMaterialSystem* MaterialSystem) {
+    if (!Make(path, MaterialSystem)) {
+        std::string errormodel = {"error.amdl"};
+        if (!Make(errormodel, MaterialSystem)) {
+            Engine::Error("Error loading the error model!");
+        }
+    }
 }
 STDGLModel::~STDGLModel() {
     glDeleteVertexArrays(1, &VAO);
@@ -156,23 +171,13 @@ std::unique_ptr<ModelInstance> STDGLModelInstanceArray::MakeModelInstance() {
 
 
 
-Engine::Reference<STDGLModel> STDGLModelSystem::GetModel(std::string path) {
+Engine::Reference<STDGLModel> STDGLModelSystem::GetModel(const std::string& path) {
     auto Model = Models.find(path);
     
     if (Model != Models.end()) {
         return Engine::Reference(Model->second);
     } else {
         auto ModelResource = new Engine::ManagedResource<STDGLModelSystem, STDGLModel>(this, path, MaterialSystem);
-
-        if (ModelResource->resource.IsBad) {
-            delete ModelResource;
-            ModelResource = new Engine::ManagedResource<STDGLModelSystem, STDGLModel>(this, "error.amdl", MaterialSystem);
-
-            if (ModelResource->resource.IsBad) {
-                Engine::Error("Error loading the error model!");
-            }
-        }
-
         Models.emplace(path, ModelResource);
         return Engine::Reference(ModelResource);
     }

@@ -18,7 +18,6 @@ struct STDGLRWorld : public RWorld {
     Engine::Reference<Renderer> GetRenderer();
     std::unique_ptr<ModelInstance> MakeModelInstance(const std::string& path = "error.glb");
 
-    ~STDGLRWorld();
     STDGLRWorld(Engine::Reference<Renderer> Renderer, GLContext* Context, STDGLModelSystem* ModelSystem) {
         context = Context;
         renderer = Renderer;

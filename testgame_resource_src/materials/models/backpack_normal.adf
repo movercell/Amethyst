@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "backpack_normal.jpg"
+    "TextureFormat" "BC5"
+}

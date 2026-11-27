@@ -141,7 +141,6 @@ void STDGLWindow::Draw() {
         NeedsUpdate = false;
     }
 
-    GLMisc::SetContext(data);
     glViewport(0, 0, Width, Height);
     
     ImGui::SetCurrentContext(UIData);
@@ -157,6 +156,7 @@ void STDGLWindow::Draw() {
     Engine::DrawEngineUI();
 
     ImGui::Render();
+    GLMisc::SetContext(data);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(data);

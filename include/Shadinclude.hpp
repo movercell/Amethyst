@@ -1,4 +1,4 @@
-//movercell: File has been modified to use Amethyst's Filesystem::GetFileAsStream and Engine::Warning
+//movercell: File has been modified to use Amethyst's Filesystem::GetFileAsStream and Engine::Warning as well as adding the #AMETHYST_HAS_ARB_BINDLESS_TEXTURE directive
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #include <iostream>
 #include <algorithm>
 #include <engine/Filesystem.h>
+
+extern "C" int GLAD_GL_ARB_bindless_texture;
 
 //	===========
 //	Shadinclude
@@ -68,6 +70,7 @@ MISCELLANEOUS
 
 class Shadinclude
 {
+	inline static std::string AMETHYST_HAS_ARB_BINDLESS_TEXTURE_indentifier = "#AMETHYST_HAS_ARB_BINDLESS_TEXTURE";
 public:
 	// Return the source code of the complete shader
 	static std::string load(std::string path, std::string includeIndentifier = "#include")
@@ -112,6 +115,11 @@ public:
 
 				// Do not add this line to the shader source code, as the include
 				// path would generate a compilation issue in the final source code
+				continue;
+			}
+			// Amethyst addition: #AMETHYST_HAS_ARB_BINDLESS_TEXTURE
+			if (lineBuffer.find(AMETHYST_HAS_ARB_BINDLESS_TEXTURE_indentifier) != lineBuffer.npos) {
+				if (GLAD_GL_ARB_bindless_texture) fullSourceCode += "#extension GL_ARB_bindless_texture : require\n#define AMETHYST_HAS_ARB_BINDLESS_TEXTURE\n";
 				continue;
 			}
 

@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "brickwall_normal.jpg"
+    "TextureFormat" "BC5"
+}

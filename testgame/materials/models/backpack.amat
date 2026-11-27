@@ -1,0 +1,8 @@
+"Material" {
+	"Program" "Engine_PBRGeneric"
+	"Parameters" {
+		"Albedo" "models/backpack.atex"
+		"Normal" "models/backpack_normal.atex"
+		"MRMap" "models/backpack_mr.atex"
+	}
+}

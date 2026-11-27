@@ -17,7 +17,7 @@ class ENGINEEXPORT EntityStorage {
 
     static inline constexpr int PreallocatedSlotAmount = 4;
     Engine::Reference<EntityHandler> PreallocatedSlots[PreallocatedSlotAmount];
-    Engine::Reference<EntityHandler>* DynamicStorage;
+    Engine::Reference<EntityHandler>* DynamicStorage = nullptr;
     uint32_t Size = 0;
     uint32_t PreservedSlotAmount = 0;
 public:
@@ -63,6 +63,9 @@ public:
             return DynamicStorage[index];
         return PreallocatedSlots[index];
     }
+
+    EntityStorage() { for (auto& i : PreallocatedSlots) { i = nullptr; } }
+    ~EntityStorage() { if (Size > PreallocatedSlotAmount) { delete[] DynamicStorage; } }
 };
 
 

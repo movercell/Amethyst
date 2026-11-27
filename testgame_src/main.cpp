@@ -20,7 +20,6 @@ std::array<std::unique_ptr<ModelInstance>, 4> models;
 inline constexpr int EXTRA_MODEL_COUNT = 512;
 std::array<std::unique_ptr<ModelInstance>, EXTRA_MODEL_COUNT> extramodels;
 std::array<Engine::Reference<Camera>, 2> cameras;
-std::array<Engine::Reference<Light>, 2> lights;
 Engine::Reference<World> world;
 
 std::optional<ADFEntry> QueuedLoad;
@@ -45,19 +44,6 @@ void gameinit() {
 	newsavefile.ToFile("saves/hi.adf");
 	newsavefile.ToFile("saves/hicompacted.adf", true);
 
-	lights[0] = rworld->MakeSpotLight(vec2(2048, 2048), 55, 60, vec3(1.0f, 1.0f, 1.0f), 1, 512.0);
-	lights[0]->SetPosition(vec3(58.0f, 77.0f, 65.0f));
-	lights[0]->SetAngles(vec3(31.0f, -120.0f, 0.0f));
-	lights[0]->SetFalloff(0.0f, 0.7f, 0.1f);
-	lights[0]->SetIntensity(79999.0f);
-
-	lights[1] = rworld->MakeSpotLight(vec2(1024, 1024), 55, 60, vec3(0.0f, 1.0f, 0.0f), 1, 256.0);
-	lights[1]->SetPosition(vec3(-88.0f, 20.0f, 37.0f));
-	lights[1]->SetAngles(vec3(20.0f, -30.0f, 0.0f));
-	lights[1]->SetFalloff(0.0f, 0.3f, 0.7f);
-	lights[1]->SetIntensity(9999.0f);
-
-
 	for (int i = 0; i < EXTRA_MODEL_COUNT; i++) {
 		extramodels[i] = (rworld->MakeModelInstance("backpack.amdl"));
 	}
@@ -70,9 +56,6 @@ void gameinit() {
 
 static void GameStateHandler_Normal() {
 	static float position = 0;
-	if (models[0])
-		models[0]->SetMatrix(mat4(1, 0, 0, -128));
-
 	float x = 128.0f;
 	for (auto& model : extramodels) {
 		model->SetMatrix(mat4(1.0f, 0.0f, 0.0f, 0.0f,

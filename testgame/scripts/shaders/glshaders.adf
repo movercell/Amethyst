@@ -11,6 +11,9 @@ Shaders {
         Generic {
             Source "generic.fs"
         }
+        Grid {
+            Source "grid.fs"
+        }
         Error {
             Source "error.fs"
         }
@@ -33,6 +36,26 @@ Shaders {
         Engine_PBRGeneric {
             Shader_Vertex Generic
             Shader_Fragment Generic
+            Shader_Depth Generic
+            MaterialShouldBeBoundAtDepth 0
+            MaterialLayout [
+                {
+                    "Name" "Albedo"
+                    "Type" "texture"
+                }
+                {
+                    "Name" "Normal"
+                    "Type" "texture"
+                }
+                {
+                    "Name" "MRMap"
+                    "Type" "texture"
+                }
+            ]
+        }
+        Engine_PBRGrid {
+            Shader_Vertex Generic
+            Shader_Fragment Grid
             Shader_Depth Generic
             MaterialShouldBeBoundAtDepth 0
             MaterialLayout [

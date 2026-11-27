@@ -1,5 +1,5 @@
 "Material" {
-	"Program" "Engine_PBRGeneric"
+	"Program" "Engine_PBRGrid"
 	"Parameters" {
 		"red" "0.8f"
 		"green" "0.2f"

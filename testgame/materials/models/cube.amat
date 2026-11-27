@@ -1,8 +1,8 @@
 "Material" {
 	"Program" "Engine_PBRGeneric"
 	"Parameters" {
-		"red" "0.7f"
-		"green" "0.3f"
-		"blue" "0.3f"
+		"Albedo" "models/brickwall.atex"
+		"Normal" "models/brickwall_normal.atex"
+		"MRMap" "dev/green.atex"
 	}
 }

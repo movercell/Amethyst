@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "channeltest.png"
+    "TextureFormat" "DXT3"
+}

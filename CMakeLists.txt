@@ -36,6 +36,9 @@ set(XXHASH_BUILD_XXHSUM OFF)
 option(BUILD_SHARED_LIBS OFF)
 add_subdirectory(libs/xxhash/build/cmake)
 
+add_library(stb "libs/stb_impl.c")
+target_include_directories(stb PRIVATE include)
+
 add_library(glad STATIC libs/glad.c)
 target_include_directories(glad PRIVATE include)
 
@@ -70,6 +73,7 @@ add_executable(amethyst
 	src/graphics/opengl/STDGLLight.cpp
 	src/graphics/opengl/GLMisc.cpp
 	src/graphics/opengl/GLSLTypes.cpp
+	src/graphics/opengl/STDGLTexture.cpp
 	src/geometry/Alloc2D.cpp
 	src/Init.cpp
 	src/filesystem/Filesystem.cpp
@@ -81,7 +85,7 @@ add_executable(amethyst
 )
 
 set_target_properties(amethyst PROPERTIES ENABLE_EXPORTS ON)
-target_link_libraries(amethyst PRIVATE glad $<LINK_LIBRARY:WHOLE_ARCHIVE,imgui> glfw assimp xxhash)
+target_link_libraries(amethyst PRIVATE glad $<LINK_LIBRARY:WHOLE_ARCHIVE,imgui> glfw assimp xxhash stb) # TODO: Remove stb
 target_include_directories(amethyst PRIVATE "src/" "engineheaders" "include" "libs/imgui" "libs/xxhash")
 
 
@@ -94,7 +98,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 if(UNIX)
-	target_link_options(amethyst PRIVATE "-rdynamic" "-Wl,-rpath,./")
+	target_link_options(amethyst PRIVATE "-rdynamic")
 	target_compile_options(amethyst PRIVATE "-fvisibility=hidden")
 endif()
 

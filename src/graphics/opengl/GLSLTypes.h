@@ -6,6 +6,7 @@
 #include <string_view>
 #include <optional>
 #include <engine/ADF.h>
+#include "STDGLTexture.h"
 
 enum class GLSLType : int {
     integer = 0,
@@ -103,15 +104,25 @@ inline const constinit std::array<std::string_view, 21> GLSLType_Name = {
     "texture" // texture
 };
 
+struct std140Buf {
+    std::unique_ptr<std::byte[]> buffer;
+    std::vector<uint32_t> textures;
+    std::vector<Engine::Reference<STDGLTexture>> textureobjrefs;
+
+    std140Buf() {};
+};
+
 
 class std140BufTemplate {
     struct Member {
         size_t Offset;
         GLSLType Type;
+        int TextureIndex;
     };
     size_t defaultbuffersize = 4096;
     size_t currentPtr = 0;
     std::byte* buffer = nullptr;
+    int texCount = 0;
     bool didShrink = false;
     std::map<std::string, Member> members;
 public:
@@ -127,16 +138,27 @@ public:
         std::copy(oldbuffer, oldbuffer + currentPtr, buffer);
         delete[] oldbuffer;
     }
-    std::unique_ptr<std::byte[]> CreateBuffer() {
+    std140Buf CreateBuffer() {
         if (!didShrink) {
             Engine::Error("Are you sure you're using this correctly?");
         }
-        auto ret = std::make_unique<std::byte[]>(currentPtr);
-        std::copy(buffer, &buffer[currentPtr], ret.get());
+
+        std140Buf ret;
+        ret.buffer = std::make_unique<std::byte[]>(currentPtr);
+
+        std::copy(buffer, &buffer[currentPtr], ret.buffer.get());
+        ret.textures.resize(texCount);
+        for (auto& tex : ret.textures) tex = 0;
+
+        ret.textureobjrefs.resize(texCount);
+        ret.textures.resize(texCount);
+        ret.textureobjrefs.resize(texCount);
+        for (auto& tex : ret.textures) tex = 0;
+
         return ret;
     }
     size_t GetBufferSize() { return currentPtr; }
-    void BufferSetValue(std::unique_ptr<std::byte[]>& Buffer, const std::string& name, ADFEntry& value);
+    void BufferSetValue(std140Buf& Buffer, const std::string& name, ADFEntry& value, std::optional<STDGLTextureSystem*> TextureSystem = std::nullopt);
 
     // Move operators.
     std140BufTemplate(std140BufTemplate&& other) {
@@ -144,6 +166,7 @@ public:
         other.buffer = nullptr;
         currentPtr = other.currentPtr;
         didShrink = other.didShrink;
+        texCount = other.texCount;
         members = std::move(other.members);
     }
     void operator=(std140BufTemplate&& other) {
@@ -151,6 +174,7 @@ public:
         other.buffer = nullptr;
         currentPtr = other.currentPtr;
         didShrink = other.didShrink;
+        texCount = other.texCount;
         members = std::move(other.members);
     }
 };

@@ -19,6 +19,10 @@
 Engine::Reference<Renderer> STDGLRenderer::Make() {
     GLMisc::EnsureGLLoaded();
 
+    if (!GLAD_GL_EXT_texture_compression_s3tc) { Engine::Error("OpenGL extension GL_EXT_texture_compression_s3tc is required for Amethyst!"); }
+    if (!GLAD_GL_EXT_texture_sRGB) { Engine::Error("OpenGL extension GL_EXT_texture_sRGB is required for Amethyst!"); }
+    if (!GLAD_GL_ARB_texture_filter_anisotropic) { Engine::Error("OpenGL extension GL_ARB_texture_filter_anisotropic is required for Amethyst!"); }
+    
     auto tempres = new Engine::UnmanagedInterfacedResource<Renderer, STDGLRenderer>();
 
     tempres->resource.selfResource = tempres;
@@ -47,11 +51,13 @@ void STDGLRenderer::Init() {
     glfwSwapInterval(1); // TODO: add a vsync setting
 
     ShaderSystem.Init();
-    MaterialSystem.Init(&ShaderSystem);
+    TextureSystem = std::make_unique<STDGLTextureSystem>();
+    MaterialSystem.Init(&ShaderSystem, TextureSystem.get());
     ModelSystem.Init(&MaterialSystem);
 
     ModelInstancePreprocessShader = ShaderSystem.GetComputeShader("STDGLModel_InstancePreprocess");
     ModelInstanceReplicatorShader = ShaderSystem.GetComputeShader("STDGLModel_InstanceReplicator");
+    ErrorATEXForUnset = TextureSystem->GetTexture("error.atex");
 
     IMGUI_CHECKVERSION();
     BaseImGuiContext = ImGui::CreateContext();
@@ -111,8 +117,10 @@ ImFontAtlas* STDGLRenderer::GetFontAtlas() {
 }
 
 void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
+    GLMisc::SetContext(Context);
+
     if (Do[0] == "help") {
-        Engine::Print("STDGLRenderer: Commands:\n help\n recompileshaders\n info");
+        Engine::Print("STDGLRenderer: Commands:\n help\n recompileshaders\n setfilteringmode\n info");
         return;
     }
     if (Do[0] == "info") {
@@ -123,6 +131,19 @@ void STDGLRenderer::RendererCommand(std::vector<std::string> Do) {
         ShaderSystem.Recompile();
         return;
     }
+    if (Do[0] == "setfiltermode") {
+        uint16_t mode = 0;
+        std::from_chars(Do[1].data(), Do[1].data() + Do[1].size(), mode);
+        auto filtering = STDGLTextureSystem::FilterSettings(std::min(mode, uint16_t(STDGLTextureSystem::FilterSettingsCount - 1)));
+        if (!GLAD_GL_ARB_bindless_texture) {
+            TextureSystem->BindfulOnlySetFiltering(filtering);
+        } else {
+            auto NewTextureSystem = std::make_unique<STDGLTextureSystem>(filtering);
+            MaterialSystem.ReInit(NewTextureSystem.get());
+            TextureSystem = std::move(NewTextureSystem);
+        }
+        return;
+    }
     Engine::Print("STDGLRenderer: Unrecognized command " + Do[0]);
 }
 
@@ -130,6 +151,7 @@ void STDGLRenderer::Draw() {
     GLMisc::SetContext(Context);
 
     glEnable(GL_DEPTH_TEST);
+    ErrorATEXForUnset->Bind(14);
 
     for (auto rworldres : RWorldVec) {
 
@@ -183,7 +205,11 @@ void STDGLRenderer::Draw() {
             glClear(GL_DEPTH_BUFFER_BIT);
             
             PreprocessIArrays(InstanceArrayRefs);
-            DrawIArrays<true>(InstanceArrayRefs);
+            if (GLAD_GL_ARB_bindless_texture) {
+                DrawIArrays<true, true>(InstanceArrayRefs);
+            } else {
+                DrawIArrays<true, false>(InstanceArrayRefs);
+            }
 
             GL_POP_DEBUG;
         }
@@ -202,13 +228,21 @@ void STDGLRenderer::Draw() {
             PreprocessIArrays(InstanceArrayRefs);
             
             // Z-Prepass.
-            DrawIArrays<true>(InstanceArrayRefs);
+            if (GLAD_GL_ARB_bindless_texture) {
+                DrawIArrays<true, true>(InstanceArrayRefs);
+            } else {
+                DrawIArrays<true, false>(InstanceArrayRefs);
+            }
 
             // TODO: Cluster processing
 
             // Normal rendering.
             glDepthFunc(GL_EQUAL);
-            DrawIArrays<false>(InstanceArrayRefs);
+            if (GLAD_GL_ARB_bindless_texture) {
+                DrawIArrays<false, true>(InstanceArrayRefs);
+            } else {
+                DrawIArrays<false, false>(InstanceArrayRefs);
+            }
             glDepthFunc(GL_GREATER);
 
             GL_POP_DEBUG;
@@ -267,16 +301,15 @@ void STDGLRenderer::PreprocessIArrays(std::vector<Engine::Reference<STDGLModelIn
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
 }
 
-template<bool isDepth>
+template<bool isDepth, bool isBindless>
 void STDGLRenderer::DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs) {
     for (auto& iarray : InstanceArrayRefs) {
         iarray->Bind();
         
         auto& Model = iarray->Model;
-        //Model->BindInfo();
         iarray->BindIndirectCommands();
 
-        Model->Draw<isDepth>();
+        Model->Draw<isDepth, isBindless>();
     }
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);

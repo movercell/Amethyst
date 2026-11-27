@@ -4,78 +4,60 @@
 #include "engine/master.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
+#include "../TextureFile.h"
+
+inline constexpr int STD140BUF_MAX_TEXTURES = 12;
 
 static ADFEntry GetDefaultValueForType(GLSLType Type) {
     switch (Type) {
     case GLSLType::integer:
         return ADFEntry::String("0");
-        break;
     case GLSLType::uinteger:
         return ADFEntry::String("0");
-        break;
     case GLSLType::floating:
         return ADFEntry::String("0.0f");
-        break;
     case GLSLType::dfloating:
         return ADFEntry::String("0.0f");
-        break;
 
     case GLSLType::vector2:
         return ADFEntry::Serialize(glm::vec2());
-        break;
     case GLSLType::vector3:
         return ADFEntry::Serialize(glm::vec3());
-        break;
     case GLSLType::vector4:
         return ADFEntry::Serialize(glm::vec4());
-        break;
 
     case GLSLType::ivector2:
         return ADFEntry::Serialize(glm::ivec2());
-        break;
     case GLSLType::ivector3:
         return ADFEntry::Serialize(glm::ivec3());
-        break;
     case GLSLType::ivector4:
         return ADFEntry::Serialize(glm::ivec4());
-        break;
 
     case GLSLType::uvector2:
         return ADFEntry::Serialize(glm::uvec2());
-        break;
     case GLSLType::uvector3:
         return ADFEntry::Serialize(glm::uvec3());
-        break;
     case GLSLType::uvector4:
         return ADFEntry::Serialize(glm::uvec4());
-        break;
 
     case GLSLType::bvector2:
         return ADFEntry::Serialize(glm::bvec2());
-        break;
     case GLSLType::bvector3:
         return ADFEntry::Serialize(glm::bvec3());
-        break;
     case GLSLType::bvector4:
         return ADFEntry::Serialize(glm::bvec4());
-        break;
 
     case GLSLType::dvector2:
         return ADFEntry::Serialize(glm::dvec2());
-        break;
     case GLSLType::dvector3:
         return ADFEntry::Serialize(glm::dvec3());
-        break;
     case GLSLType::dvector4:
         return ADFEntry::Serialize(glm::dvec4());
-        break;
         
     case GLSLType::boolean:
         return ADFEntry::String("0");
-        break;
     case GLSLType::texture:
-        Engine::Error("oof");
-        break;
+        return ADFEntry::String("14");
     }
 
     Engine::Error("my bad");
@@ -150,7 +132,7 @@ static void SetValueInBufferForType(GLSLType Type, void* Place, ADFEntry& Value)
         Value.Deserialize(*reinterpret_cast<GLboolean*>(Place));
         break;
     case GLSLType::texture:
-        Engine::Error("oof");
+        Value.Deserialize(*reinterpret_cast<GLuint64*>(Place));
         break;
     }
 }
@@ -162,6 +144,7 @@ void std140BufTemplate::AddMember(std::string_view name, std::string_view type, 
     }
 
     GLSLType Type;
+    int TextureIndex = 0;
     {
         auto it = std::find(GLSLType_Name.begin(), GLSLType_Name.end(), type);
         if (it == GLSLType_Name.end()) {
@@ -170,24 +153,49 @@ void std140BufTemplate::AddMember(std::string_view name, std::string_view type, 
         }
         Type = (GLSLType)std::distance(GLSLType_Name.begin(), it);
     }
+    if (Type == GLSLType::texture) {
+        TextureIndex = texCount++;
+        if (texCount > STD140BUF_MAX_TEXTURES) {
+            Engine::Error("std140BufTemplate: Buffer exceeded STD140BUF_MAX_TEXTURES textures!");
+        }
+    }
     size_t Alignment = GLSLType_Align[(int)Type];
     size_t Size = GLSLType_Size[(int)Type];
 
     size_t Ptr = (currentPtr + (Alignment - 1)) & ~(Alignment - 1);
     currentPtr = Ptr + Size;
 
-    if (defaultvalue) {
+    if (defaultvalue && (Type == GLSLType::texture)) {
+        Engine::Warning("A shader default value may not be applied to a texture!");
+    }
+    if (defaultvalue && (Type != GLSLType::texture)) {
         SetValueInBufferForType(Type, buffer + Ptr, defaultvalue.value());
     } else {
         auto Default = GetDefaultValueForType(Type);
         SetValueInBufferForType(Type, buffer + Ptr, Default);
     }
 
-    members.emplace(name, Member(Ptr, Type));
+    members.emplace(name, Member(Ptr, Type, TextureIndex));
 }
-void std140BufTemplate::BufferSetValue(std::unique_ptr<std::byte[]>& Buffer, const std::string& name, ADFEntry& value) {
+void std140BufTemplate::BufferSetValue(std140Buf& Buffer, const std::string& name, ADFEntry& value, std::optional<STDGLTextureSystem*> TextureSystem) {
     auto it = members.find(name);
     if (it != members.end()) {
-        SetValueInBufferForType(it->second.Type, Buffer.get() + it->second.Offset, value);
+        if (it->second.Type == GLSLType::texture) {
+            if (!TextureSystem.has_value()) {
+                Engine::Error("std140BufTemplate::BufferSetValue: Attempted to add a texture without providing a pointer to a texture system!");
+            }
+
+            auto texsystem = TextureSystem.value();
+            auto tex = texsystem->GetTexture(value.GetString());
+
+            Buffer.textureobjrefs[it->second.TextureIndex] = tex;
+            Buffer.textures[it->second.TextureIndex] = tex.get()->GetTexture();
+
+            auto texvalue = ADFEntry::String(std::to_string(GLAD_GL_ARB_bindless_texture ? tex.get()->GetBindlessHandle() : it->second.TextureIndex));
+            SetValueInBufferForType(GLSLType::texture, Buffer.buffer.get() + it->second.Offset, texvalue);
+            return;
+        }
+
+        SetValueInBufferForType(it->second.Type, Buffer.buffer.get() + it->second.Offset, value);
     }
 }

@@ -1,0 +1,18 @@
+#AMETHYST_HAS_ARB_BINDLESS_TEXTURE
+
+#ifdef AMETHYST_HAS_ARB_BINDLESS_TEXTURE
+layout (binding = 14) uniform sampler2D Amethyst_ErrorATEX;
+#else
+layout (binding = 0) uniform sampler2D Amethyst_Textures[15];
+#endif
+
+vec4 Amethyst_SampleTexture(uvec2 tex, vec2 UV) {
+#ifdef AMETHYST_HAS_ARB_BINDLESS_TEXTURE
+    if (tex == uvec2(14u, 0u)) {
+        return texture(Amethyst_ErrorATEX, UV);
+    }
+    return texture(sampler2D(tex), UV);
+#else
+    return texture(Amethyst_Textures[tex.x], UV);
+#endif
+}

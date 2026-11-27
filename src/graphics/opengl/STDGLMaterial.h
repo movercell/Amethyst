@@ -9,31 +9,38 @@
 class STDGLMaterialSystem;
 
 class STDGLMaterial {
+    std140Buf Descriptor;
     GLuint ubo = 0;
     std::map<std::string, Engine::ManagedResource<STDGLMaterialSystem, STDGLMaterial>*>::iterator IteratorInMaterialMap;
 
     friend class STDGLMaterialSystem;
 public:
     STDGLMaterial() {};
+    ~STDGLMaterial() { glDeleteBuffers(1, &ubo); }
     
     STDGLShaderSystem::ShaderProgram* Program;
 
-    void Bind();
+    void Bind_Bindful();
+    void Bind_Bindless();
 };
 
 class STDGLMaterialSystem {
     STDGLShaderSystem* ShaderSystem = nullptr;
-    Engine::Reference<STDGLMaterial> DefaultMaterial;
     std::map<std::string, Engine::ManagedResource<STDGLMaterialSystem, STDGLMaterial>*> Materials;
+    Engine::Reference<STDGLMaterial> DefaultMaterial; // Must come after the map due to destruction order.
+    STDGLTextureSystem* TextureSystem;
+
+    void MakeMaterialData(Engine::ManagedResource<STDGLMaterialSystem, STDGLMaterial>* Material, std::string& name);
 public:
     STDGLMaterialSystem() {};
 
-    void Init(STDGLShaderSystem* shadersystem);
+    void Init(STDGLShaderSystem* shadersystem, STDGLTextureSystem* texturesystem);
+    void ReInit(STDGLTextureSystem* texturesystem);
     Engine::Reference<STDGLMaterial> Get(std::string name);
 
     void _unmanage_resource(Engine::Resource<STDGLMaterial>* res) {
         auto* mat = res->Get();
-        glDeleteBuffers(1, &mat->ubo);
         Materials.erase(mat->IteratorInMaterialMap);
+        delete res;
     }
 };

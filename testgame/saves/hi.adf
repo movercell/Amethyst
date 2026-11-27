@@ -488,6 +488,51 @@
 				"WasInit"
 			]
 		}
+		"000108" {
+			"children" {}
+			"classname" "light_spot"
+			"properties" {
+				"color" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"constantfalloff" "0"
+				"far" "512"
+				"innerfalloffangle" "55"
+				"intensity" "69999"
+				"isconstantlyupdating" "0"
+				"linearfalloff" "0.7"
+				"near" "1"
+				"outerfalloffangle" "60"
+				"position" {
+					"x" "58"
+					"y" "77"
+					"z" "65"
+				}
+				"quadraticfalloff" "0.1"
+				"resolution" {
+					"x" "2048"
+					"y" "2048"
+				}
+				"rotation" {
+					"w" "0.4818152"
+					"x" "0.23143524"
+					"y" "0.13361917"
+					"z" "-0.8345285"
+				}
+				"scale" {
+					"x" "1"
+					"y" "1"
+					"z" "1"
+				}
+				"spawnflags" "0"
+				"targetname" ""
+			}
+			"tags" [
+				"WasInit"
+			]
+		}
 	}
 	"MapName" ""
 	"MapVersion" "thisvalueisnotyetused"

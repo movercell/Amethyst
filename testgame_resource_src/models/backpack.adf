@@ -9,7 +9,7 @@ Model {
         }
     ]
     MaterialReplacements {
-        "" "regular.amat"
-        "Material" "regular.amat"
+        "" "models/backpack.amat"
+        "Material" "models/cube.amat"
     }
 }

@@ -55,19 +55,4 @@ std::unique_ptr<ModelInstance> STDGLRWorld::MakeModelInstance(const std::string&
 
     // When found but not enough space.
     return MakeModelInstanceArray()->resource.MakeModelInstance();
-
-    /*auto InstanceArray = InstanceArrays.find(path);
-    if (InstanceArray != InstanceArrays.end()) {
-        return InstanceArray->second->resource.MakeModelInstance();
-    } else {
-        GLMisc::SetContext(context);
-        auto array = new Engine::ManagedResource<STDGLRWorld, STDGLModelInstanceArray>(this, context, modelsystem->GetModel(path));
-        array->resource.selfResource = array;
-        InstanceArrays.emplace(path, array);
-        return array->resource.MakeModelInstance();
-    }*/
-}
-
-STDGLRWorld::~STDGLRWorld() {
-
 }

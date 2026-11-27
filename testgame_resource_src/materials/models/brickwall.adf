@@ -1,0 +1,4 @@
+"Texture" {
+    "Texture" "brickwall.jpg"
+    "TextureFormat" "DXT1_SRGB"
+}

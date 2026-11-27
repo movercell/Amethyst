@@ -9,8 +9,8 @@
 #include <iostream>
 
 using GraphicsVertex = Geometry::Modelfile::GraphicsVertex;
-using MeshLump_t = Geometry::Modelfile::MeshLump;
-using LODLump_t = Geometry::Modelfile::LODLump;
+using MeshLump_t = Geometry::Modelfile::MeshLump_t;
+using LODLump_t = Geometry::Modelfile::LODLump_t;
 using FlagDefs = Geometry::Modelfile::FlagDefs;
 
 struct ADFSerialize ImportConfigurationLOD {
@@ -95,7 +95,7 @@ protected:
 
             vertex.Position = Position;
             vertex.Normal = Normal;
-            vertex.Tangent = vec4(Tangent, IsBitangentInverted); 
+            vertex.TangentSpace = vec4(Tangent, IsBitangentInverted); 
             vertex.TexCoords = *(reinterpret_cast<vec2*>(&(paimesh->mTextureCoords[0][vertexindex])));
 
             Radius = std::max(Radius, Position.length());
@@ -147,7 +147,7 @@ struct ImportedLOD {
     ImportedModel Model;
     float Distance;
 
-    ImportedLOD(const ImportConfigurationLOD& from) : Model(inpath.parent_path().string() + "/" + from.Model), Distance(from.Distance) {};
+    ImportedLOD(const ImportConfigurationLOD& from) : Model((inpath.parent_path()/from.Model).string()), Distance(from.Distance) {};
 };
 
 int main(int argc, char* argv[]) {
@@ -201,22 +201,27 @@ int main(int argc, char* argv[]) {
     LODs[0].Distance = -std::numeric_limits<float>::infinity();
 
     // Collect everything into the lumps.
-    for (const auto& LOD : LODs) {
+    for (auto& LOD : LODs) {
         LODLump_t CurrLOD;
         CurrLOD.MeshOffset = MeshLump.size();
         CurrLOD.MeshCount = LOD.Model.Meshes.size();
         CurrLOD.Distance = LOD.Distance;
 
-        for (const auto& Mesh : LOD.Model.Meshes) {
+        for (auto& Mesh : LOD.Model.Meshes) {
             MeshLump_t CurrMesh;
-            CurrMesh.VertexOffset = VertexLump.size();
-            CurrMesh.VertexCount = Mesh.Vertices.size();
+
+            // Make the indices global.
+            // (Yes this thrashes the ImportedMesh's internal indices so I hope that code doesn't change to use them after this point, otherwise someone's gonna be in for a very bad time.)
+            std::transform(Mesh.Indices.begin(), Mesh.Indices.end(), Mesh.Indices.begin(), [](uint32_t Index) {
+                return Index + VertexLump.size();
+            });
+
             CurrMesh.IndexOffset = IndexLump.size();
             CurrMesh.IndexCount = Mesh.Indices.size();
             CurrMesh.MaterialNameOffset = StringLump.size();
             Radius = std::max(Radius, Mesh.Radius);
 
-            VertexLump.reserve(VertexLump.size() + CurrMesh.VertexCount);
+            VertexLump.reserve(VertexLump.size() + Mesh.Vertices.size());
             VertexLump.insert(VertexLump.end(), Mesh.Vertices.begin(), Mesh.Vertices.end());
             IndexLump.reserve(IndexLump.size() + CurrMesh.IndexCount);
             IndexLump.insert(IndexLump.end(), Mesh.Indices.begin(), Mesh.Indices.end());
@@ -247,14 +252,14 @@ int main(int argc, char* argv[]) {
     Engine::BinaryFileConstructor<Geometry::Modelfile> fileconstructor;
     auto file = fileconstructor.GetHeader();
 
-    file->Vertices = fileconstructor.CreateLump<GraphicsVertex>(VertexLump);
-    file->Indices = fileconstructor.CreateLump<uint32_t>(IndexLump);
-    file->Meshes = fileconstructor.CreateLump<MeshLump_t>(MeshLump);
-    file->LODs = fileconstructor.CreateLump<LODLump_t>(LODLump);
-    file->Strings = fileconstructor.CreateLump<Engine::BinaryFileStringLump>(StringLump);
+    file->VertexLump = fileconstructor.CreateLump<GraphicsVertex>(VertexLump);
+    file->IndexLump = fileconstructor.CreateLump<uint32_t>(IndexLump);
+    file->MeshLump = fileconstructor.CreateLump<MeshLump_t>(MeshLump);
+    file->LODLump = fileconstructor.CreateLump<LODLump_t>(LODLump);
+    file->StringLump = fileconstructor.CreateLump<Engine::BinaryFileStringLump>(StringLump);
     if (!CollisionVertexLump.empty()) {
-        file->CollisionVertices = fileconstructor.CreateLump<vec3>(CollisionVertexLump);
-        file->CollisionIndices = fileconstructor.CreateLump<uint32_t>(CollisionIndexLump);
+        file->CollisionVertexLump = fileconstructor.CreateLump<vec3>(CollisionVertexLump);
+        file->CollisionIndexLump = fileconstructor.CreateLump<uint32_t>(CollisionIndexLump);
     }
     file->Flags = Flags;
     file->Radius = Radius;

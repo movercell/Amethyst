@@ -186,7 +186,7 @@ void EntityStorage::reserve(uint32_t count) {
             DynamicStorage = new Engine::Reference<EntityHandler>[count];
                 
             for (int i = 0; i < Size; i++) {
-                DynamicStorage[i] = OldStorage[i];
+                DynamicStorage[i] = std::move(OldStorage[i]);
             }
             if (Size > PreallocatedSlotAmount) {
                 delete[] OldStorage;

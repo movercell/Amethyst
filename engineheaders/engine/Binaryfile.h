@@ -8,7 +8,7 @@
 #include "engine/master.h"
 #include "xxhash.h"
 
-#define AMETHYST_BINARY_FILE_VALIDATE_CHECKSUM
+#define BINARY_FILE_VALIDATE_CHECKSUM
 
 namespace Engine {
 
@@ -55,7 +55,12 @@ namespace Engine {
 
     template<typename LumpType>
     class BinaryFileLump {
+        [[noreturn]] void OOBError() { Engine::Error("Lump addressed out of bounds!(" + Internal::GetIdentifier<LumpType>() + ")"); }
+        void InvalidCheck() { if (IsInvalid()) Engine::Error("Attempted to read an invalid lump!(" + Internal::GetIdentifier<LumpType>() + ")"); }
+
+        // When on disk this is an offset from start of file to the lump data, when in memory it is a global pointer.
         LumpType* LumpPtr = nullptr;
+        // When on disk this is the size of the lump in bytes, when in memory it is a count of elements that the lump contains.
         std::uintptr_t LumpSize = 0;
 
         template <typename T>
@@ -63,10 +68,25 @@ namespace Engine {
         template<typename... Versions>
         friend class BinaryFileImporter;
     public:
-        std::span<LumpType> Get() {
-            if (IsInvalid()) Engine::Error("Attempted to get an invalid lump!(" + Internal::GetIdentifier<LumpType>() + ")");
-            return {LumpPtr, LumpSize / sizeof(LumpType)};
-        }
+        using iterator = LumpType*;
+        using const_iterator = LumpType*;
+
+        LumpType& operator[](uint64_t i) { InvalidCheck(); if (i < LumpSize) return LumpPtr[i]; OOBError(); }
+        const LumpType& operator[](uint64_t i) const { InvalidCheck(); if (i < LumpSize) return LumpPtr[i]; OOBError(); }
+        LumpType& at(uint64_t i) { InvalidCheck(); if (i < LumpSize) return LumpPtr[i]; OOBError(); }
+        const LumpType& at(uint64_t i) const { InvalidCheck(); if (i < LumpSize) return LumpPtr[i]; OOBError(); }
+
+        iterator begin() { InvalidCheck(); return LumpPtr; }
+        iterator end() { InvalidCheck(); return LumpPtr + LumpSize; }
+        auto rbegin() { InvalidCheck(); return std::make_reverse_iterator(end()); }
+        auto rend() { InvalidCheck(); return std::make_reverse_iterator(begin()); }
+        const_iterator cbegin() { InvalidCheck(); return LumpPtr; }
+        const_iterator cend() { InvalidCheck(); return LumpPtr + LumpSize; }
+        auto crbegin() { InvalidCheck(); return std::make_reverse_iterator(end()); }
+        auto crend() { InvalidCheck(); return std::make_reverse_iterator(begin()); }
+
+        size_t size() { return LumpSize; }
+
         bool IsInvalid() { return LumpPtr == nullptr || LumpSize == 0; }
     };
 
@@ -115,8 +135,9 @@ namespace Engine {
                             }
                         }
 
-                        // Correct the address.
+                        // Correct the address and size.
                         Object.[:Member:].LumpPtr = (LumpType_t*)(std::uintptr_t(Object.[:Member:].LumpPtr) - std::uintptr_t(Header));
+                        Object.[:Member:].LumpSize *= sizeof(LumpType_t);
                     }
 
                 } else if constexpr (std::is_class_v<TMember_t> && !std::is_union_v<TMember_t>) {
@@ -153,7 +174,7 @@ namespace Engine {
             static_assert(std::is_trivially_destructible_v<LumpType>);
 
             BinaryFileLump<LumpType> ret;
-            ret.LumpSize = From.size_bytes();
+            ret.LumpSize = From.size();
             ret.LumpPtr = Allocator.NewArray<LumpType>(From.size());
             std::copy(From.begin(), From.end(), ret.LumpPtr);
 
@@ -194,16 +215,20 @@ namespace Engine {
                     constexpr auto LumpType = std::meta::remove_pointer(std::meta::type_of(^^LumpPtrCopy));
                     using LumpType_t = [:LumpType:];
 
-                    // Correct the address.
+                    if (Object.[:Member:].IsInvalid()) continue;
+
+                    // Correct the address and size.
                     auto LumpStart = std::uintptr_t(Object.[:Member:].LumpPtr) + std::uintptr_t(Fileaddress);
-                    auto LumpSize = Object.[:Member:].LumpSize;
-                    Object.[:Member:].LumpPtr = std::start_lifetime_as_array<LumpType_t>((void*)(LumpStart), LumpSize / sizeof(LumpType_t));
+                    auto LumpDataSize = Object.[:Member:].LumpSize;
+                    auto LumpSize = LumpDataSize / sizeof(LumpType_t);
+                    Object.[:Member:].LumpPtr = std::start_lifetime_as_array<LumpType_t>((void*)(LumpStart), LumpSize);
+                    Object.[:Member:].LumpSize = LumpSize;
                     
                     // Protections.
-                    if (LumpStart + LumpSize > EndOfFile) {
+                    if (LumpStart + LumpDataSize > EndOfFile) {
                         Engine::Error("BinaryFileImporter: Lump goes past end of file.(" + Internal::GetIdentifier<LumpType_t>() + ")(File: " + Filename + ")");
                     }
-                    if (LumpSize % sizeof(LumpType_t)) {
+                    if (LumpDataSize % sizeof(LumpType_t)) {
                         Engine::Error("BinaryFileImporter: Bad lump size.(" + Internal::GetIdentifier<LumpType_t>() + ")(File: " + Filename + ")");
                     }
                     if constexpr (LumpType == ^^BinaryFileStringLump) {
@@ -258,7 +283,7 @@ namespace Engine {
             BinaryFileBaseHeader* BaseHeader = std::start_lifetime_as<BinaryFileBaseHeader>(data.data());
 
 
-        #ifdef AMETHYST_BINARY_FILE_VALIDATE_CHECKSUM
+        #ifdef BINARY_FILE_VALIDATE_CHECKSUM
             constexpr int offset = offsetof(BinaryFileBaseHeader, Version);
             if (BaseHeader->Checksum != XXH3_64bits(data.data() + offset, data.size_bytes() - offset)) {
                 Engine::Error("BinaryFileImporter: File failed checksum!(File: " + Filename + ")");

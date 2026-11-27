@@ -4,9 +4,9 @@
 #extension GL_GOOGLE_include_directive : require
 #endif
 
+#include "Amethyst_SampleTexture.incl"
 #include "STDGLCamera.incl"
 #include "STDGLLight.incl"
-#include "ApplyTBNToTexture.incl"
 #include "OctahedralMapping.incl"
 
 layout (location = 0) out vec4 FragColor;
@@ -18,47 +18,34 @@ in _VertexData {
     vec2 UV;
 } VertexData;
 layout (std140, binding = 1) uniform _Material {
-    float red;
-    float green;
-    float blue;
-    float gridexponent;
+    uvec2 AlbedoTexture;
+    uvec2 NormalTexture;
+    uvec2 MRMapTexture;
 } Material;
-
-vec3 GenerateTemporaryTexture() {
-    uint isOther = 0u;
-    float X = VertexData.UV.x;
-    float Y = VertexData.UV.y;
-
-    while (X > 1.0f) X -= 1.0f;
-    while (Y > 1.0f) Y -= 1.0f;
-    while (X < 0.0f) X += 1.0f;
-    while (Y < 0.0f) Y += 1.0f;
-
-    if (X >= 0.5f)
-        isOther = 1u;
-    if (Y >= 0.5f)
-        isOther += 2u;
-    vec3 ret = vec3(1.0f);
-    return isOther != 0u && isOther != 3u ? ret : ret * Material.gridexponent;
-}
 
 void main()
 {
-    vec3 Texture = GenerateTemporaryTexture();
-    vec3 Albedo = Texture * vec3(Material.red, Material.green, Material.blue);
+    mat3 TBN = mat3(
+        normalize(VertexData.TBN[0]),
+        normalize(VertexData.TBN[1]),
+        normalize(VertexData.TBN[2])
+    );
+
+    vec3 Albedo = Amethyst_SampleTexture(Material.AlbedoTexture, VertexData.UV).xyz;
+    vec2 RawTexNormal = Amethyst_SampleTexture(Material.NormalTexture, VertexData.UV).rg * 2.0 - 1.0;
+    vec3 TexNormal = vec3(RawTexNormal, sqrt(1 - RawTexNormal.x * RawTexNormal.x - RawTexNormal.y * RawTexNormal.y));
+    vec4 MRMap = Amethyst_SampleTexture(Material.MRMapTexture, VertexData.UV);
 
     vec3 IncomingLight;
 
-    float TexNormX = 0.5f;
-    float TexNormY = 0.5f;
-    vec3 TexNormal = vec3(TexNormX, TexNormY, 1.0f);//sqrt(1 - TexNormX * TexNormX - TexNormY * TexNormY));
-    vec3 Normal = ApplyTBNToTexture(VertexData.TBN, TexNormal);
+    vec3 Normal = normalize(TBN * TexNormal);
 
     for (int light = 0; light < STDGLLIGHT_MAX_COUNT; light++) {
         STDGLLightData Light = LightBuffer.Lights[light];
 
         if (Light.Type == LIGHT_TYPE_SPOT)
-            IncomingLight += STDGLight_ProcessSpotlight(Albedo, VertexData.TBN[2], Normal, Texture.z * 1.1f, (1.0f - Texture.z * 0.3f), vec3(VertexData.Position.xyz), Light);    }
+            IncomingLight += STDGLight_ProcessSpotlight(Albedo, TBN[2], Normal, MRMap.r, MRMap.g, vec3(VertexData.Position.xyz), Light);
+    }
     vec3 AmbientLight = vec3(0.03) * Albedo;
 
     vec3 Color = AmbientLight + IncomingLight;

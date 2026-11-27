@@ -22,6 +22,7 @@ protected:
     std::vector<Engine::ManagedInterfacedResource<STDGLRenderer, Window, STDGLWindow>*> WindowVector;
     STDGLModelSystem ModelSystem;
     STDGLShaderSystem ShaderSystem;
+    std::unique_ptr<STDGLTextureSystem> TextureSystem; // Unique because it may be replaced while the original one is still needed.
     STDGLMaterialSystem MaterialSystem;
 
     Engine::UnmanagedInterfacedResource<Renderer, STDGLRenderer>* selfResource; // Stored to be able to make the Engine::Reference objects for objects that it gives out.
@@ -30,6 +31,7 @@ protected:
 
     GLuint* ModelInstancePreprocessShader;
     GLuint* ModelInstanceReplicatorShader;
+    Engine::Reference<STDGLTexture> ErrorATEXForUnset;
     
     uint64_t FrameCounter = 0;
 
@@ -48,7 +50,7 @@ protected:
         delete res;
     }
     void PreprocessIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs);
-    template<bool isDepth>
+    template<bool isDepth, bool isBindless>
     void DrawIArrays(std::vector<Engine::Reference<STDGLModelInstanceArray>>& InstanceArrayRefs);
 public:
     ~STDGLRenderer();

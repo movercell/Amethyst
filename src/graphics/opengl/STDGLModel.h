@@ -18,8 +18,10 @@
 #include <queue>
 #include <map>
 
-struct STDGLModel {
-    template<bool isDepth>
+class STDGLModel {
+    bool Make(const std::string& path, STDGLMaterialSystem* MaterialSystem);
+public:
+    template<bool isDepth, bool isBindless>
     void Draw() {
         glBindVertexArray(VAO);
         for (int LOD = 0; LOD < LODCount; LOD++) {
@@ -29,11 +31,19 @@ struct STDGLModel {
                 // Bind material.
                 if constexpr (isDepth) {
                     if (Mesh.Material->Program->MaterialShouldBeBoundAtDepth) {
-                        Mesh.Material->Bind();
+                        if constexpr (isBindless) {
+                            Mesh.Material->Bind_Bindless();
+                        } else {
+                            Mesh.Material->Bind_Bindful();
+                        }
                     }
                     glUseProgram(Mesh.Material->Program->DepthProgram);
                 } else {
-                    Mesh.Material->Bind();
+                    if constexpr (isBindless) {
+                        Mesh.Material->Bind_Bindless();
+                    } else {
+                        Mesh.Material->Bind_Bindful();
+                    }
                     glUseProgram(Mesh.Material->Program->Program);
                 }
 
@@ -62,7 +72,7 @@ struct STDGLModel {
         std::array<float, STDGLMODEL_LOD_MAX_COUNT> LODDistances;
     };
 
-    STDGLModel(std::string path, STDGLMaterialSystem* MaterialSystem);
+    STDGLModel(const std::string& path, STDGLMaterialSystem* MaterialSystem);
     ~STDGLModel();
 
     uint8_t LODCount;
@@ -70,7 +80,6 @@ struct STDGLModel {
     std::array<LOD, STDGLMODEL_LOD_MAX_COUNT> LODs;
     GLuint VAO = 0;
     GLuint VBO = 0, EBO = 0, ModelInfo = 0;
-    bool IsBad = false;
 };
 
 struct STDGLModelInstanceArray {
@@ -133,6 +142,7 @@ class STDGLModelSystem {
     template<typename Container, typename T>
     friend class Engine::ManagedResource;
     void _unmanage_resource(Engine::Resource<STDGLModel>* res) {
+        Engine::Print("hi");
         for (auto it = Models.begin(); it != Models.end(); ++it) {
             if (it->second == res) {
                 Models.erase(it);
@@ -143,6 +153,6 @@ class STDGLModelSystem {
     }
 public:
     void Init(STDGLMaterialSystem* materialsystem) { MaterialSystem = materialsystem; }
-    Engine::Reference<STDGLModel> GetModel(std::string path);
+    Engine::Reference<STDGLModel> GetModel(const std::string& path);
 
 };
