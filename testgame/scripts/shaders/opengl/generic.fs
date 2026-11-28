@@ -4,6 +4,8 @@
 #extension GL_GOOGLE_include_directive : require
 #endif
 
+#extension GL_KHR_shader_subgroup_vote : require
+
 #include "Amethyst_SampleTexture.incl"
 #include "STDGLCamera.incl"
 #include "STDGLLight.incl"

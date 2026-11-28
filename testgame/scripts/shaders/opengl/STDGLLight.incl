@@ -92,7 +92,7 @@ float STDGLight_SampleShadowMap(STDGLLightData Light, vec3 point) {
 vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 Normal, float Metalness, float Roughness, vec3 Position, STDGLLightData Light) {
     vec3 FromFragToLight = Light.LightPos - Position;
     float FromFragToLightDistance = length(FromFragToLight);
-    if (FromFragToLightDistance > Light.Far) return vec3(0.0f);
+    if (subgroupAll(FromFragToLightDistance > Light.Far)) return vec3(0.0f);
 
     vec3 LightDir = normalize(FromFragToLight);
 
@@ -105,7 +105,7 @@ vec3 STDGLight_ProcessSpotlight(vec3 Albedo, vec3 VertexNormal, vec3 Normal, flo
     projCoords = vec3((projCoords * 0.5 + 0.5).xy, projCoords.z);
     
     float Shadow = STDGLight_SampleShadowMap(Light, projCoords);
-    if (Shadow == 0.0f) return vec3(0.0f); // Allow for skipping if the entire subgroup is in shadow.
+    if (subgroupAll(Shadow == 0.0f)) return vec3(0.0f); // Allow for skipping if the entire subgroup is in shadow.
 
 
     // PBR Lighting.
